@@ -127,7 +127,7 @@ $totalPages = ceil(count($members) / $perPage);
                                         <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                                     </svg>
                                 </button>
-                                <button class="icon-btn more-btn" title="Meer opties">
+                                <button class="icon-btn more-btn" data-member-id="<?php echo $member['id']; ?>" data-member-name="<?php echo htmlspecialchars($member['name']); ?>" title="Meer opties">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
                                         <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
                                     </svg>
@@ -165,6 +165,23 @@ $totalPages = ceil(count($members) / $perPage);
             </div>
         </div>
     </main>
+
+    <!-- Admin Modal -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeModal">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+            </button>
+            <h2 class="modal-title">Admin beheer</h2>
+            <p class="modal-text">Wil je deze gebruiker admin maken?</p>
+            <div class="modal-actions">
+                <button class="modal-btn cancel-btn" id="cancelBtn">Annuleer</button>
+                <button class="modal-btn confirm-btn" id="confirmBtn">Ja</button>
+            </div>
+        </div>
+    </div>
 
     <script src="../js/ledenbeheer.js"></script>
 </body>
