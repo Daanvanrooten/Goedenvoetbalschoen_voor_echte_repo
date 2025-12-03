@@ -252,3 +252,128 @@ nav {
 }
 }
 
+/* Uitloggen Modal Styles */
+.taak-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.taak-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.taak-modal-content {
+    background: #f8f5f8;
+    border-radius: 16px;
+    padding: 40px;
+    max-width: 500px;
+    width: 100%;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.taak-modal-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.modal-text {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 32px;
+    line-height: 1.5;
+}
+
+.form-actions,
+.logout-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: flex-end;
+}
+
+.cancel-logout-btn {
+    background: #f0f0f0;
+    color: #333;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cancel-logout-btn:hover {
+    background: #e0e0e0;
+}
+
+.confirm-logout-btn {
+    background: #6b5b95;
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.confirm-logout-btn:hover {
+    background: #5a4a80;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(107, 91, 149, 0.3);
+}
+
+@media screen and (max-width: 768px) {
+    .taak-modal {
+        padding: 10px;
+    }
+
+    .taak-modal-content {
+        padding: 30px 24px;
+    }
+
+    .taak-modal-title {
+        font-size: 1.5rem;
+    }
+
+    .modal-text {
+        font-size: 1rem;
+    }
+
+    .logout-actions {
+        flex-direction: column-reverse;
+        gap: 12px;
+    }
+
+    .cancel-logout-btn,
+    .confirm-logout-btn {
+        width: 100%;
+        padding: 14px 24px;
+    }
+}

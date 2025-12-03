@@ -82,7 +82,7 @@ while (count($weekNumbers) < 2) {
                     </svg>
                 </a>
                 <a href="profiel.php" class="nav-icon profile-icon" title="Profiel">
-                    <div class="profile-circle"><?php echo $userInitial; ?></div>
+                    <div class="profile-circle" id="profileBtn"><?php echo $userInitial; ?></div>
                 </a>
             </nav>
         </div>
@@ -99,8 +99,8 @@ while (count($weekNumbers) < 2) {
                 </div>
 
                 <div class="calendar-controls">
-                    <button class="account-btn" onclick="window.location.href='login.php'">
-                        Account
+                    <button class="account-btn">
+                        Taak aanmaken
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
                             <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
                         </svg>
@@ -487,6 +487,109 @@ while (count($weekNumbers) < 2) {
             </div>
         </section>
     </main>
+
+    <!-- Taak Aanmaken Modal -->
+    <div id="taakModal" class="taak-modal">
+        <div class="taak-modal-content">
+            <h2 class="taak-modal-title">Taak aanmaken</h2>
+            
+            <form id="taakForm" class="taak-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Taak naam</label>
+                        <input type="text" name="taaknaam" placeholder="Placeholder" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Categorie</label>
+                        <select name="categorie" required>
+                            <option value="">Bijv. koken.</option>
+                            <option value="koken">Koken</option>
+                            <option value="schoonmaken">Schoonmaken</option>
+                            <option value="training">Training</option>
+                            <option value="administratie">Administratie</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Datum</label>
+                        <input type="date" name="datum" value="2025-11-28" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tijd</label>
+                        <input type="time" name="tijd" value="10:00" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Herhaling</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="herhaling" value="eenmalig" checked>
+                                <span>Eenmalig</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="herhaling" value="dagelijks">
+                                <span>Dagelijks</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="herhaling" value="wekelijks">
+                                <span>Wekelijks</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Max aantal leden</label>
+                        <select name="maxleden">
+                            <option value="">Selecteer aantal</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Beschrijving</label>
+                    <textarea name="beschrijving" placeholder="Placeholder" rows="4"></textarea>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Foto toevoegen</label>
+                    <div class="file-upload">
+                        <div class="upload-icon">
+                            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <p>Voeg foto toe</p>
+                        </div>
+                        <input type="file" name="foto" accept="image/*" style="display: none;" id="fotoInput">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn">Taak aanmaken</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Uitloggen Modal -->
+    <div id="logoutModal" class="taak-modal">
+        <div class="taak-modal-content logout-modal-content">
+            <h2 class="taak-modal-title">Uitloggen</h2>
+            <p class="modal-text">Weet je zeker dat je wilt uitloggen?</p>
+            <div class="form-actions logout-actions">
+                <button type="button" class="cancel-logout-btn">Annuleer</button>
+                <button type="button" class="confirm-logout-btn">Ja</button>
+            </div>
+        </div>
+    </div>
 
     <script src="../js/agenda.js"></script>
 </body>

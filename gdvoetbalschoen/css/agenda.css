@@ -806,3 +806,302 @@ nav {
         display: none;
     }
 }
+
+/* Taak Aanmaken Modal */
+.taak-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.taak-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.taak-modal-content {
+    background: #f8f5f8;
+    border-radius: 16px;
+    padding: 40px;
+    max-width: 700px;
+    width: 100%;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    animation: modalSlideIn 0.3s ease;
+    margin-top: 200px;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.taak-modal-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 30px;
+}
+
+.taak-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group input[type="time"],
+.form-group select,
+.form-group textarea {
+    padding: 12px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    background: white;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #6b5b95;
+}
+
+.form-group select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+}
+
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+.radio-label input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #6b5b95;
+}
+
+.radio-label span {
+    user-select: none;
+}
+
+.file-upload {
+    border: 2px dashed #d0d0d0;
+    border-radius: 12px;
+    padding: 30px;
+    text-align: center;
+    background: #f0eff0;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.file-upload:hover {
+    border-color: #6b5b95;
+    background: #e8e6e8;
+}
+
+.upload-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    color: #999;
+}
+
+.upload-icon p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #999;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.submit-btn {
+    background: #6b5b95;
+    color: white;
+    border: none;
+    padding: 14px 40px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.submit-btn:hover {
+    background: #5a4a80;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(107, 91, 149, 0.3);
+}
+
+/* Mobile responsive voor taak modal */
+@media screen and (max-width: 768px) {
+    .taak-modal {
+        padding: 10px;
+    }
+
+    .taak-modal-content {
+        padding: 24px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .taak-modal-title {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 10px 14px;
+        font-size: 0.9rem;
+    }
+
+    .file-upload {
+        padding: 20px;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 12px 24px;
+    }
+}
+
+/* Uitloggen Modal Styles */
+.logout-modal-content {
+    max-width: 500px;
+    padding: 40px;
+}
+
+.modal-text {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 32px;
+    line-height: 1.5;
+}
+
+.logout-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: flex-end;
+}
+
+.cancel-logout-btn {
+    background: #f0f0f0;
+    color: #333;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cancel-logout-btn:hover {
+    background: #e0e0e0;
+}
+
+.confirm-logout-btn {
+    background: #6b5b95;
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.confirm-logout-btn:hover {
+    background: #5a4a80;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(107, 91, 149, 0.3);
+}
+
+@media screen and (max-width: 768px) {
+    .logout-modal-content {
+        padding: 30px 24px;
+    }
+
+    .modal-text {
+        font-size: 1rem;
+    }
+
+    .logout-actions {
+        flex-direction: column-reverse;
+        gap: 12px;
+    }
+
+    .cancel-logout-btn,
+    .confirm-logout-btn {
+        width: 100%;
+        padding: 14px 24px;
+    }
+}

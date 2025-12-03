@@ -47,10 +47,7 @@ $totalPages = ceil(count($members) / $perPage);
             <!-- Tabs -->
             <div class="tabs-container">
                 <div class="tabs">
-                    <a href="#" class="tab">
-                        Taken deze week
-                        <span class="badge">7</span>
-                    </a>
+                   
                     <a href="#" class="tab active">
                         Leden beheer
                         <span class="badge">5</span>
@@ -66,7 +63,7 @@ $totalPages = ceil(count($members) / $perPage);
 
             <!-- Admin Link -->
             <div class="admin-link">
-                <a href="#">Ga naar admin</a>
+                <a href="admin_dashboard.php">Ga naar admin</a>
             </div>
 
             <!-- Mobile Search -->
