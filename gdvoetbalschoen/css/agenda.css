@@ -106,6 +106,38 @@ nav {
     margin-bottom: 30px;
     gap: 20px;
     position: relative;
+    flex-wrap: wrap;
+}
+
+.month-navigation {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.month-nav-btn {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #333;
+}
+
+.month-nav-btn:hover {
+    background: #f5f5f5;
+    border-color: #6b7adb;
+    color: #6b7adb;
+    transform: scale(1.05);
+}
+
+.month-nav-btn:active {
+    transform: scale(0.95);
 }
 
 .account-btn {
@@ -185,6 +217,11 @@ nav {
     align-items: center;
     justify-content: center;
     gap: 10px;
+}
+
+.week-navigation {
+    display: flex;
+    align-items: center;
 }
 
 .info-label {

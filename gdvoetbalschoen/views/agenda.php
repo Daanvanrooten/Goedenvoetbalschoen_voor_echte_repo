@@ -108,7 +108,19 @@ while (count($weekNumbers) < 2) {
                 </div>
                 
                 <div class="calendar-header">
-                    <h2 class="calendar-title"><?php echo htmlspecialchars($userName); ?>'s schema/Mijn schema</h2>
+                    <div class="month-navigation">
+                        <button class="month-nav-btn prev-month-btn" id="prevMonth" title="Vorige maand">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                            </svg>
+                        </button>
+                        <h2 class="calendar-title"><?php echo htmlspecialchars($userName); ?>'s schema/Mijn schema</h2>
+                        <button class="month-nav-btn next-month-btn" id="nextMonth" title="Volgende maand">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                            </svg>
+                        </button>
+                    </div>
                     <div class="view-toggle">
                         <button class="toggle-btn" data-view="week">week</button>
                         <button class="toggle-btn active" data-view="month">maand</button>
@@ -116,6 +128,19 @@ while (count($weekNumbers) < 2) {
                 </div>
                 
                 <div class="current-week-info">
+                    <div class="week-navigation" style="display: none;">
+                        <button class="month-nav-btn" id="prevWeek" title="Vorige week">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                            </svg>
+                        </button>
+                        <span class="selected-week-badge" style="margin: 0 10px; font-weight: 600; color: #6b5b95;">Week <span id="selectedWeekNum"></span></span>
+                        <button class="month-nav-btn" id="nextWeek" title="Volgende week">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                            </svg>
+                        </button>
+                    </div>
                     <span class="info-label">Huidige week:</span>
                     <span class="week-badge"><?php echo $currentWeek; ?></span>
                     <span class="info-separator">|</span>
