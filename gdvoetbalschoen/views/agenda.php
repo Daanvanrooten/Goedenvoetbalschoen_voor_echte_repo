@@ -22,7 +22,7 @@ $currentWeek = (int)$currentDate->format('W'); // Huidig weeknummer
 $currentMonth = $currentDate->format('F'); // Maandnaam
 $currentYear = $currentDate->format('Y');
 
-// Bereken eerste dag van de maand
+// Bereken eerste dag van demaand
 $firstDayOfMonth = new DateTime($currentYear . '-' . $currentDate->format('m') . '-01');
 $firstWeekOfMonth = (int)$firstDayOfMonth->format('W');
 
