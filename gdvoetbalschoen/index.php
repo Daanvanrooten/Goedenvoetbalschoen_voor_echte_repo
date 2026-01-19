@@ -38,7 +38,7 @@
             <div class="container">
                 <div class="hero-content">
                     <div class="hero-image">
-                        <div class="circle-placeholder"></div>
+                        <div class="circle-placeholder" style="background-image: url('https://images.pexels.com/photos/274506/pexels-photo-274506.jpeg?auto=compress&cs=tinysrgb&w=500&h=500&dpr=2'); background-size: cover; background-position: center;"></div>
                     </div>
                     <div class="hero-text">
                         <p class="subtitle">I AM</p>
