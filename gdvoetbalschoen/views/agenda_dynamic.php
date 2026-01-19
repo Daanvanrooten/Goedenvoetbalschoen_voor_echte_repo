@@ -1,81 +1,29 @@
 <?php
 session_start();
 
-// Simuleer ingelogde gebruiker (vervang dit later met echte database login)
+// Check if user is logged in
 if (!isset($_SESSION['user'])) {
-    // Default test gebruiker
-    $_SESSION['user'] = [
-        'id' => 1,
-        'voornaam' => 'Pietje',
-        'achternaam' => 'Bell',
-        'email' => 'pietje@example.com'
-    ];
+    header('Location: login.php');
+    exit();
 }
 
 $user = $_SESSION['user'];
 $userInitial = strtoupper(substr($user['voornaam'], 0, 1));
 $userName = $user['voornaam'] . ' ' . $user['achternaam'];
 
-// Agenda events - dit zou normaal uit een database komen
-$events = [
-    [
-        'date' => '2025-04-01',
-        'title' => '5-Minute Workouts for Busy People',
-        'author' => 'Robert Fox',
-        'color' => 'green'
-    ],
-    [
-        'date' => '2025-04-04',
-        'title' => 'How to Start Exercising as a Beginner',
-        'author' => 'Annette Black',
-        'color' => 'pink'
-    ],
-    [
-        'date' => '2025-04-06',
-        'title' => 'Best Stretches to Improve Flexibility',
-        'author' => 'Dianne Russell',
-        'color' => 'green'
-    ],
-    [
-        'date' => '2025-04-14',
-        'title' => 'How to Stay Motivated to Work Out',
-        'author' => 'Kristin Watson',
-        'color' => 'pink'
-    ],
-    [
-        'date' => '2025-04-18',
-        'title' => 'The Benefits of Walking Every Day',
-        'author' => 'Devon Lane',
-        'color' => 'pink'
-    ],
-    [
-        'date' => '2025-04-20',
-        'title' => 'Strength Training vs. Cardio: Which is Better?',
-        'author' => 'Eleanor Pena',
-        'color' => 'yellow'
-    ],
-    [
-        'date' => '2025-04-23',
-        'title' => 'Simple Exercises to Reduce Back Pain',
-        'author' => 'Jane Cooper',
-        'color' => 'green'
-    ],
-    [
-        'date' => '2025-04-26',
-        'title' => 'How to Create a Workout Routine That Works for You',
-        'author' => 'Marvin McKinney',
-        'color' => 'pink'
-    ]
-];
+// TODO: Haal agenda events op uit de database
+$events = [];
 ?>
 <!DOCTYPE html>
 <html lang="nl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agenda - Gouden Schoen</title>
     <link rel="stylesheet" href="../css/agenda.css">
 </head>
+
 <body>
     <header>
         <div class="container">
@@ -85,12 +33,12 @@ $events = [
             <nav>
                 <a href="../index.html" class="nav-icon home-icon" title="Home">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
                     </svg>
                 </a>
                 <a href="agenda.php" class="nav-icon calendar-icon active" title="Kalender">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" />
                     </svg>
                 </a>
                 <a href="profiel.php" class="nav-icon profile-icon" title="Profiel">
@@ -107,7 +55,7 @@ $events = [
                     <button class="account-btn" onclick="window.location.href='account.php'">
                         Account
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
                         </svg>
                     </button>
                     <h2 class="calendar-title"><?php echo htmlspecialchars($userName); ?>'s schema/Mijn schema</h2>
@@ -258,4 +206,5 @@ $events = [
 
     <script src="../js/agenda.js"></script>
 </body>
+
 </html>
