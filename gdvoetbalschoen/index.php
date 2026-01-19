@@ -16,17 +16,17 @@
 
             </div>
             <nav>
-                <a href="#" class="nav-icon home-icon" title="Home">
+                <a href="index.php" class="nav-icon home-icon" title="Home">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
                     </svg>
                 </a>
-                <a href="#" class="nav-icon calendar-icon" title="Kalender">
+                <a href="views/agenda.php" class="nav-icon calendar-icon" title="Kalender">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" />
                     </svg>
                 </a>
-                <a href="#" class="nav-icon profile-icon" title="Profiel" id="profileBtn">
+                <a href="views/login.php" class="nav-icon profile-icon" title="Profiel" id="profileBtn">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
                     </svg>
