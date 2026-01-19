@@ -40,7 +40,7 @@ if (isset($_SESSION['user'])) {
                 <span class="logo-text">FC Team zonder plan</span>
             </div>
             <nav>
-                <a href="../index.html" class="nav-icon home-icon" title="Home">
+                <a href="../index.php" class="nav-icon home-icon" title="Home">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
                     </svg>
