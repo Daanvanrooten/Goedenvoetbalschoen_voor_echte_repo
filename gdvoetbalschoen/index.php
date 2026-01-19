@@ -51,7 +51,7 @@
                             cursus tincidunt massa et a. Dolor odio parturient cursus justo nunc enim,
                             a, sit facilisi. Eleifend et ac lacus, ullamcorper mauris eget tortor mollis.
                         </p>
-                        <a href="#" class="cta-button">Meld je aan</a>
+                        <a href="views/register.php" class="cta-button">Meld je aan</a>
                     </div>
                 </div>
             </div>
