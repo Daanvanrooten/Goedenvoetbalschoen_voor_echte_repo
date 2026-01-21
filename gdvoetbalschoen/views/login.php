@@ -19,10 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Als gebruiker al ingelogd is, redirect naar agenda
-if (isset($_SESSION['user'])) {
-    header('Location: ../index.php');
-    exit;
-}
+
 ?>
 <!DOCTYPE html>
 <html lang="nl">

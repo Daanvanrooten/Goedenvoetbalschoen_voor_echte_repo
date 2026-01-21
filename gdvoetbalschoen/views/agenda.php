@@ -62,16 +62,16 @@ while (count($weekNumbers) < 2) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agenda - Gouden Schoen</title>
-    <link rel="stylesheet" href="../css/agenda.css">
+    <link rel="stylesheet" href="/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/css/agenda.css">
 </head>
 <body>
     <header>
         <div class="container">
             <div class="logo">
-                <img src="../images/fc_team_zonder_plan.png" alt="FC Team zonder plan logo">
+                <img src="/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/images/fc_team_zonder_plan.png" alt="FC Team zonder plan logo">
             </div>
             <nav>
-                <a href="../index.html" class="nav-icon home-icon" title="Home">
+                <a href="../index.php" class="nav-icon home-icon" title="Home">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
                     </svg>
@@ -563,6 +563,10 @@ while (count($weekNumbers) < 2) {
                                 <input type="radio" name="herhaling" value="wekelijks">
                                 <span>Wekelijks</span>
                             </label>
+                            <label class="radio-label">
+                                <input type="radio" name="herhaling" value="maandelijks">
+                                <span>Maandelijks</span>
+                            </label>
                         </div>
                     </div>
                     <div class="form-group">
@@ -616,6 +620,6 @@ while (count($weekNumbers) < 2) {
         </div>
     </div>
 
-    <script src="../js/agenda.js"></script>
+    <script src="/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/js/agenda.js"></script>
 </body>
 </html>

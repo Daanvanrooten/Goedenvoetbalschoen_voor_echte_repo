@@ -18,7 +18,7 @@ $userName = $user['voornaam'] . ' ' . $user['achternaam'];
 
 // Agenda events - dit zou normaal uit een database komen
 $events = [
-    [
+    [   
         'date' => '2025-04-01',
         'title' => '5-Minute Workouts for Busy People',
         'author' => 'Robert Fox',
