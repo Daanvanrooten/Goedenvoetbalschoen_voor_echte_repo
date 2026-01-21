@@ -1,15 +1,10 @@
 <?php
 session_start();
 
-// Simuleer ingelogde gebruiker (vervang dit later met echte database login)
+// Check if user is logged in
 if (!isset($_SESSION['user'])) {
-    // Default test gebruiker
-    $_SESSION['user'] = [
-        'id' => 1,
-        'voornaam' => 'Pietje',
-        'achternaam' => 'Bell',
-        'email' => 'pietje@example.com'
-    ];
+    header('Location: login.php');
+    exit();
 }
 
 $user = $_SESSION['user'];
@@ -70,12 +65,14 @@ $events = [
 ?>
 <!DOCTYPE html>
 <html lang="nl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agenda - Gouden Schoen</title>
     <link rel="stylesheet" href="../css/agenda.css">
 </head>
+
 <body>
     <header>
         <div class="container">
@@ -83,17 +80,17 @@ $events = [
                 <img src="../images/fc_team_zonder_plan.png" alt="FC Team zonder plan logo">
             </div>
             <nav>
-                <a href="../index.html" class="nav-icon home-icon" title="Home">
+                <a href="../index.php" class="nav-icon home-icon" title="Home">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
                     </svg>
                 </a>
                 <a href="agenda.php" class="nav-icon calendar-icon active" title="Kalender">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" />
                     </svg>
                 </a>
-                <a href="profiel.php" class="nav-icon profile-icon" title="Profiel">
+                <a href="login.php" class="nav-icon profile-icon" title="Profiel">
                     <div class="profile-circle"><?php echo $userInitial; ?></div>
                 </a>
             </nav>
@@ -107,7 +104,7 @@ $events = [
                     <button class="account-btn" onclick="window.location.href='account.php'">
                         Account
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
                         </svg>
                     </button>
                     <h2 class="calendar-title"><?php echo htmlspecialchars($userName); ?>'s schema/Mijn schema</h2>
@@ -258,4 +255,5 @@ $events = [
 
     <script src="../js/agenda.js"></script>
 </body>
+
 </html>

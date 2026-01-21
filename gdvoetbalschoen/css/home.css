@@ -101,6 +101,18 @@ nav {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
+.circle-image {
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border: 5px solid #fff;
+}
+
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
 .hero-text {
     flex: 1;
     max-width: 500px;
@@ -240,16 +252,17 @@ nav {
         height: 70px;
     }
 }
+
 @media (max-width: 622px) {
 
-.awards-grid {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    gap: 30px;
-    flex-wrap: wrap;
-    flex-direction: column;
-}
+    .awards-grid {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        gap: 30px;
+        flex-wrap: wrap;
+        flex-direction: column;
+    }
 }
 
 /* Uitloggen Modal Styles */
@@ -288,6 +301,7 @@ nav {
         transform: translateY(-20px);
         opacity: 0;
     }
+
     to {
         transform: translateY(0);
         opacity: 1;

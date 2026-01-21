@@ -1,15 +1,10 @@
 <?php
 session_start();
 
-// Simuleer ingelogde gebruiker (vervang dit later met echte database login)
+// Check if user is logged in
 if (!isset($_SESSION['user'])) {
-    // Default test gebruiker
-    $_SESSION['user'] = [
-        'id' => 1,
-        'voornaam' => 'Pietje',
-        'achternaam' => 'Bell',
-        'email' => 'pietje@example.com'
-    ];
+    header('Location: login.php');
+    exit();
 }
 
 $user = $_SESSION['user'];
@@ -22,7 +17,7 @@ $currentWeek = (int)$currentDate->format('W'); // Huidig weeknummer
 $currentMonth = $currentDate->format('F'); // Maandnaam
 $currentYear = $currentDate->format('Y');
 
-// Bereken eerste dag van de maand
+// Bereken eerste dag van demaand
 $firstDayOfMonth = new DateTime($currentYear . '-' . $currentDate->format('m') . '-01');
 $firstWeekOfMonth = (int)$firstDayOfMonth->format('W');
 
@@ -58,12 +53,14 @@ while (count($weekNumbers) < 2) {
 ?>
 <!DOCTYPE html>
 <html lang="nl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agenda - Gouden Schoen</title>
     <link rel="stylesheet" href="/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/css/agenda.css">
 </head>
+
 <body>
     <header>
         <div class="container">
@@ -73,15 +70,15 @@ while (count($weekNumbers) < 2) {
             <nav>
                 <a href="../index.php" class="nav-icon home-icon" title="Home">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
                     </svg>
                 </a>
                 <a href="agenda.php" class="nav-icon calendar-icon active" title="Kalender">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" />
                     </svg>
                 </a>
-                <a href="profiel.php" class="nav-icon profile-icon" title="Profiel">
+                <a href="login.php" class="nav-icon profile-icon" title="Profiel">
                     <div class="profile-circle" id="profileBtn"><?php echo $userInitial; ?></div>
                 </a>
             </nav>
@@ -102,22 +99,22 @@ while (count($weekNumbers) < 2) {
                     <button class="account-btn">
                         Taak aanmaken
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
                         </svg>
                     </button>
                 </div>
-                
+
                 <div class="calendar-header">
                     <div class="month-navigation">
                         <button class="month-nav-btn prev-month-btn" id="prevMonth" title="Vorige maand">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
                             </svg>
                         </button>
                         <h2 class="calendar-title"><?php echo htmlspecialchars($userName); ?>'s schema/Mijn schema</h2>
                         <button class="month-nav-btn next-month-btn" id="nextMonth" title="Volgende maand">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
                             </svg>
                         </button>
                     </div>
@@ -126,18 +123,18 @@ while (count($weekNumbers) < 2) {
                         <button class="toggle-btn active" data-view="month">maand</button>
                     </div>
                 </div>
-                
+
                 <div class="current-week-info">
                     <div class="week-navigation" style="display: none;">
                         <button class="month-nav-btn" id="prevWeek" title="Vorige week">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
                             </svg>
                         </button>
                         <span class="selected-week-badge" style="margin: 0 10px; font-weight: 600; color: #6b5b95;">Week <span id="selectedWeekNum"></span></span>
                         <button class="month-nav-btn" id="nextWeek" title="Volgende week">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
                             </svg>
                         </button>
                     </div>
@@ -150,257 +147,257 @@ while (count($weekNumbers) < 2) {
                 <!-- Month View -->
                 <div class="month-view">
 
-                <!-- Desktop Calendar -->
-                <div class="calendar-grid desktop-calendar">
-                    <!-- Week numbers column -->
-                    <div class="week-numbers">
-                        <div class="week-header"></div>
-                        <?php 
-                        // Toon maximaal 6 weeknummers (voor typische maandweergave)
-                        $displayWeeks = array_slice($weekNumbers, 0, 6);
-                        foreach ($displayWeeks as $weekNum): 
-                            $isCurrentWeek = ($weekNum == $currentWeek) ? 'current-week' : '';
-                        ?>
-                        <div class="week-number <?php echo $isCurrentWeek; ?>"><?php echo $weekNum; ?></div>
-                        <?php endforeach; ?>
+                    <!-- Desktop Calendar -->
+                    <div class="calendar-grid desktop-calendar">
+                        <!-- Week numbers column -->
+                        <div class="week-numbers">
+                            <div class="week-header"></div>
+                            <?php
+                            // Toon maximaal 6 weeknummers (voor typische maandweergave)
+                            $displayWeeks = array_slice($weekNumbers, 0, 6);
+                            foreach ($displayWeeks as $weekNum):
+                                $isCurrentWeek = ($weekNum == $currentWeek) ? 'current-week' : '';
+                            ?>
+                                <div class="week-number <?php echo $isCurrentWeek; ?>"><?php echo $weekNum; ?></div>
+                            <?php endforeach; ?>
+                        </div>
+
+                        <!-- Calendar days -->
+                        <div class="days-grid">
+                            <!-- Week 1 -->
+                            <div class="day-cell prev-month"></div>
+                            <div class="day-cell prev-month"></div>
+                            <div class="day-cell current-month green">
+                                <div class="event green-event">
+                                    <h3>5-Minute Workouts for Busy People</h3>
+                                    <p>Robert Fox</p>
+                                </div>
+                            </div>
+                            <div class="day-cell current-month">2</div>
+                            <div class="day-cell current-month">3</div>
+                            <div class="day-cell current-month pink">
+                                <div class="event pink-event">
+                                    <h3>How to Start Exercising as a Beginner</h3>
+                                    <p>Annette Black</p>
+                                </div>
+                            </div>
+                            <div class="day-cell weekend">5</div>
+
+                            <!-- Week 2 -->
+                            <div class="day-cell current-month">6</div>
+                            <div class="day-cell current-month green">
+                                <div class="event green-event">
+                                    <h3>Best Stretches to Improve Flexibility</h3>
+                                    <p>Dianne Russell</p>
+                                </div>
+                            </div>
+                            <div class="day-cell current-month">8</div>
+                            <div class="day-cell current-month pink">9</div>
+                            <div class="day-cell current-month">10</div>
+                            <div class="day-cell current-month">11</div>
+                            <div class="day-cell weekend">12</div>
+
+                            <!-- Week 3 -->
+                            <div class="day-cell current-month">13</div>
+                            <div class="day-cell current-month pink">
+                                <div class="event pink-event">
+                                    <h3>How to Stay Motivated to Work Out</h3>
+                                    <p>Kristin Watson</p>
+                                </div>
+                            </div>
+                            <div class="day-cell current-month">15</div>
+                            <div class="day-cell current-month">16</div>
+                            <div class="day-cell current-month">17</div>
+                            <div class="day-cell current-month pink">
+                                <div class="event pink-event">
+                                    <h3>The Benefits of Walking Every Day</h3>
+                                    <p>Devon Lane</p>
+                                </div>
+                            </div>
+                            <div class="day-cell weekend">19</div>
+
+                            <!-- Week 4 -->
+                            <div class="day-cell current-month yellow">
+                                <div class="event yellow-event">
+                                    <h3>Strength Training vs. Cardio: Which is Better?</h3>
+                                    <p>Eleanor Pena</p>
+                                </div>
+                            </div>
+                            <div class="day-cell current-month">21</div>
+                            <div class="day-cell current-month">22</div>
+                            <div class="day-cell current-month green">
+                                <div class="event green-event">
+                                    <h3>Simple Exercises to Reduce Back Pain</h3>
+                                    <p>Jane Cooper</p>
+                                </div>
+                            </div>
+                            <div class="day-cell current-month">24</div>
+                            <div class="day-cell current-month">25</div>
+                            <div class="day-cell current-month pink">
+                                <div class="event pink-event">
+                                    <h3>How to Create a Workout Routine That Works for You</h3>
+                                    <p>Marvin McKinney</p>
+                                </div>
+                            </div>
+
+                            <!-- Week 5 -->
+                            <div class="day-cell current-month">27</div>
+                            <div class="day-cell current-month">28</div>
+                        </div>
                     </div>
 
-                    <!-- Calendar days -->
-                    <div class="days-grid">
-                        <!-- Week 1 -->
-                        <div class="day-cell prev-month"></div>
-                        <div class="day-cell prev-month"></div>
-                        <div class="day-cell current-month green">
-                            <div class="event green-event">
-                                <h3>5-Minute Workouts for Busy People</h3>
-                                <p>Robert Fox</p>
-                            </div>
-                        </div>
-                        <div class="day-cell current-month">2</div>
-                        <div class="day-cell current-month">3</div>
-                        <div class="day-cell current-month pink">
-                            <div class="event pink-event">
-                                <h3>How to Start Exercising as a Beginner</h3>
-                                <p>Annette Black</p>
-                            </div>
-                        </div>
-                        <div class="day-cell weekend">5</div>
-
-                        <!-- Week 2 -->
-                        <div class="day-cell current-month">6</div>
-                        <div class="day-cell current-month green">
-                            <div class="event green-event">
-                                <h3>Best Stretches to Improve Flexibility</h3>
-                                <p>Dianne Russell</p>
-                            </div>
-                        </div>
-                        <div class="day-cell current-month">8</div>
-                        <div class="day-cell current-month pink">9</div>
-                        <div class="day-cell current-month">10</div>
-                        <div class="day-cell current-month">11</div>
-                        <div class="day-cell weekend">12</div>
-
-                        <!-- Week 3 -->
-                        <div class="day-cell current-month">13</div>
-                        <div class="day-cell current-month pink">
-                            <div class="event pink-event">
-                                <h3>How to Stay Motivated to Work Out</h3>
-                                <p>Kristin Watson</p>
-                            </div>
-                        </div>
-                        <div class="day-cell current-month">15</div>
-                        <div class="day-cell current-month">16</div>
-                        <div class="day-cell current-month">17</div>
-                        <div class="day-cell current-month pink">
-                            <div class="event pink-event">
-                                <h3>The Benefits of Walking Every Day</h3>
-                                <p>Devon Lane</p>
-                            </div>
-                        </div>
-                        <div class="day-cell weekend">19</div>
-
-                        <!-- Week 4 -->
-                        <div class="day-cell current-month yellow">
-                            <div class="event yellow-event">
-                                <h3>Strength Training vs. Cardio: Which is Better?</h3>
-                                <p>Eleanor Pena</p>
-                            </div>
-                        </div>
-                        <div class="day-cell current-month">21</div>
-                        <div class="day-cell current-month">22</div>
-                        <div class="day-cell current-month green">
-                            <div class="event green-event">
-                                <h3>Simple Exercises to Reduce Back Pain</h3>
-                                <p>Jane Cooper</p>
-                            </div>
-                        </div>
-                        <div class="day-cell current-month">24</div>
-                        <div class="day-cell current-month">25</div>
-                        <div class="day-cell current-month pink">
-                            <div class="event pink-event">
-                                <h3>How to Create a Workout Routine That Works for You</h3>
-                                <p>Marvin McKinney</p>
-                            </div>
-                        </div>
-
-                        <!-- Week 5 -->
-                        <div class="day-cell current-month">27</div>
-                        <div class="day-cell current-month">28</div>
+                    <!-- Mobile Calendar -->
+                    <div class="mobile-calendar">
+                        <table class="mobile-calendar-table">
+                            <tbody>
+                                <tr>
+                                    <td class="day-label">SUN</td>
+                                    <td>2</td>
+                                    <td>9</td>
+                                    <td>16</td>
+                                    <td>23</td>
+                                    <td class="green-cell">30</td>
+                                </tr>
+                                <tr>
+                                    <td class="day-label">MON</td>
+                                    <td>3</td>
+                                    <td>10</td>
+                                    <td>17</td>
+                                    <td>24</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td class="day-label">TUE</td>
+                                    <td>4</td>
+                                    <td>11</td>
+                                    <td>18</td>
+                                    <td>25</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td class="day-label">WED</td>
+                                    <td>5</td>
+                                    <td>12</td>
+                                    <td>19</td>
+                                    <td>26</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td class="day-label">THUR</td>
+                                    <td>6</td>
+                                    <td>13</td>
+                                    <td>20</td>
+                                    <td>27</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td class="day-label">FRI</td>
+                                    <td>7</td>
+                                    <td>14</td>
+                                    <td>21</td>
+                                    <td>28</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td class="day-label">Sat</td>
+                                    <td>1</td>
+                                    <td>8</td>
+                                    <td>15</td>
+                                    <td>22</td>
+                                    <td>29</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                </div>
-
-                <!-- Mobile Calendar -->
-                <div class="mobile-calendar">
-                    <table class="mobile-calendar-table">
-                        <tbody>
-                            <tr>
-                                <td class="day-label">SUN</td>
-                                <td>2</td>
-                                <td>9</td>
-                                <td>16</td>
-                                <td>23</td>
-                                <td class="green-cell">30</td>
-                            </tr>
-                            <tr>
-                                <td class="day-label">MON</td>
-                                <td>3</td>
-                                <td>10</td>
-                                <td>17</td>
-                                <td>24</td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td class="day-label">TUE</td>
-                                <td>4</td>
-                                <td>11</td>
-                                <td>18</td>
-                                <td>25</td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td class="day-label">WED</td>
-                                <td>5</td>
-                                <td>12</td>
-                                <td>19</td>
-                                <td>26</td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td class="day-label">THUR</td>
-                                <td>6</td>
-                                <td>13</td>
-                                <td>20</td>
-                                <td>27</td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td class="day-label">FRI</td>
-                                <td>7</td>
-                                <td>14</td>
-                                <td>21</td>
-                                <td>28</td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td class="day-label">Sat</td>
-                                <td>1</td>
-                                <td>8</td>
-                                <td>15</td>
-                                <td>22</td>
-                                <td>29</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
                 </div>
 
                 <!-- Week View -->
                 <div class="week-view" style="display: none;">
                     <!-- Desktop Week View -->
                     <div class="desktop-week-view">
-                    <div class="week-grid">
-                        <?php
-                        // Bereken de dagen van de huidige week (zondag tot zaterdag)
-                        $weekStart = clone $currentDate;
-                        $weekStart->modify('this week'); // Maandag van deze week
-                        
-                        // Ga terug naar zondag
-                        $weekStart->modify('-1 day');
-                        
-                        $daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THUR', 'FRI', 'SAT'];
-                        
-                        for ($i = 0; $i < 6; $i++): // Toon 6 dagen (zondag t/m vrijdag zoals in design)
-                            $day = clone $weekStart;
-                            $day->modify("+$i days");
-                            
-                            $isToday = ($day->format('Y-m-d') == $currentDate->format('Y-m-d'));
-                            $dayNumber = $day->format('j');
-                            $displayDate = ($i == 2) ? $day->format('F j') : $dayNumber; // Toon maand bij 3e dag
-                        ?>
-                        <div class="week-day-header <?php echo $isToday ? 'active-day' : ''; ?>">
-                            <div class="day-label"><?php echo $daysOfWeek[$i]; ?></div>
-                            <div class="day-number"><?php echo $displayDate; ?></div>
-                        </div>
-                        <?php endfor; ?>
-                    </div>
+                        <div class="week-grid">
+                            <?php
+                            // Bereken de dagen van de huidige week (zondag tot zaterdag)
+                            $weekStart = clone $currentDate;
+                            $weekStart->modify('this week'); // Maandag van deze week
 
-                    <div class="week-days-container">
-                        <!-- Sunday -->
-                        <div class="week-day-column"></div>
+                            // Ga terug naar zondag
+                            $weekStart->modify('-1 day');
 
-                        <!-- Monday -->
-                        <div class="week-day-column"></div>
+                            $daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THUR', 'FRI', 'SAT'];
 
-                        <!-- Tuesday (April 1) -->
-                        <div class="week-day-column active-column">
-                            <div class="week-event green-bg">
-                                <div class="event-time">10:00</div>
-                                <div class="event-title">5-Minute Workouts</div>
-                            </div>
-                            <div class="week-event green-bg">
-                                <div class="event-time">11:00</div>
-                                <div class="event-title">How to Start Exercising</div>
-                            </div>
-                            <div class="week-event green-bg">
-                                <div class="event-time">15:00</div>
-                                <div class="event-title">Strength Training</div>
-                            </div>
-                            <div class="week-event green-bg">
-                                <div class="event-time">18:00</div>
-                                <div class="event-title">How to Create a Workout</div>
-                                <div class="event-extra">...</div>
-                            </div>
-                            <div class="event-author">Robert Fox</div>
+                            for ($i = 0; $i < 6; $i++): // Toon 6 dagen (zondag t/m vrijdag zoals in design)
+                                $day = clone $weekStart;
+                                $day->modify("+$i days");
+
+                                $isToday = ($day->format('Y-m-d') == $currentDate->format('Y-m-d'));
+                                $dayNumber = $day->format('j');
+                                $displayDate = ($i == 2) ? $day->format('F j') : $dayNumber; // Toon maand bij 3e dag
+                            ?>
+                                <div class="week-day-header <?php echo $isToday ? 'active-day' : ''; ?>">
+                                    <div class="day-label"><?php echo $daysOfWeek[$i]; ?></div>
+                                    <div class="day-number"><?php echo $displayDate; ?></div>
+                                </div>
+                            <?php endfor; ?>
                         </div>
 
-                        <!-- Wednesday -->
-                        <div class="week-day-column"></div>
+                        <div class="week-days-container">
+                            <!-- Sunday -->
+                            <div class="week-day-column"></div>
 
-                        <!-- Thursday -->
-                        <div class="week-day-column"></div>
+                            <!-- Monday -->
+                            <div class="week-day-column"></div>
 
-                        <!-- Friday (April 4) -->
-                        <div class="week-day-column">
-                            <div class="week-event pink-bg">
-                                <div class="event-time">10:00</div>
-                                <div class="event-title">5-Minute Workouts</div>
+                            <!-- Tuesday (April 1) -->
+                            <div class="week-day-column active-column">
+                                <div class="week-event green-bg">
+                                    <div class="event-time">10:00</div>
+                                    <div class="event-title">5-Minute Workouts</div>
+                                </div>
+                                <div class="week-event green-bg">
+                                    <div class="event-time">11:00</div>
+                                    <div class="event-title">How to Start Exercising</div>
+                                </div>
+                                <div class="week-event green-bg">
+                                    <div class="event-time">15:00</div>
+                                    <div class="event-title">Strength Training</div>
+                                </div>
+                                <div class="week-event green-bg">
+                                    <div class="event-time">18:00</div>
+                                    <div class="event-title">How to Create a Workout</div>
+                                    <div class="event-extra">...</div>
+                                </div>
+                                <div class="event-author">Robert Fox</div>
                             </div>
-                            <div class="week-event pink-bg">
-                                <div class="event-time">11:00</div>
-                                <div class="event-title">How to Start Exercising</div>
+
+                            <!-- Wednesday -->
+                            <div class="week-day-column"></div>
+
+                            <!-- Thursday -->
+                            <div class="week-day-column"></div>
+
+                            <!-- Friday (April 4) -->
+                            <div class="week-day-column">
+                                <div class="week-event pink-bg">
+                                    <div class="event-time">10:00</div>
+                                    <div class="event-title">5-Minute Workouts</div>
+                                </div>
+                                <div class="week-event pink-bg">
+                                    <div class="event-time">11:00</div>
+                                    <div class="event-title">How to Start Exercising</div>
+                                </div>
+                                <div class="week-event pink-bg">
+                                    <div class="event-time">15:00</div>
+                                    <div class="event-title">Strength Training</div>
+                                </div>
+                                <div class="week-event pink-bg">
+                                    <div class="event-time">18:00</div>
+                                    <div class="event-title">How to Create a Workout</div>
+                                    <div class="event-extra">...</div>
+                                </div>
+                                <div class="event-author">Annette Black</div>
                             </div>
-                            <div class="week-event pink-bg">
-                                <div class="event-time">15:00</div>
-                                <div class="event-title">Strength Training</div>
-                            </div>
-                            <div class="week-event pink-bg">
-                                <div class="event-time">18:00</div>
-                                <div class="event-title">How to Create a Workout</div>
-                                <div class="event-extra">...</div>
-                            </div>
-                            <div class="event-author">Annette Black</div>
                         </div>
-                    </div>
                     </div>
 
                     <!-- Mobile Week View -->
@@ -517,7 +514,7 @@ while (count($weekNumbers) < 2) {
     <div id="taakModal" class="taak-modal">
         <div class="taak-modal-content">
             <h2 class="taak-modal-title">Taak aanmaken</h2>
-            
+
             <form id="taakForm" class="taak-form">
                 <div class="form-row">
                     <div class="form-group">
@@ -593,7 +590,7 @@ while (count($weekNumbers) < 2) {
                     <div class="file-upload">
                         <div class="upload-icon">
                             <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                             <p>Voeg foto toe</p>
                         </div>
@@ -622,4 +619,5 @@ while (count($weekNumbers) < 2) {
 
     <script src="/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/js/agenda.js"></script>
 </body>
+
 </html>
