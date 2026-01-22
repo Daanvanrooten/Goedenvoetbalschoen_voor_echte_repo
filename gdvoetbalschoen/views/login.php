@@ -1,23 +1,5 @@
 <?php
 session_start();
-
-// TODO: Implementeer echte database login
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = $_POST['email'] ?? '';
-    $password = $_POST['password'] ?? '';
-
-    // TODO: Valideer gebruiker tegen database
-    // Bijvoorbeeld:
-    // $user = getUserByEmailAndPassword($email, $password);
-    // if ($user) {
-    //     $_SESSION['user'] = $user;
-    //     header('Location: agenda.php');
-    //     exit;
-    // }
-}
-
-// Als gebruiker al ingelogd is, redirect naar agenda
-
 ?>
 <!DOCTYPE html>
 <html lang="nl">
@@ -60,14 +42,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="auth-container">
             <h1 class="auth-title">Log in</h1>
             <div class="auth-card">
-                <form method="POST" class="auth-form">
+                <div id="errorMessage" class="error-message" style="display: none;"></div>
+                <form method="POST" class="auth-form" id="loginForm">
                     <div class="form-group">
-                        <input type="text" id="voornaam" name="voornaam" required placeholder=" ">
-                        <label for="voornaam">Voornaam</label>
+                        <input type="text" id="username" name="username" required placeholder=" ">
+                        <label for="username">Gebruikersnaam</label>
                     </div>
                     <div class="form-group">
-                        <input type="text" id="achternaam" name="achternaam" required placeholder=" ">
-                        <label for="achternaam">Achternaam</label>
+                        <input type="password" id="password" name="password" required placeholder=" ">
+                        <label for="password">Wachtwoord</label>
                     </div>
                     <button type="submit" class="auth-btn">Log in</button>
                 </form>
@@ -77,6 +60,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </p>
         </div>
     </main>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const errorDiv = document.getElementById('errorMessage');
+            const submitBtn = this.querySelector('.auth-btn');
+            
+            // Disable button
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Bezig...';
+            errorDiv.style.display = 'none';
+            
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch('/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/logincode.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    window.location.href = data.redirect;
+                } else {
+                    errorDiv.textContent = data.message;
+                    errorDiv.style.display = 'block';
+                    errorDiv.style.color = 'red';
+                    errorDiv.style.padding = '10px';
+                    errorDiv.style.marginBottom = '15px';
+                    errorDiv.style.backgroundColor = '#ffe6e6';
+                    errorDiv.style.borderRadius = '5px';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Er is een fout opgetreden. Probeer het opnieuw.';
+                errorDiv.style.display = 'block';
+                errorDiv.style.color = 'red';
+                errorDiv.style.padding = '10px';
+                errorDiv.style.marginBottom = '15px';
+                errorDiv.style.backgroundColor = '#ffe6e6';
+                errorDiv.style.borderRadius = '5px';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Log in';
+            }
+        });
+    </script>
 </body>
 
 </html>

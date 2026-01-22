@@ -175,29 +175,7 @@ dayCells.forEach(cell => {
     });
 });
 
-// Simulate user login - change this based on actual login status
-function updateUserProfile() {
-    // Simuleer ingelogde gebruiker
-    const loggedInUser = {
-        name: 'Pietje Bell',
-        initial: 'P' // Dit is de eerste letter van de voornaam
-    };
-    
-    // Update profile circle met initial
-    const profileCircle = document.querySelector('.profile-circle');
-    if (profileCircle && loggedInUser.initial) {
-        profileCircle.textContent = loggedInUser.initial;
-    }
-    
-    // Update calendar title
-    const calendarTitle = document.querySelector('.calendar-title');
-    if (calendarTitle && loggedInUser.name) {
-        calendarTitle.textContent = `${loggedInUser.name}'s schema/Mijn schema`;
-    }
-}
 
-// Initialize profile on page load
-updateUserProfile();
 
 // Profile circle click
 const profileCircle = document.querySelector('.profile-circle');
@@ -236,8 +214,8 @@ if (logoutModal) {
 // Confirm logout
 if (confirmLogoutBtn) {
     confirmLogoutBtn.addEventListener('click', function() {
-        // Redirect to login page
-        window.location.href = 'login.php';
+        // Redirect to logout page
+        window.location.href = 'logout.php';
     });
 }
 
@@ -255,9 +233,7 @@ const weekInfoLabel = document.querySelector('.current-week-info .info-label:las
 
 // Update calendar title with current month
 function updateCalendarTitle() {
-    const loggedInUser = {
-        name: 'Pietje Bell'
-    };
+    
     
     const monthYear = `${monthNames[currentMonth]} ${currentYear}`;
     if (calendarTitle) {
