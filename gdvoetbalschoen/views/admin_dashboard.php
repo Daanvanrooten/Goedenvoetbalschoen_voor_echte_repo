@@ -1,22 +1,21 @@
 <?php
 session_start();
 
-// Check if user is logged in and is admin
-if (!isset($_SESSION['user'])) {
-    header('Location: login.php');
-    exit();
-}
 
-// TODO: Check if user is admin
-$isAdmin = isset($_SESSION['user']['is_admin']) && $_SESSION['user']['is_admin'];
 
-if (!$isAdmin) {
-    header('Location: ../index.php');
-    exit();
-}
+// Controleer of user admin is via role_id == 2
+
+// Controleer of user admin is via role_id == 2 (volgens database)
+$isAdmin = isset($_SESSION['user']['role_id']) && $_SESSION['user']['role_id'] == 2;
+
+// Data wordt via AJAX opgehaald
+$aantalLeden = 0;
+$aantalAfspraken = 0;
+$aantalTakenOpen = 0;
+
 
 $user = $_SESSION['user'];
-$userInitial = strtoupper(substr($user['voornaam'], 0, 1));
+$userInitial = isset($user['first_name']) ? strtoupper(substr($user['first_name'], 0, 1)) : '';
 
 // TODO: Haal echte data op uit de database
 $aantalLeden = 0;
@@ -71,13 +70,16 @@ $aantalTakenOpen = 0;
             <section class="stats-section">
                 <div class="stat-card">
                     <h2 class="stat-label">Leden</h2>
-                    <p class="stat-value"><?php echo $aantalLeden; ?></p>
+                    <p class="stat-value" id="ledenCount">...</p>
                 </div>
                 <div class="stat-card">
                     <h2 class="stat-label">Taken open</h2>
-                    <p class="stat-value"><?php echo $aantalTakenOpen; ?></p>
+                    <p class="stat-value" id="takenCount">...</p>
                 </div>
             </section>
+
+            <!-- Ledenlijst -->
+            
 
             <!-- Action Buttons -->
             <section class="actions-section">
@@ -91,8 +93,6 @@ $aantalTakenOpen = 0;
                         </svg>
                     </div>
                 </a>
-
-
                 <a href="ledenbeheer.php" class="action-card">
                     <h3 class="action-title">Leden beheer</h3>
                     <div class="action-icon">
@@ -104,14 +104,51 @@ $aantalTakenOpen = 0;
                 </a>
             </section>
         </main>
-    </div>
 
     <!-- Uitloggen Modal -->
     <div id="logoutModal" class="taak-modal">
-        <div class="taak-modal-content logout-modal-content">
+                                <p class="stat-value" id="takenCount">...</p>
             <h2 class="taak-modal-title">Uitloggen</h2>
             <p class="modal-text">Weet je zeker dat je wilt uitloggen?</p>
             <div class="form-actions logout-actions">
+                        <!-- Ledenlijst -->
+                        <section class="leden-section">
+                            <h2>Alle leden</h2>
+                            <table class="leden-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Naam</th>
+                                        <th>Email</th>
+                                        <th>Gebruikersnaam</th>
+                                        <th>Rol</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ledenTableBody">
+                                    <tr><td colspan="5">Laden...</td></tr>
+                                </tbody>
+                            </table>
+                        </section>
+
+                        <!-- Open taken -->
+                        <section class="taken-section">
+                            <h2>Open taken</h2>
+                            <table class="taken-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Titel</th>
+                                        <th>Beschrijving</th>
+                                        <th>Startdatum</th>
+                                        <th>Einddatum</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="takenTableBody">
+                                    <tr><td colspan="5">Laden...</td></tr>
+                                </tbody>
+                            </table>
+                        </section>
+
                 <button type="button" class="cancel-logout-btn">Annuleer</button>
                 <button type="button" class="confirm-logout-btn">Ja</button>
             </div>
@@ -119,6 +156,39 @@ $aantalTakenOpen = 0;
     </div>
 
     <script>
+    // Haal leden en open taken op via AJAX
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('../phpcode/admin_data.php')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // Leden
+                    document.getElementById('ledenCount').textContent = data.leden.length;
+                    const ledenBody = document.getElementById('ledenTableBody');
+                    ledenBody.innerHTML = '';
+                    data.leden.forEach(lid => {
+                        ledenBody.innerHTML += `<tr><td>${lid.user_id}</td><td>${lid.first_name} ${lid.last_name}</td><td>${lid.email}</td><td>${lid.username}</td><td>${lid.role_id}</td></tr>`;
+                    });
+                    if (data.leden.length === 0) ledenBody.innerHTML = '<tr><td colspan="5">Geen leden gevonden</td></tr>';
+
+                    // Taken
+                    document.getElementById('takenCount').textContent = data.open_taken.length;
+                    const takenBody = document.getElementById('takenTableBody');
+                    takenBody.innerHTML = '';
+                    data.open_taken.forEach(taak => {
+                        takenBody.innerHTML += `<tr><td>${taak.task_id}</td><td>${taak.title}</td><td>${taak.description || ''}</td><td>${taak.start_date || ''}</td><td>${taak.end_date || ''}</td></tr>`;
+                    });
+                    if (data.open_taken.length === 0) takenBody.innerHTML = '<tr><td colspan="5">Geen open taken</td></tr>';
+                } else {
+                    document.getElementById('ledenTableBody').innerHTML = '<tr><td colspan="5">Fout: ' + data.message + '</td></tr>';
+                    document.getElementById('takenTableBody').innerHTML = '<tr><td colspan="5">Fout: ' + data.message + '</td></tr>';
+                }
+            })
+            .catch(err => {
+                document.getElementById('ledenTableBody').innerHTML = '<tr><td colspan="5">Fout bij ophalen</td></tr>';
+                document.getElementById('takenTableBody').innerHTML = '<tr><td colspan="5">Fout bij ophalen</td></tr>';
+            });
+    });
         // Mobile menu toggle
         const menuToggle = document.querySelector('.mobile-menu-toggle');
         const mobileMenu = document.querySelector('.mobile-menu');
@@ -139,6 +209,7 @@ $aantalTakenOpen = 0;
         if (profileCircle) {
             profileCircle.addEventListener('click', function(e) {
                 e.preventDefault();
+                // Haal leden en open taken op via AJAX
                 logoutModal.classList.add('active');
                 document.body.style.overflow = 'hidden';
             });

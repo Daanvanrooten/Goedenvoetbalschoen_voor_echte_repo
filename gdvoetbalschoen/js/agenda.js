@@ -119,36 +119,31 @@ if (fileUpload && fotoInput) {
 
 // Form submit handler
 if (taakForm) {
-    taakForm.addEventListener('submit', function(e) {
+    taakForm.addEventListener('submit', async function(e) {
         e.preventDefault();
-        
-        // Verzamel form data
         const formData = new FormData(this);
-        const taakData = {
-            naam: formData.get('taaknaam'),
-            categorie: formData.get('categorie'),
-            datum: formData.get('datum'),
-            tijd: formData.get('tijd'),
-            herhaling: formData.get('herhaling'),
-            maxLeden: formData.get('maxleden'),
-            beschrijving: formData.get('beschrijving'),
-            foto: formData.get('foto')
-        };
-        
-        console.log('Taak aangemaakt:', taakData);
-        
-        // Toon bevestiging
-        alert('Taak succesvol aangemaakt!');
-        
-        // Reset form en sluit modal
-        this.reset();
-        closeTaakModal();
-        
-        // Hier zou je de taak naar de server sturen met AJAX
-        // fetch('/api/create-task', {
-        //     method: 'POST',
-        //     body: formData
-        // });
+        const submitBtn = this.querySelector('.submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Bezig...';
+        try {
+            const response = await fetch('/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/create_task.php', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            if (data.success) {
+                alert(data.message);
+                this.reset();
+                closeTaakModal();
+            } else {
+                alert(data.message);
+            }
+        } catch (err) {
+            alert('Er is een fout opgetreden. Probeer het opnieuw.');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Taak aanmaken';
+        }
     });
 }
 

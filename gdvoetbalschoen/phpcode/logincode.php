@@ -67,17 +67,22 @@ try {
     // Login succesvol - sla gebruiker op in sessie
     $_SESSION['user'] = [
         'id' => $user['user_id'],
-        'voornaam' => $user['first_name'],
-        'achternaam' => $user['last_name'],
+        'first_name' => $user['first_name'],
+        'last_name' => $user['last_name'],
         'email' => $user['email'],
         'username' => $user['username'],
         'role_id' => $user['role_id']
     ];
-    
+
+    // DEBUG: Toon sessie voor troubleshooting
+    file_put_contents(__DIR__ . '/debug_session.txt', print_r($_SESSION['user'], true));
+
+    // Bepaal redirect op basis van rol
+    $redirect = ($user['role_id'] == 2) ? '../views/admin_dashboard.php' : 'agenda.php';
     echo json_encode([
         'success' => true, 
         'message' => 'Login succesvol!',
-        'redirect' => 'agenda.php'
+        'redirect' => $redirect
     ]);
     
 } catch (PDOException $e) {
