@@ -338,8 +338,9 @@ input[type="checkbox"] {
 .pagination {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     gap: 1rem;
+    flex-direction: row;
 }
 
 .page-btn {

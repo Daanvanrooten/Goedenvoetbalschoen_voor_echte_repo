@@ -7,9 +7,20 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 
+
 $user = $_SESSION['user'];
-$userInitial = strtoupper(substr($user['voornaam'], 0, 1));
-$userName = $user['voornaam'] . ' ' . $user['achternaam'];
+$userInitial = '';
+if (isset($user['first_name'])) {
+    $userInitial = strtoupper(substr($user['first_name'], 0, 1));
+} elseif (isset($user['voornaam'])) {
+    $userInitial = strtoupper(substr($user['voornaam'], 0, 1));
+}
+$userName = '';
+if (isset($user['first_name']) && isset($user['last_name'])) {
+    $userName = $user['first_name'] . ' ' . $user['last_name'];
+} elseif (isset($user['voornaam']) && isset($user['achternaam'])) {
+    $userName = $user['voornaam'] . ' ' . $user['achternaam'];
+}
 
 // Haal huidige datum en weeknummers op
 $currentDate = new DateTime();

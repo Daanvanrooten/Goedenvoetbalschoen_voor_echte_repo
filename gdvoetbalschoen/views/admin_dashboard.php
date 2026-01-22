@@ -6,7 +6,12 @@ session_start();
 // Controleer of user admin is via role_id == 2
 
 // Controleer of user admin is via role_id == 2 (volgens database)
+
 $isAdmin = isset($_SESSION['user']['role_id']) && $_SESSION['user']['role_id'] == 2;
+if (!$isAdmin) {
+    header('Location: ../index.php');
+    exit();
+}
 
 // Data wordt via AJAX opgehaald
 $aantalLeden = 0;
@@ -105,55 +110,56 @@ $aantalTakenOpen = 0;
             </section>
         </main>
 
+
     <!-- Uitloggen Modal -->
     <div id="logoutModal" class="taak-modal">
-                                <p class="stat-value" id="takenCount">...</p>
+        <div class="taak-modal-content logout-modal-content">
             <h2 class="taak-modal-title">Uitloggen</h2>
             <p class="modal-text">Weet je zeker dat je wilt uitloggen?</p>
             <div class="form-actions logout-actions">
-                        <!-- Ledenlijst -->
-                        <section class="leden-section">
-                            <h2>Alle leden</h2>
-                            <table class="leden-table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Naam</th>
-                                        <th>Email</th>
-                                        <th>Gebruikersnaam</th>
-                                        <th>Rol</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="ledenTableBody">
-                                    <tr><td colspan="5">Laden...</td></tr>
-                                </tbody>
-                            </table>
-                        </section>
-
-                        <!-- Open taken -->
-                        <section class="taken-section">
-                            <h2>Open taken</h2>
-                            <table class="taken-table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Titel</th>
-                                        <th>Beschrijving</th>
-                                        <th>Startdatum</th>
-                                        <th>Einddatum</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="takenTableBody">
-                                    <tr><td colspan="5">Laden...</td></tr>
-                                </tbody>
-                            </table>
-                        </section>
-
                 <button type="button" class="cancel-logout-btn">Annuleer</button>
                 <button type="button" class="confirm-logout-btn">Ja</button>
             </div>
         </div>
     </div>
+
+    <!-- Ledenlijst -->
+    <section class="leden-section">
+        <h2>Alle leden</h2>
+        <table class="leden-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Naam</th>
+                    <th>Email</th>
+                    <th>Gebruikersnaam</th>
+                    <th>Rol</th>
+                </tr>
+            </thead>
+            <tbody id="ledenTableBody">
+                <tr><td colspan="5">Laden...</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Open taken -->
+    <section class="taken-section">
+        <h2>Open taken</h2>
+        <table class="taken-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Titel</th>
+                    <th>Beschrijving</th>
+                    <th>Startdatum</th>
+                    <th>Einddatum</th>
+                </tr>
+            </thead>
+            <tbody id="takenTableBody">
+                <tr><td colspan="5">Laden...</td></tr>
+            </tbody>
+        </table>
+    </section>
 
     <script>
     // Haal leden en open taken op via AJAX

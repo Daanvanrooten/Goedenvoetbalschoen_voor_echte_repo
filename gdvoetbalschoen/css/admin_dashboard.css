@@ -591,3 +591,12 @@ header nav {
         padding: 14px 24px;
     }
 }
+.taken-section{
+    display: none;
+}
+.leden-section{
+    display: none;
+}
+.leden-table-container{
+    display: none;
+}

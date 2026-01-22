@@ -85,97 +85,8 @@ $totalPages = 1;
                     <tbody id="ledenTableBody">
                         <tr><td colspan="5">Laden...</td></tr>
                     </tbody>
-                </main>
-                <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    fetch('../phpcode/leden_lijst.php')
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data.success) {
-                                const ledenBody = document.getElementById('ledenTableBody');
-                                ledenBody.innerHTML = '';
-                                data.leden.forEach(lid => {
-                                    ledenBody.innerHTML += `
-                                        <tr>
-                                            <td class="checkbox-col"><input type="checkbox" name="member[]" value="${lid.user_id}"></td>
-                                            <td class="author-col">
-                                                <div class="member-info">
-                                                    <div class="avatar">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
-                                                    </div>
-                                                    <div class="member-details">
-                                                        <div class="member-name">${lid.first_name} ${lid.last_name}</div>
-                                                        <div class="member-role">${lid.role_id}</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="email-col desktop-only"><span class="email-text">${lid.email}</span></td>
-                                            <td class="phone-col desktop-only"><span class="phone-text">-</span></td>
-                                            <td class="actions-col">
-                                                <button class="icon-btn delete-btn" title="Verwijderen">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" /></svg>
-                                                </button>
-                                                <button class="icon-btn more-btn" data-member-id="${lid.user_id}" data-member-name="${lid.first_name} ${lid.last_name}" data-role="${lid.role_id}" title="Meer opties">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" /></svg>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    `;
-                                });
-                                if (data.leden.length === 0) ledenBody.innerHTML = '<tr><td colspan="5">Geen leden gevonden</td></tr>';
-                            } else {
-                                document.getElementById('ledenTableBody').innerHTML = '<tr><td colspan="5">Fout: ' + data.message + '</td></tr>';
-                            }
-                        })
-                        .catch(err => {
-                            document.getElementById('ledenTableBody').innerHTML = '<tr><td colspan="5">Fout bij ophalen</td></tr>';
-                        });
-                });
-                // Modal admin beheer logica
-                const adminModal = document.getElementById('adminModal');
-                const closeModalBtn = document.getElementById('closeModal');
-                const cancelBtn = document.getElementById('cancelBtn');
-                const confirmBtn = document.getElementById('confirmBtn');
-                let selectedUserId = null;
-                let selectedRole = null;
-                let selectedName = '';
-
-                document.getElementById('ledenTableBody').addEventListener('click', function(e) {
-                    if (e.target.classList.contains('more-btn')) {
-                        selectedUserId = e.target.dataset.memberId;
-                        selectedRole = parseInt(e.target.dataset.role);
-                        selectedName = e.target.dataset.memberName;
-                        // Pas modal tekst aan
-                        document.querySelector('.modal-title').textContent = 'Admin beheer';
-                        if (selectedRole === 2) {
-                            document.querySelector('.modal-text').textContent = `Wil je ${selectedName} geen admin meer maken?`;
-                        } else {
-                            document.querySelector('.modal-text').textContent = `Wil je ${selectedName} admin maken?`;
-                        }
-                        adminModal.classList.add('active');
-                    }
-                });
-                function closeAdminModal() {
-                    adminModal.classList.remove('active');
-                }
-                closeModalBtn.addEventListener('click', closeAdminModal);
-                cancelBtn.addEventListener('click', closeAdminModal);
-                confirmBtn.addEventListener('click', function() {
-                    if (!selectedUserId) return;
-                    const newRole = selectedRole === 2 ? 1 : 2;
-                    fetch('../phpcode/update_role.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: `user_id=${selectedUserId}&role_id=${newRole}`
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        alert(data.message);
-                        closeAdminModal();
-                        window.location.reload();
-                    });
-                });
-                </script>
+                </table>
+            </div>
                 </table>
             </div>
 
@@ -224,6 +135,99 @@ $totalPages = 1;
     </div>
 
     <script src="../js/ledenbeheer.js"></script>
+    <script>
+    // Dynamische leden ophalen en modal logica
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('../phpcode/leden_lijst.php')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const ledenBody = document.getElementById('ledenTableBody');
+                    ledenBody.innerHTML = '';
+                    data.leden.forEach(lid => {
+                        ledenBody.innerHTML += `
+                            <tr>
+                                <td class="checkbox-col"><input type="checkbox" name="member[]" value="${lid.user_id}"></td>
+                                <td class="author-col">
+                                    <div class="member-info">
+                                        <div class="avatar">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
+                                        </div>
+                                        <div class="member-details">
+                                            <div class="member-name">${lid.first_name} ${lid.last_name}</div>
+                                            <div class="member-role">${lid.role_id}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="email-col desktop-only"><span class="email-text">${lid.email}</span></td>
+                                <td class="phone-col desktop-only"><span class="phone-text">-</span></td>
+                                <td class="actions-col">
+                                    <button class="icon-btn delete-btn" title="Verwijderen">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" /></svg>
+                                    </button>
+                                    <button class="icon-btn more-btn" data-member-id="${lid.user_id}" data-member-name="${lid.first_name} ${lid.last_name}" data-role="${lid.role_id}" title="Meer opties">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" /></svg>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    if (data.leden.length === 0) ledenBody.innerHTML = '<tr><td colspan="5">Geen leden gevonden</td></tr>';
+                } else {
+                    document.getElementById('ledenTableBody').innerHTML = '<tr><td colspan="5">Fout: ' + data.message + '</td></tr>';
+                }
+            })
+            .catch(err => {
+                document.getElementById('ledenTableBody').innerHTML = '<tr><td colspan="5">Fout bij ophalen</td></tr>';
+            });
+
+        // Modal admin beheer logica
+        const adminModal = document.getElementById('adminModal');
+        const closeModalBtn = document.getElementById('closeModal');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const confirmBtn = document.getElementById('confirmBtn');
+        let selectedUserId = null;
+        let selectedRole = null;
+        let selectedName = '';
+
+        document.getElementById('ledenTableBody').addEventListener('click', function(e) {
+            const moreBtn = e.target.closest('.more-btn');
+            if (moreBtn) {
+                selectedUserId = moreBtn.dataset.memberId;
+                selectedRole = parseInt(moreBtn.dataset.role);
+                selectedName = moreBtn.dataset.memberName;
+                // Pas modal tekst aan
+                document.querySelector('.modal-title').textContent = 'Admin beheer';
+                if (selectedRole === 2) {
+                    document.querySelector('.modal-text').textContent = `Wil je ${selectedName} geen admin meer maken?`;
+                } else {
+                    document.querySelector('.modal-text').textContent = `Wil je ${selectedName} admin maken?`;
+                }
+                adminModal.classList.add('active');
+            }
+        });
+        function closeAdminModal() {
+            adminModal.classList.remove('active');
+        }
+        closeModalBtn.addEventListener('click', closeAdminModal);
+        cancelBtn.addEventListener('click', closeAdminModal);
+        confirmBtn.addEventListener('click', function() {
+            if (!selectedUserId) return;
+            const newRole = selectedRole === 2 ? 1 : 2;
+            fetch('../phpcode/update_role.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `user_id=${selectedUserId}&role_id=${newRole}`
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                closeAdminModal();
+                window.location.reload();
+            });
+        });
+    });
+    </script>
 </body>
 
 </html>

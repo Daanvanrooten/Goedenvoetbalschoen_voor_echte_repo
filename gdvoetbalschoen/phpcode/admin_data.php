@@ -17,8 +17,9 @@ try {
     $ledenStmt = $conn->query("SELECT user_id, first_name, last_name, email, username, role_id FROM users");
     $leden = $ledenStmt->fetchAll();
 
-    // Haal alle open taken op (is_active = 1)
-    $takenStmt = $conn->query("SELECT task_id, title, description, start_date, end_date, is_active FROM tasks WHERE is_active = 1");
+
+    // Haal alle open taken op (is_active is niet 0/null)
+    $takenStmt = $conn->query("SELECT task_id, title, description, start_date, end_date, is_active FROM tasks WHERE is_active IS NULL OR is_active != 0");
     $taken = $takenStmt->fetchAll();
 
     echo json_encode([

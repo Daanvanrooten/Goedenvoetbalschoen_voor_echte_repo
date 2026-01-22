@@ -7,9 +7,7 @@ if (isset($_SESSION['user'])) {
     $user = $_SESSION['user'];
     // Controleer of gebruiker admin is (role_id == 2)
     if (isset($user['role_id']) && $user['role_id'] == 2) {
-        // Forceer redirect naar admin dashboard
-        header('Location: views/admin_dashboard.php');
-        exit();
+        $isAdmin = true;
     }
     $userInitial = isset($user['first_name']) ? strtoupper(substr($user['first_name'], 0, 1)) : (isset($user['voornaam']) ? strtoupper(substr($user['voornaam'], 0, 1)) : '');
 }
