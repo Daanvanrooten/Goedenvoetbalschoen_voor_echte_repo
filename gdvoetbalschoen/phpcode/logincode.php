@@ -36,7 +36,7 @@ try {
 
     // Haal gebruiker op met username
     $stmt = $conn->prepare("
-        SELECT user_id, role_id, first_name, last_name, email, username, password_hash, is_active 
+        SELECT user_id, role_id, first_name, last_name, email, username, password_hash, is_active, is_email_verified 
         FROM users 
         WHERE username = ?
     ");
