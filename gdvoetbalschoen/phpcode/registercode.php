@@ -113,14 +113,18 @@ try {
     ");
     $stmt->execute([$userId, $verificationCode, $expiresAt]);
 
-    // TODO: Stuur email met verificatiecode
-    // Voor nu: log de code naar een debug bestand
+    // Verstuur email met verificatiecode
+    require_once __DIR__ . '/email_functions.php';
+    $emailSent = sendVerificationEmail($email, "$voornaam $achternaam", $verificationCode);
+    
+    // Log voor debug (blijft ook werken als email faalt)
     $debugMessage = "=== EMAIL VERIFICATIE ===\n";
     $debugMessage .= "Tijd: " . date('Y-m-d H:i:s') . "\n";
     $debugMessage .= "Naar: $email\n";
     $debugMessage .= "Gebruiker: $voornaam $achternaam\n";
     $debugMessage .= "Verificatiecode: $verificationCode\n";
     $debugMessage .= "Geldig tot: $expiresAt\n";
+    $debugMessage .= "Email verzonden: " . ($emailSent ? 'JA' : 'NEE') . "\n";
     $debugMessage .= "========================\n\n";
     file_put_contents(__DIR__ . '/verification_codes.txt', $debugMessage, FILE_APPEND);
 
