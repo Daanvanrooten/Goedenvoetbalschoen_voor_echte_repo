@@ -19,7 +19,8 @@ $user_id = $_SESSION['user']['id'];
 $title = trim($_POST['taaknaam'] ?? '');
 $category = $_POST['categorie'] ?? null;
 $date = $_POST['datum'] ?? null;
-$time = $_POST['tijd'] ?? null;
+$start_time = $_POST['start_time'] ?? null;
+$end_time = $_POST['end_time'] ?? null;
 $herhaling = $_POST['herhaling'] ?? 'eenmalig';
 $maxleden = $_POST['maxleden'] ?? null;
 $beschrijving = trim($_POST['beschrijving'] ?? '');
@@ -29,7 +30,8 @@ $errors = [];
 if (empty($title)) $errors[] = 'Taaknaam is verplicht';
 if (empty($category)) $errors[] = 'Categorie is verplicht';
 if (empty($date)) $errors[] = 'Datum is verplicht';
-if (empty($time)) $errors[] = 'Tijd is verplicht';
+if (empty($start_time)) $errors[] = 'Start tijd is verplicht';
+if (empty($end_time)) $errors[] = 'Eind tijd is verplicht';
 if (!empty($errors)) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => implode(', ', $errors)]);
@@ -38,12 +40,16 @@ if (!empty($errors)) {
 
 try {
     $conn = getDbConnection();
-    // Insert task (vereenvoudigd, zonder herhaling/slots)
-    $stmt = $conn->prepare("INSERT INTO tasks (title, description, is_active, created_at) VALUES (?, ?, 1, NOW())");
-    $stmt->execute([$title, $beschrijving]);
+    // Insert task met category_id, start_time en end_time
+    $stmt = $conn->prepare("INSERT INTO tasks (title, description, category_id, is_active, created_at, start_time, end_time) VALUES (?, ?, ?, 1, NOW(), ?, ?)");
+    $stmt->execute([$title, $beschrijving, $category, $start_time, $end_time]);
     $task_id = $conn->lastInsertId();
-    // Optioneel: koppel aan user, categorie, etc.
-    echo json_encode(['success' => true, 'message' => 'Taak succesvol opgeslagen!']);
+
+    // Voeg slot toe met start en eind uur
+    $stmtSlot = $conn->prepare("INSERT INTO task_slots (task_id, slot_date, start_time, end_time, capacity, created_at) VALUES (?, ?, ?, ?, ?, NOW())");
+    $stmtSlot->execute([$task_id, $date, $start_time, $end_time, $maxleden ?? 1]);
+
+    echo json_encode(['success' => true, 'message' => 'Taak succesvol opgeslagen!', 'task_id' => $task_id, 'category_id' => $category]);
 } catch (PDOException $e) {
     error_log('Taak opslaan fout: ' . $e->getMessage());
     http_response_code(500);

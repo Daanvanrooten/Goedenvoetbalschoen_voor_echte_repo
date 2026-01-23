@@ -535,12 +535,8 @@ while (count($weekNumbers) < 2) {
                     </div>
                     <div class="form-group">
                         <label>Categorie</label>
-                        <select name="categorie" required>
-                            <option value="">Bijv. koken.</option>
-                            <option value="koken">Koken</option>
-                            <option value="schoonmaken">Schoonmaken</option>
-                            <option value="training">Training</option>
-                            <option value="administratie">Administratie</option>
+                        <select name="categorie" id="categorieSelect" required>
+                            <option value="">Selecteer categorie...</option>
                         </select>
                     </div>
                 </div>
@@ -548,11 +544,15 @@ while (count($weekNumbers) < 2) {
                 <div class="form-row">
                     <div class="form-group">
                         <label>Datum</label>
-                        <input type="date" name="datum" value="2025-11-28" required>
+                        <input type="date" name="datum" required>
                     </div>
                     <div class="form-group">
-                        <label>Tijd</label>
-                        <input type="time" name="tijd" value="10:00" required>
+                        <label>Start tijd</label>
+                        <input type="time" name="start_time" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Eind tijd</label>
+                        <input type="time" name="end_time" required>
                     </div>
                 </div>
 
@@ -630,6 +630,24 @@ while (count($weekNumbers) < 2) {
     </div>
 
     <script src="/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/js/agenda.js"></script>
+    <script>
+    // Dynamisch categorieën laden
+    function loadCategories() {
+        fetch('/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/get_categories.php')
+            .then(res => res.json())
+            .then(data => {
+                const select = document.getElementById('categorieSelect');
+                if (!select) return;
+                select.innerHTML = '<option value="">Selecteer categorie...</option>';
+                if (data.success && data.categories.length) {
+                    data.categories.forEach(cat => {
+                        select.innerHTML += `<option value="${cat.category_id}">${cat.name}</option>`;
+                    });
+                }
+            });
+    }
+    document.addEventListener('DOMContentLoaded', loadCategories);
+    </script>
 </body>
 
 </html>

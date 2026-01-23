@@ -88,8 +88,8 @@ $aantalTakenOpen = 0;
 
             <!-- Action Buttons -->
             <section class="actions-section">
-                <a href="#" class="action-card">
-                    <h3 class="action-title">Taken toevoegen</h3>
+                <a href="categoriebeheer.php" class="action-card">
+                    <h3 class="action-title">Categorie toevoegen</h3>
                     <div class="action-icon">
                         <svg width="56" height="56" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect x="5" y="3" width="14" height="18" rx="1" stroke="#2c2c2c" stroke-width="1.5" />

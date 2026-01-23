@@ -1,9 +1,0 @@
-Array
-(
-    [id] => 2
-    [first_name] => Daan
-    [last_name] => van Rooten
-    [email] => daanvanrooten@gmail.com
-    [username] => Daan
-    [role_id] => 2
-)
