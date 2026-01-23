@@ -1,24 +1,72 @@
 <!DOCTYPE html>
 <html lang="nl">
+
 <head>
     <meta charset="UTF-8">
     <title>Registratie Test</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-        button { background: #6b5b95; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
-        .result { margin-top: 20px; padding: 15px; border-radius: 4px; }
-        .success { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
-        pre { background: #f4f4f4; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background: #6b5b95;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
     </style>
 </head>
+
 <body>
     <h1>Registratie Test</h1>
     <p>Gebruik dit formulier om te testen wat er mis gaat bij registratie.</p>
-    
+
     <form id="testForm">
         <div class="form-group">
             <label>Voornaam:</label>
@@ -46,31 +94,31 @@
         </div>
         <button type="submit">Test Registratie</button>
     </form>
-    
+
     <div id="result"></div>
-    
+
     <script>
         document.getElementById('testForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const resultDiv = document.getElementById('result');
             const submitBtn = this.querySelector('button');
-            
+
             submitBtn.disabled = true;
             submitBtn.textContent = 'Bezig...';
             resultDiv.innerHTML = '<p>Laden...</p>';
-            
+
             const formData = new FormData(this);
-            
+
             try {
                 const response = await fetch('/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/registercode.php', {
                     method: 'POST',
                     body: formData
                 });
-                
+
                 const responseText = await response.text();
                 console.log('Response text:', responseText);
-                
+
                 let data;
                 try {
                     data = JSON.parse(responseText);
@@ -88,7 +136,7 @@
                     submitBtn.textContent = 'Test Registratie';
                     return;
                 }
-                
+
                 if (data.success) {
                     resultDiv.innerHTML = `
                         <div class="result success">
@@ -132,4 +180,5 @@
         });
     </script>
 </body>
+
 </html>
