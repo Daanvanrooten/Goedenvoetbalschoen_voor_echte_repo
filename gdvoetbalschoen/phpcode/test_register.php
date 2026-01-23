@@ -111,7 +111,7 @@
             const formData = new FormData(this);
 
             try {
-                const response = await fetch('/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/registercode.php', {
+                const response = await fetch('/goudenvoetbalschoen/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/registercode.php', {
                     method: 'POST',
                     body: formData
                 });

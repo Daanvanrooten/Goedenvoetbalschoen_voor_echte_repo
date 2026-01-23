@@ -76,7 +76,7 @@ session_start();
             const formData = new FormData(this);
 
             try {
-                const response = await fetch('/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/logincode.php', {
+                const response = await fetch('/goudenvoetbalschoen/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/logincode.php', {
                     method: 'POST',
                     body: formData
                 });
