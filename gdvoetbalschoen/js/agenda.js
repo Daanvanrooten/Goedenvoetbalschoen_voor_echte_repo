@@ -44,8 +44,23 @@ function setWeekDates(startDate) {
         col.dataset.date = iso;
     });
 }
+
+// Enable clicking on week day columns to show tasks modal
+function enableWeekDayClick(tasksByDate) {
+    document.querySelectorAll('.week-day-column').forEach(col => {
+        col.onclick = () => {
+            const date = col.dataset.date;
+            const events = tasksByDate[date] || [];
+            showTasksModal(date, events);
+        };
+    });
+}
 // Modal voor taken tonen
 function showTasksModal(date, events) {
+    if (!events || events.length === 0) {
+        alert('Geen taken op deze dag');
+        return;
+    }
     let modal = document.getElementById('tasksModal');
     if (!modal) {
         modal = document.createElement('div');
@@ -604,30 +619,66 @@ function regenerateWeekView() {
             .then(res => res.json())
             .then(tasksByDate => {
                 populateWeekView(tasksByDate);
+                enableWeekDayClick(tasksByDate); // 👈 nieuw
             });
     }
     
     // Clear and rebuild mobile week view
     if (mobileWeekView) {
         mobileWeekView.innerHTML = '';
-        
-        for (let i = 0; i < 7; i++) {
-            const dayDate = new Date(weekStart);
-            dayDate.setDate(weekStart.getDate() + i);
-            
-            const dayNumber = dayDate.getDate();
-            
-            const mobileDay = document.createElement('div');
-            mobileDay.className = 'mobile-week-day';
-            mobileDay.innerHTML = `
-                <div class="mobile-day-label">${daysOfWeek[i]}</div>
-                <div class="mobile-day-content">
-                    <div class="mobile-day-number">${dayNumber}</div>
-                </div>
-            `;
-            
-            mobileWeekView.appendChild(mobileDay);
-        }
+        // Haal taken op voor deze week
+        const weekStartStr = `${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,'0')}-${String(weekStart.getDate()).padStart(2,'0')}`;
+        const weekEndDate = new Date(weekStart);
+        weekEndDate.setDate(weekStart.getDate() + 6);
+        const weekEndStr = `${weekEndDate.getFullYear()}-${String(weekEndDate.getMonth()+1).padStart(2,'0')}-${String(weekEndDate.getDate()).padStart(2,'0')}`;
+        fetch(`/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/get_calendar_tasks.php?start=${weekStartStr}&end=${weekEndStr}`)
+            .then(res => res.json())
+            .then(tasksByDate => {
+                for (let i = 0; i < 7; i++) {
+                    const dayDate = new Date(weekStart);
+                    dayDate.setDate(weekStart.getDate() + i);
+                    const dayNumber = dayDate.getDate();
+                    const dateKey = `${dayDate.getFullYear()}-${String(dayDate.getMonth()+1).padStart(2,'0')}-${String(dayDate.getDate()).padStart(2,'0')}`;
+                    const events = tasksByDate[dateKey] || [];
+                    const mobileDay = document.createElement('div');
+                    mobileDay.className = 'mobile-week-day';
+                    let contentClass = '';
+                    if (events.length > 0 && events[0].color === '#cccccc') contentClass = 'green-day';
+                    if (events.length > 0 && events[0].color === '#ffb8d1') contentClass = 'pink-day';
+                    // Genereer de dagcel
+                    mobileDay.innerHTML = `
+                        <div class="mobile-day-label">${daysOfWeek[i]}</div>
+                        <div class="mobile-day-content ${contentClass}">
+                            <div class="mobile-day-number">${dayNumber}</div>
+                            ${events.map((ev, idx) => `
+                                <div class=\"mobile-week-event\" data-idx=\"${idx}\" style=\"cursor:pointer;\">
+                                    <div class=\"event-time\">${ev.start}</div>
+                                    <div class=\"event-title\">${ev.title}</div>
+                                </div>
+                            `).join('')}
+                            ${events.length > 0 ? `<div class=\"event-author\">${events[0].author || ''}</div>` : ''}
+                        </div>
+                    `;
+                    // Click handler op dag zelf (voor dagen zonder taken)
+                    mobileDay.onclick = function(e) {
+                        // Alleen uitvoeren als er niet op een taak geklikt is
+                        if (!e.target.closest('.mobile-week-event')) {
+                            showMobileTasksForDay(dateKey, events);
+                        }
+                    };
+                    // Click handler op elke taak
+                    setTimeout(() => {
+                        const eventDivs = mobileDay.querySelectorAll('.mobile-week-event');
+                        eventDivs.forEach(evDiv => {
+                            evDiv.onclick = function(e) {
+                                e.stopPropagation();
+                                showMobileTasksForDay(dateKey, events);
+                            };
+                        });
+                    }, 0);
+                    mobileWeekView.appendChild(mobileDay);
+                }
+            });
     }
 }
 
