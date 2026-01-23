@@ -80,25 +80,25 @@ session_start();
     <script>
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const errorDiv = document.getElementById('errorMessage');
             const submitBtn = this.querySelector('.auth-btn');
-            
+
             // Disable button
             submitBtn.disabled = true;
             submitBtn.textContent = 'Bezig...';
             errorDiv.style.display = 'none';
-            
+
             const formData = new FormData(this);
-            
+
             try {
                 const response = await fetch('/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/registercode.php', {
                     method: 'POST',
                     body: formData
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
                     // Toon de verificatiecode tijdelijk voor testing
                     if (data.verification_code) {

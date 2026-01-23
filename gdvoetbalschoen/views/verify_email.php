@@ -28,36 +28,44 @@ $maskedEmail = substr($emailParts[0], 0, 3) . '***@' . $emailParts[1];
             text-align: center;
             margin-bottom: 20px;
         }
+
         .verification-info h2 {
             color: #6b5b95;
             margin-bottom: 10px;
         }
+
         .verification-info p {
             color: #666;
             line-height: 1.6;
         }
+
         .masked-email {
             font-weight: 600;
             color: #6b5b95;
         }
+
         .code-input {
             text-align: center;
             font-size: 24px;
             letter-spacing: 8px;
             font-weight: 600;
         }
+
         .resend-link {
             text-align: center;
             margin-top: 15px;
         }
+
         .resend-link a {
             color: #6b5b95;
             text-decoration: none;
             font-size: 14px;
         }
+
         .resend-link a:hover {
             text-decoration: underline;
         }
+
         .success-message {
             background-color: #d4edda;
             color: #155724;
@@ -66,6 +74,7 @@ $maskedEmail = substr($emailParts[0], 0, 3) . '***@' . $emailParts[1];
             margin-bottom: 15px;
             display: none;
         }
+
         .timer-info {
             text-align: center;
             margin-top: 10px;
@@ -97,7 +106,8 @@ $maskedEmail = substr($emailParts[0], 0, 3) . '***@' . $emailParts[1];
             <div class="verification-info">
                 <h2>👋 Hallo <?php echo htmlspecialchars($firstName); ?>!</h2>
                 <p>We hebben een verificatiecode gestuurd naar:<br>
-                <span class="masked-email"><?php echo htmlspecialchars($maskedEmail); ?></span></p>
+                    <span class="masked-email"><?php echo htmlspecialchars($maskedEmail); ?></span>
+                </p>
                 <p>Voer de 6-cijferige code hieronder in om je account te activeren.</p>
                 <div class="timer-info">
                     ⏱️ De code is 15 minuten geldig
@@ -107,23 +117,23 @@ $maskedEmail = substr($emailParts[0], 0, 3) . '***@' . $emailParts[1];
             <div class="auth-card">
                 <div id="errorMessage" class="error-message" style="display: none;"></div>
                 <div id="successMessage" class="success-message"></div>
-                
+
                 <form method="POST" class="auth-form" id="verifyForm">
                     <div class="form-group">
-                        <input type="text" 
-                               id="verification_code" 
-                               name="verification_code" 
-                               required 
-                               placeholder=" "
-                               maxlength="6"
-                               pattern="[0-9]{6}"
-                               class="code-input"
-                               autocomplete="off">
+                        <input type="text"
+                            id="verification_code"
+                            name="verification_code"
+                            required
+                            placeholder=" "
+                            maxlength="6"
+                            pattern="[0-9]{6}"
+                            class="code-input"
+                            autocomplete="off">
                         <label for="verification_code">Verificatiecode</label>
                     </div>
                     <button type="submit" class="auth-btn">Verifieer Account</button>
                 </form>
-                
+
                 <div class="resend-link">
                     <a href="#" id="resendLink">Code niet ontvangen? Stuur opnieuw</a>
                 </div>
@@ -143,30 +153,30 @@ $maskedEmail = substr($emailParts[0], 0, 3) . '***@' . $emailParts[1];
         // Verify form submit
         document.getElementById('verifyForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const errorDiv = document.getElementById('errorMessage');
             const successDiv = document.getElementById('successMessage');
             const submitBtn = this.querySelector('.auth-btn');
-            
+
             submitBtn.disabled = true;
             submitBtn.textContent = 'Verifiëren...';
             errorDiv.style.display = 'none';
             successDiv.style.display = 'none';
-            
+
             const formData = new FormData(this);
-            
+
             try {
                 const response = await fetch('/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/verify_email_code.php', {
                     method: 'POST',
                     body: formData
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
                     successDiv.textContent = '✓ ' + data.message;
                     successDiv.style.display = 'block';
-                    
+
                     // Redirect na 1 seconde
                     setTimeout(() => {
                         window.location.href = data.redirect;
@@ -197,26 +207,26 @@ $maskedEmail = substr($emailParts[0], 0, 3) . '***@' . $emailParts[1];
         // Resend code
         document.getElementById('resendLink').addEventListener('click', async function(e) {
             e.preventDefault();
-            
+
             const errorDiv = document.getElementById('errorMessage');
             const successDiv = document.getElementById('successMessage');
-            
+
             this.textContent = 'Bezig met versturen...';
             errorDiv.style.display = 'none';
             successDiv.style.display = 'none';
-            
+
             try {
                 const response = await fetch('/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/resend_verification.php', {
                     method: 'POST'
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
                     successDiv.textContent = '✓ ' + data.message;
                     successDiv.style.display = 'block';
                     this.textContent = 'Code opnieuw verzonden!';
-                    
+
                     // Reset link text na 3 seconden
                     setTimeout(() => {
                         this.textContent = 'Code niet ontvangen? Stuur opnieuw';

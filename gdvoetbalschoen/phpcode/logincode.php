@@ -33,7 +33,7 @@ if (!empty($errors)) {
 
 try {
     $conn = getDbConnection();
-    
+
     // Haal gebruiker op met username
     $stmt = $conn->prepare("
         SELECT user_id, role_id, first_name, last_name, email, username, password_hash, is_active 
@@ -42,21 +42,21 @@ try {
     ");
     $stmt->execute([$username]);
     $user = $stmt->fetch();
-    
+
     // Check of gebruiker bestaat
     if (!$user) {
         http_response_code(401);
         echo json_encode(['success' => false, 'message' => 'Gebruikersnaam of wachtwoord is onjuist']);
         exit;
     }
-    
+
     // Check of account actief is
     if (!$user['is_active']) {
         http_response_code(401);
         echo json_encode(['success' => false, 'message' => 'Account is gedeactiveerd. Neem contact op met de beheerder.']);
         exit;
     }
-    
+
     // Check of email geverifieerd is
     if (!$user['is_email_verified']) {
         // Sla tijdelijk info op voor verificatie
@@ -68,20 +68,20 @@ try {
         ];
         http_response_code(401);
         echo json_encode([
-            'success' => false, 
+            'success' => false,
             'message' => 'Email nog niet geverifieerd. Je wordt doorgestuurd naar de verificatiepagina.',
             'redirect' => 'verify_email.php'
         ]);
         exit;
     }
-    
+
     // Verifieer wachtwoord
     if (!password_verify($password, $user['password_hash'])) {
         http_response_code(401);
         echo json_encode(['success' => false, 'message' => 'Gebruikersnaam of wachtwoord is onjuist']);
         exit;
     }
-    
+
     // Login succesvol - sla gebruiker op in sessie
     $_SESSION['user'] = [
         'id' => $user['user_id'],
@@ -98,17 +98,15 @@ try {
     // Bepaal redirect op basis van rol
     $redirect = ($user['role_id'] == 2) ? '../views/admin_dashboard.php' : 'agenda.php';
     echo json_encode([
-        'success' => true, 
+        'success' => true,
         'message' => 'Login succesvol!',
         'redirect' => $redirect
     ]);
-    
 } catch (PDOException $e) {
     error_log("Login fout: " . $e->getMessage());
     http_response_code(500);
     echo json_encode([
-        'success' => false, 
+        'success' => false,
         'message' => 'Database fout: ' . $e->getMessage()
     ]);
 }
-?>
