@@ -39,7 +39,7 @@ $totalPages = 1;
 
                     <a href="#" class="tab active">
                         Leden beheer
-                        <span class="badge">5</span>
+                        <span class="badge" id="ledenAantalBadge">...</span>
                     </a>
                 </div>
                 <div class="search-box desktop-search">
@@ -136,52 +136,102 @@ $totalPages = 1;
 
     <script src="../js/ledenbeheer.js"></script>
     <script>
-    // Dynamische leden ophalen en modal logica
+    // Dynamische leden ophalen en paginering
     document.addEventListener('DOMContentLoaded', function() {
-        fetch('../phpcode/leden_lijst.php')
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    const ledenBody = document.getElementById('ledenTableBody');
-                    ledenBody.innerHTML = '';
-                    data.leden.forEach(lid => {
-                        ledenBody.innerHTML += `
-                            <tr>
-                                <td class="checkbox-col"><input type="checkbox" name="member[]" value="${lid.user_id}"></td>
-                                <td class="author-col">
-                                    <div class="member-info">
-                                        <div class="avatar">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
-                                        </div>
-                                        <div class="member-details">
-                                            <div class="member-name">${lid.first_name} ${lid.last_name}</div>
-                                            <div class="member-role">${lid.role_id}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="email-col desktop-only"><span class="email-text">${lid.email}</span></td>
-                                <td class="phone-col desktop-only"><span class="phone-text">-</span></td>
-                                <td class="actions-col">
-                                    <button class="icon-btn delete-btn" title="Verwijderen">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" /></svg>
-                                    </button>
-                                    <button class="icon-btn more-btn" data-member-id="${lid.user_id}" data-member-name="${lid.first_name} ${lid.last_name}" data-role="${lid.role_id}" title="Meer opties">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" /></svg>
-                                    </button>
-                                </td>
-                            </tr>
-                        `;
-                    });
-                    if (data.leden.length === 0) ledenBody.innerHTML = '<tr><td colspan="5">Geen leden gevonden</td></tr>';
-                } else {
-                    document.getElementById('ledenTableBody').innerHTML = '<tr><td colspan="5">Fout: ' + data.message + '</td></tr>';
-                }
-            })
-            .catch(err => {
-                document.getElementById('ledenTableBody').innerHTML = '<tr><td colspan="5">Fout bij ophalen</td></tr>';
-            });
+        const ledenBody = document.getElementById('ledenTableBody');
+        const ledenAantalBadge = document.getElementById('ledenAantalBadge');
+        const pagination = document.querySelector('.pagination');
+        let currentPage = 1;
+        const perPage = 10;
 
-        // Modal admin beheer logica
+        function fetchLeden(page = 1) {
+            fetch(`../phpcode/leden_lijst_paginated.php?page=${page}&perPage=${perPage}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        ledenBody.innerHTML = '';
+                        if (ledenAantalBadge && typeof data.aantal !== 'undefined') {
+                            ledenAantalBadge.textContent = data.aantal;
+                        }
+                        data.leden.forEach(lid => {
+                            ledenBody.innerHTML += `
+                                <tr>
+                                    <td class="checkbox-col"><input type="checkbox" name="member[]" value="${lid.user_id}"></td>
+                                    <td class="author-col">
+                                        <div class="member-info">
+                                            <div class="avatar">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
+                                            </div>
+                                            <div class="member-details">
+                                                <div class="member-name">${lid.first_name} ${lid.last_name}</div>
+                                                <div class="member-role">${lid.role_id}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="email-col desktop-only"><span class="email-text">${lid.email}</span></td>
+                                    <td class="phone-col desktop-only"><span class="phone-text">${lid.telefoonnummer ? lid.telefoonnummer : '-'}</span></td>
+                                    <td class="actions-col">
+                                        <button class="icon-btn delete-btn" title="Verwijderen">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" /></svg>
+                                        </button>
+                                        <button class="icon-btn more-btn" data-member-id="${lid.user_id}" data-member-name="${lid.first_name} ${lid.last_name}" data-role="${lid.role_id}" title="Meer opties">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" /></svg>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                        if (data.leden.length === 0) ledenBody.innerHTML = '<tr><td colspan="5">Geen leden gevonden</td></tr>';
+                        renderPagination(data.page, data.totalPages);
+                    } else {
+                        ledenBody.innerHTML = '<tr><td colspan="5">Fout: ' + data.message + '</td></tr>';
+                    }
+                })
+                .catch(err => {
+                    ledenBody.innerHTML = '<tr><td colspan="5">Fout bij ophalen</td></tr>';
+                });
+        }
+
+        function renderPagination(page, totalPages) {
+            let html = '';
+            html += `<button class="page-btn prev-btn" ${page === 1 ? 'disabled' : ''}>Previous</button>`;
+            let start = Math.max(1, page - 2);
+            let end = Math.min(totalPages, page + 2);
+            if (start > 1) html += `<button class="page-num">1</button>${start > 2 ? '<span class="dots">...</span>' : ''}`;
+            for (let i = start; i <= end; i++) {
+                html += `<button class="page-num${i === page ? ' active' : ''}">${i}</button>`;
+            }
+            if (end < totalPages) html += `${end < totalPages - 1 ? '<span class="dots">...</span>' : ''}<button class="page-num">${totalPages}</button>`;
+            html += `<button class="page-btn next-btn" ${page === totalPages ? 'disabled' : ''}>Next</button>`;
+            pagination.innerHTML = html;
+
+            // Event listeners
+            pagination.querySelector('.prev-btn').onclick = function() {
+                if (page > 1) {
+                    currentPage = page - 1;
+                    fetchLeden(currentPage);
+                }
+            };
+            pagination.querySelector('.next-btn').onclick = function() {
+                if (page < totalPages) {
+                    currentPage = page + 1;
+                    fetchLeden(currentPage);
+                }
+            };
+            pagination.querySelectorAll('.page-num').forEach(btn => {
+                btn.onclick = function() {
+                    const num = parseInt(this.textContent);
+                    if (!isNaN(num) && num !== page) {
+                        currentPage = num;
+                        fetchLeden(currentPage);
+                    }
+                };
+            });
+        }
+
+        fetchLeden(currentPage);
+
+        // Modal admin beheer logica (ongewijzigd)
         const adminModal = document.getElementById('adminModal');
         const closeModalBtn = document.getElementById('closeModal');
         const cancelBtn = document.getElementById('cancelBtn');
@@ -190,7 +240,7 @@ $totalPages = 1;
         let selectedRole = null;
         let selectedName = '';
 
-        document.getElementById('ledenTableBody').addEventListener('click', function(e) {
+        ledenBody.addEventListener('click', function(e) {
             const moreBtn = e.target.closest('.more-btn');
             if (moreBtn) {
                 selectedUserId = moreBtn.dataset.memberId;

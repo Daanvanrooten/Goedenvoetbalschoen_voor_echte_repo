@@ -169,7 +169,7 @@ $aantalTakenOpen = 0;
             .then(data => {
                 if (data.success) {
                     // Leden
-                    document.getElementById('ledenCount').textContent = data.leden.length;
+                    document.getElementById('ledenCount').textContent = data.aantalLeden;
                     const ledenBody = document.getElementById('ledenTableBody');
                     ledenBody.innerHTML = '';
                     data.leden.forEach(lid => {
