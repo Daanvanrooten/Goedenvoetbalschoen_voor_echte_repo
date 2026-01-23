@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Gegenereerd op: 22 jan 2026 om 11:03
+-- Gegenereerd op: 23 jan 2026 om 11:08
 -- Serverversie: 10.4.32-MariaDB
 -- PHP-versie: 8.2.12
 
@@ -46,6 +46,14 @@ CREATE TABLE `roles` (
   `name` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Gegevens worden geëxporteerd voor tabel `roles`
+--
+
+INSERT INTO `roles` (`role_id`, `name`) VALUES
+(2, 'Admin'),
+(1, 'User');
+
 -- --------------------------------------------------------
 
 --
@@ -79,11 +87,21 @@ CREATE TABLE `tasks` (
   `updated_at` datetime DEFAULT NULL,
   `frequency` enum('DAILY','WEEKLY','MONTHLY') DEFAULT NULL,
   `interval_value` int(10) UNSIGNED NOT NULL DEFAULT 1,
-  `start_date` date DEFAULT NULL,
-  `end_date` date DEFAULT NULL,
-  `day_of_week` tinyint(3) UNSIGNED DEFAULT NULL COMMENT '0=Sunday,1=Monday,...,6=Saturday',
-  `day_of_month` tinyint(3) UNSIGNED DEFAULT NULL COMMENT '1-31 monthly'
+  `start_time` time DEFAULT NULL,
+  `end_time` time DEFAULT NULL,
+  `day` tinyint(3) UNSIGNED DEFAULT NULL COMMENT 'Dag van de maand (1-31)',
+  `week` tinyint(3) UNSIGNED DEFAULT NULL COMMENT 'Weeknummer (1-53)',
+  `month` tinyint(3) UNSIGNED DEFAULT NULL COMMENT 'Maand (1-12)',
+  `year` smallint(5) UNSIGNED DEFAULT NULL COMMENT 'Jaar (bv. 2026)'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `tasks`
+--
+
+INSERT INTO `tasks` (`task_id`, `title`, `description`, `category_id`, `is_active`, `created_at`, `updated_at`, `frequency`, `interval_value`, `start_time`, `end_time`, `day`, `week`, `month`, `year`) VALUES
+(9, '321213', '312213', 1, 1, '2026-01-23 10:04:04', NULL, NULL, 1, '12:03:00', '14:03:00', NULL, NULL, NULL, NULL),
+(10, '123213213312', '212321321', 1, 1, '2026-01-23 10:05:07', NULL, NULL, 1, '13:04:00', '16:04:00', NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -96,6 +114,13 @@ CREATE TABLE `task_categories` (
   `name` varchar(100) NOT NULL,
   `color_hex` char(7) NOT NULL COMMENT '#RRGGBB'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `task_categories`
+--
+
+INSERT INTO `task_categories` (`category_id`, `name`, `color_hex`) VALUES
+(1, 'test 1234', '#cccccc');
 
 -- --------------------------------------------------------
 
@@ -128,6 +153,14 @@ CREATE TABLE `task_slots` (
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Gegevens worden geëxporteerd voor tabel `task_slots`
+--
+
+INSERT INTO `task_slots` (`slot_id`, `task_id`, `slot_date`, `start_time`, `end_time`, `capacity`, `location`, `created_at`, `updated_at`) VALUES
+(4, 9, '2026-01-29', '12:03:00', '14:03:00', 4, NULL, '2026-01-23 10:04:04', NULL),
+(5, 10, '2026-01-24', '13:04:00', '16:04:00', 0, NULL, '2026-01-23 10:05:07', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -148,6 +181,14 @@ CREATE TABLE `users` (
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `users`
+--
+
+INSERT INTO `users` (`user_id`, `role_id`, `first_name`, `last_name`, `email`, `telefoonnummer`, `username`, `password_hash`, `is_active`, `is_email_verified`, `created_at`, `updated_at`) VALUES
+(1, 1, 'Daan', 'van Rooten', 'djaanvanrooten@gmail.com', '', 'admin', '$2y$10$vCl3g3wQh01LlFASuZ3o7.FpmqjL5IvcfqZh.n4rLxASYXxlawjZS', 1, 0, '2026-01-22 11:11:27', NULL),
+(2, 2, 'Daan', 'van Rooten', 'daanvanrooten@gmail.com', '', 'Daan', '$2y$10$4M7./LSCZfowvCA9jU1/GewpbW7bX/UjGdGLD63xZvLX5cF.rAQAe', 1, 0, '2026-01-22 11:13:23', NULL);
 
 -- --------------------------------------------------------
 
@@ -216,6 +257,40 @@ ALTER TABLE `users`
   ADD UNIQUE KEY `uniq_users_email` (`email`),
   ADD UNIQUE KEY `uniq_users_username` (`username`),
   ADD KEY `fk_users_role` (`role_id`);
+
+--
+-- AUTO_INCREMENT voor geëxporteerde tabellen
+--
+
+--
+-- AUTO_INCREMENT voor een tabel `tasks`
+--
+ALTER TABLE `tasks`
+  MODIFY `task_id` int(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT voor een tabel `task_categories`
+--
+ALTER TABLE `task_categories`
+  MODIFY `category_id` tinyint(3) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT voor een tabel `task_registrations`
+--
+ALTER TABLE `task_registrations`
+  MODIFY `registration_id` int(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT voor een tabel `task_slots`
+--
+ALTER TABLE `task_slots`
+  MODIFY `slot_id` int(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT voor een tabel `users`
+--
+ALTER TABLE `users`
+  MODIFY `user_id` int(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Beperkingen voor geëxporteerde tabellen
