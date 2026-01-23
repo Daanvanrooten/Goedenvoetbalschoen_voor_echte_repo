@@ -51,6 +51,7 @@ define('MAIL_FROM_EMAIL', 'jouw-email@outlook.com');
 ## 📧 Stap 3: Test Email
 
 Registreer een nieuwe gebruiker en check:
+
 - Je inbox voor de verificatiecode
 - `phpcode/email_log.txt` voor debug info
 - `phpcode/verification_codes.txt` voor backup codes
@@ -60,15 +61,18 @@ Registreer een nieuwe gebruiker en check:
 ## 🔧 Troubleshooting
 
 **Email wordt niet verzonden?**
+
 - Check `phpcode/email_log.txt` voor errors
 - Verificatiecode staat ALTIJD in `phpcode/verification_codes.txt`
 - Zet `MAIL_DEBUG` op `true` in `email_config.php`
 
 **Gmail blokkeert emails?**
+
 - Gebruik een App Password (NIET je normale wachtwoord)
 - Check "Less secure app access" is AAN
 
 **Composer werkt niet?**
+
 - Download: https://getcomposer.org/Composer-Setup.exe
 - Installeer en herstart terminal
 - Run `composer install` opnieuw

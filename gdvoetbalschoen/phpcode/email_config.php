@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Email Configuratie
  * 
@@ -38,4 +39,3 @@ define('MAIL_DEBUG', true);
  * ANDERE PROVIDERS:
  * - Zoek naar "[provider] SMTP settings" in Google
  */
-?>

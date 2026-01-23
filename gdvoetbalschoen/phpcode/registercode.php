@@ -116,7 +116,7 @@ try {
     // Verstuur email met verificatiecode
     require_once __DIR__ . '/email_functions.php';
     $emailSent = sendVerificationEmail($email, "$voornaam $achternaam", $verificationCode);
-    
+
     // Log voor debug (blijft ook werken als email faalt)
     $debugMessage = "=== EMAIL VERIFICATIE ===\n";
     $debugMessage .= "Tijd: " . date('Y-m-d H:i:s') . "\n";
