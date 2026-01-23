@@ -71,9 +71,7 @@ if (isset($_SESSION['user'])) {
                         <h1>Gouden schoen</h1>
                         <h2>Club voor iedereen</h2>
                         <p class="description">
-                            Proin quis cras euismod sit et metus risus ut. Semper nam vel morbi sit
-                            cursus tincidunt massa et a. Dolor odio parturient cursus justo nunc enim,
-                            a, sit facilisi. Eleifend et ac lacus, ullamcorper mauris eget tortor mollis.
+                            De Gouden Schoen draait op vrijwilligers! Via dit platform schrijf je je eenvoudig in voor taken en help je onze club bruisend en sportief te houden. Samen maken we het verschil voor alle leden. Doe mee en draag bij aan het succes van onze vereniging!
                         </p>
                         <a href="views/register.php" class="cta-button">Meld je aan</a>
                     </div>
