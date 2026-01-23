@@ -57,6 +57,10 @@ session_start();
                         <label for="email">Email</label>
                     </div>
                     <div class="form-group">
+                        <input type="text" id="telefoonnummer" name="telefoonnummer" required placeholder=" ">
+                        <label for="telefoonnummer">Telefoonnummer</label>
+                    </div>
+                    <div class="form-group">
                         <input type="text" id="username" name="username" required placeholder=" ">
                         <label for="username">Gebruikersnaam</label>
                     </div>

@@ -14,6 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $voornaam = trim($_POST['voornaam'] ?? '');
 $achternaam = trim($_POST['achternaam'] ?? '');
 $email = trim($_POST['email'] ?? '');
+$telefoonnummer = trim($_POST['telefoonnummer'] ?? '');
 $username = trim($_POST['username'] ?? '');
 $password = $_POST['password'] ?? '';
 
@@ -34,6 +35,9 @@ if (empty($email)) {
     $errors[] = 'Ongeldig email adres';
 }
 
+if (empty($telefoonnummer)) {
+    $errors[] = 'Telefoonnummer is verplicht';
+}
 if (empty($username)) {
     $errors[] = 'Gebruikersnaam is verplicht';
 } elseif (strlen($username) < 3) {
@@ -82,8 +86,8 @@ try {
     // Insert nieuwe gebruiker
     $stmt = $conn->prepare("
         INSERT INTO users 
-        (role_id, first_name, last_name, email, username, password_hash, is_active, is_email_verified, created_at) 
-        VALUES (?, ?, ?, ?, ?, ?, 1, 0, NOW())
+        (role_id, first_name, last_name, email, telefoonnummer, username, password_hash, is_active, is_email_verified, created_at) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, 1, 0, NOW())
     ");
     
     $stmt->execute([
@@ -91,6 +95,7 @@ try {
         $voornaam,
         $achternaam,
         $email,
+        $telefoonnummer,
         $username,
         $passwordHash
     ]);
@@ -99,7 +104,7 @@ try {
     
     // Haal gebruiker op voor sessie
     $stmt = $conn->prepare("
-        SELECT user_id, first_name, last_name, email, username, role_id 
+        SELECT user_id, first_name, last_name, email, telefoonnummer, username, role_id 
         FROM users 
         WHERE user_id = ?
     ");
@@ -112,6 +117,7 @@ try {
         'voornaam' => $user['first_name'],
         'achternaam' => $user['last_name'],
         'email' => $user['email'],
+        'telefoonnummer' => $user['telefoonnummer'],
         'username' => $user['username'],
         'role_id' => $user['role_id']
     ];
