@@ -57,6 +57,24 @@ try {
         exit;
     }
     
+    // Check of email geverifieerd is
+    if (!$user['is_email_verified']) {
+        // Sla tijdelijk info op voor verificatie
+        $_SESSION['pending_verification'] = [
+            'user_id' => $user['user_id'],
+            'email' => $user['email'],
+            'first_name' => $user['first_name'],
+            'last_name' => $user['last_name']
+        ];
+        http_response_code(401);
+        echo json_encode([
+            'success' => false, 
+            'message' => 'Email nog niet geverifieerd. Je wordt doorgestuurd naar de verificatiepagina.',
+            'redirect' => 'verify_email.php'
+        ]);
+        exit;
+    }
+    
     // Verifieer wachtwoord
     if (!password_verify($password, $user['password_hash'])) {
         http_response_code(401);

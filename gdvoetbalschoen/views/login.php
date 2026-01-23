@@ -93,6 +93,13 @@ session_start();
                     errorDiv.style.marginBottom = '15px';
                     errorDiv.style.backgroundColor = '#ffe6e6';
                     errorDiv.style.borderRadius = '5px';
+                    
+                    // Als er een redirect naar verificatie pagina is
+                    if (data.redirect) {
+                        setTimeout(() => {
+                            window.location.href = data.redirect;
+                        }, 2000);
+                    }
                 }
             } catch (error) {
                 errorDiv.textContent = 'Er is een fout opgetreden. Probeer het opnieuw.';

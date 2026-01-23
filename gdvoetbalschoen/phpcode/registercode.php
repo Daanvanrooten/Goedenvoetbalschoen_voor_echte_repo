@@ -102,30 +102,41 @@ try {
     
     $userId = $conn->lastInsertId();
     
-    // Haal gebruiker op voor sessie
-    $stmt = $conn->prepare("
-        SELECT user_id, first_name, last_name, email, telefoonnummer, username, role_id 
-        FROM users 
-        WHERE user_id = ?
-    ");
-    $stmt->execute([$userId]);
-    $user = $stmt->fetch();
+    // Genereer 6-cijferige verificatiecode
+    $verificationCode = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+    $expiresAt = date('Y-m-d H:i:s', strtotime('+15 minutes'));
     
-    // Sla gebruiker op in sessie
-    $_SESSION['user'] = [
-        'id' => $user['user_id'],
-        'voornaam' => $user['first_name'],
-        'achternaam' => $user['last_name'],
-        'email' => $user['email'],
-        'telefoonnummer' => $user['telefoonnummer'],
-        'username' => $user['username'],
-        'role_id' => $user['role_id']
+    // Sla verificatiecode op
+    $stmt = $conn->prepare("
+        INSERT INTO email_verifications (user_id, token, created_at, expires_at) 
+        VALUES (?, ?, NOW(), ?)
+    ");
+    $stmt->execute([$userId, $verificationCode, $expiresAt]);
+    
+    // TODO: Stuur email met verificatiecode
+    // Voor nu: log de code naar een debug bestand
+    $debugMessage = "=== EMAIL VERIFICATIE ===\n";
+    $debugMessage .= "Tijd: " . date('Y-m-d H:i:s') . "\n";
+    $debugMessage .= "Naar: $email\n";
+    $debugMessage .= "Gebruiker: $voornaam $achternaam\n";
+    $debugMessage .= "Verificatiecode: $verificationCode\n";
+    $debugMessage .= "Geldig tot: $expiresAt\n";
+    $debugMessage .= "========================\n\n";
+    file_put_contents(__DIR__ . '/verification_codes.txt', $debugMessage, FILE_APPEND);
+    
+    // Sla tijdelijk gebruiker info op in sessie voor verificatie pagina
+    $_SESSION['pending_verification'] = [
+        'user_id' => $userId,
+        'email' => $email,
+        'first_name' => $voornaam,
+        'last_name' => $achternaam
     ];
     
     echo json_encode([
         'success' => true, 
-        'message' => 'Account succesvol aangemaakt!',
-        'redirect' => 'agenda.php'
+        'message' => 'Account aangemaakt! Controleer je email voor de verificatiecode.',
+        'redirect' => 'verify_email.php',
+        'verification_code' => $verificationCode // Tijdelijk voor testing, verwijder later
     ]);
     
 } catch (PDOException $e) {
