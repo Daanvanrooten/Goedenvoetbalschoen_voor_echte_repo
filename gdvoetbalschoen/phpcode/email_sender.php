@@ -20,10 +20,10 @@ function sendVerificationEmail($toEmail, $toName, $verificationCode)
     try {
         // SMTP instellingen - vul jouw gegevens in
         $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';  // of smtp.office365.com voor outlook
+        $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
-        $mail->Username = 'jouw-email@gmail.com'; // VUL IN
-        $mail->Password = 'jouw-app-password';     // VUL IN (app password!)
+        $mail->Username = 'bryvarooijen@gmail.com';
+        $mail->Password = 'tpfyvtpbegpenfmb';
         $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
 
