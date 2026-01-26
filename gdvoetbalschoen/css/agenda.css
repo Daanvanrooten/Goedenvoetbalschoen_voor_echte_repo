@@ -113,6 +113,8 @@ nav {
     display: flex;
     align-items: center;
     gap: 20px;
+    justify-content: center;
+    margin-bottom: 30px;
 }
 
 .month-nav-btn {

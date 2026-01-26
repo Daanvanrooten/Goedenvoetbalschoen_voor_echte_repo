@@ -117,7 +117,13 @@ while (count($weekNumbers) < 2) {
                 </div>
 
                 <div class="calendar-header">
-                    <div class="month-navigation">
+                    
+                    <div class="view-toggle">
+                        <button class="toggle-btn" data-view="week">week</button>
+                        <button class="toggle-btn active" data-view="month">maand</button>
+                    </div>
+                </div>
+                <div class="month-navigation">
                         <button class="month-nav-btn prev-month-btn" id="prevMonth" title="Vorige maand">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
                                 <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
@@ -130,11 +136,6 @@ while (count($weekNumbers) < 2) {
                             </svg>
                         </button>
                     </div>
-                    <div class="view-toggle">
-                        <button class="toggle-btn" data-view="week">week</button>
-                        <button class="toggle-btn active" data-view="month">maand</button>
-                    </div>
-                </div>
 
                 <div class="current-week-info">
                     <div class="week-navigation" id="weekNavigation" style="display: none;">
