@@ -569,15 +569,7 @@ while (count($weekNumbers) < 2) {
 
     <script src="../js/agenda.js"></script>
     <script>
-        // Detecteer base URL voor dynamische fetch calls
-        const isLocal = window.location.hostname.includes('localhost') ||
-            window.location.hostname.includes('127.0.0.1') ||
-            window.location.hostname.includes('webroot.local');
-        // Automatische path detectie - werkt op elke PC
-        const currentPath = window.location.pathname;
-        const viewsIndex = currentPath.lastIndexOf('/views/');
-        const baseUrl = viewsIndex !== -1 ? currentPath.substring(0, viewsIndex) : '';
-
+        // Gebruik de baseUrl uit agenda.js (al geladen hierboven)
         // Dynamisch categorieën laden
         function loadCategories() {
             fetch(baseUrl + '/phpcode/get_categories.php')
