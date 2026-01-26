@@ -66,7 +66,10 @@ session_start();
         const isLocal = window.location.hostname.includes('localhost') ||
             window.location.hostname.includes('127.0.0.1') ||
             window.location.hostname.includes('webroot.local');
-        const baseUrl = isLocal ? '/goudenvoetbalschoen/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen' : '';
+        // Automatische path detectie - werkt op elke PC
+        const currentPath = window.location.pathname;
+        const viewsIndex = currentPath.lastIndexOf('/views/');
+        const baseUrl = viewsIndex !== -1 ? currentPath.substring(0, viewsIndex) : '';
 
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
