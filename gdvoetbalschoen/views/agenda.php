@@ -101,12 +101,15 @@ while (count($weekNumbers) < 2) {
         <section class="calendar-section">
             <div class="container">
                 <!-- Mobile create task button -->
+                <?php if (isset($user['role_id']) && $user['role_id'] == 2): ?>
                 <div class="mobile-create-task">
                     <button class="create-task-btn">
                         + Taak aanmaken
                     </button>
                 </div>
+                <?php endif; ?>
 
+                <?php if (isset($user['role_id']) && $user['role_id'] == 2): ?>
                 <div class="calendar-controls">
                     <button class="account-btn">
                         Taak aanmaken
@@ -115,6 +118,7 @@ while (count($weekNumbers) < 2) {
                         </svg>
                     </button>
                 </div>
+                <?php endif; ?>
 
                 <div class="calendar-header">
                     
@@ -468,12 +472,14 @@ while (count($weekNumbers) < 2) {
         </section>
     </main>
 
+    <?php if (isset($user['role_id']) && $user['role_id'] == 2): ?>
     <!-- Taak Aanmaken Modal -->
     <div id="taakModal" class="taak-modal">
         <div class="taak-modal-content">
             <h2 class="taak-modal-title">Taak aanmaken</h2>
-
             <form id="taakForm" class="taak-form">
+                <!-- ...bestaande formulier velden... -->
+                <?php /* De volledige inhoud van het formulier blijft ongewijzigd */ ?>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Taak naam</label>
@@ -498,7 +504,6 @@ while (count($weekNumbers) < 2) {
                         <small>Typ om personeel te zoeken en klik om toe te voegen. Klik op een naam onder de input om te verwijderen.</small>
                     </div>
                 </div>
-
                 <div class="form-row">
                     <div class="form-group">
                         <label>Datum</label>
@@ -531,7 +536,6 @@ while (count($weekNumbers) < 2) {
                         <input type="number" name="year" id="yearInput" min="2020" max="2100" readonly>
                     </div>
                 </div>
-
                 <div class="form-row">
                     <div class="form-group">
                         <label>Herhaling</label>
@@ -567,12 +571,10 @@ while (count($weekNumbers) < 2) {
                         </select>
                     </div>
                 </div>
-
                 <div class="form-group full-width">
                     <label>Beschrijving</label>
                     <textarea name="beschrijving" placeholder="Placeholder" rows="4"></textarea>
                 </div>
-
                 <div class="form-group full-width">
                     <label>Foto toevoegen</label>
                     <div class="file-upload">
@@ -585,13 +587,13 @@ while (count($weekNumbers) < 2) {
                         <input type="file" name="foto" accept="image/*" style="display: none;" id="fotoInput">
                     </div>
                 </div>
-
                 <div class="form-actions">
                     <button type="submit" class="submit-btn">Taak aanmaken</button>
                 </div>
             </form>
         </div>
     </div>
+    <?php endif; ?>
 
     <!-- Uitloggen Modal -->
     <div id="logoutModal" class="taak-modal">
