@@ -1,3 +1,133 @@
+// Kleur mapping voor week-events
+function getEventClass(colorHex) {
+    switch (colorHex) {
+        case '#cccccc':
+            return 'green-bg';
+        default:
+            return 'green-bg';
+    }
+}
+
+// Render week events in een kolom
+function renderWeekEvents(dayColumn, events) {
+    events.forEach(ev => {
+        const el = document.createElement('div');
+        el.classList.add('week-event', getEventClass(ev.color));
+        el.innerHTML = `
+            <div class="event-time">${ev.start} - ${ev.end}</div>
+            <div class="event-title">${ev.title}</div>
+        `;
+        dayColumn.appendChild(el);
+    });
+}
+
+// Vul weekview met events
+function populateWeekView(tasksByDate) {
+    const dayColumns = document.querySelectorAll('.week-day-column');
+    dayColumns.forEach(col => {
+        const date = col.dataset.date;
+        col.innerHTML = '';
+        if (tasksByDate[date]) {
+            renderWeekEvents(col, tasksByDate[date]);
+            col.classList.add('active-column');
+        }
+    });
+}
+
+// Zet de data-date attribuut op elke kolom
+function setWeekDates(startDate) {
+    const cols = document.querySelectorAll('.week-day-column');
+    cols.forEach((col, i) => {
+        const d = new Date(startDate);
+        d.setDate(d.getDate() + i);
+        const iso = d.toISOString().split('T')[0];
+        col.dataset.date = iso;
+    });
+}
+
+// Enable clicking on week day columns to show tasks modal
+function enableWeekDayClick(tasksByDate) {
+    document.querySelectorAll('.week-day-column').forEach(col => {
+        col.onclick = () => {
+            const date = col.dataset.date;
+            const events = tasksByDate[date] || [];
+            showTasksModal(date, events);
+        };
+    });
+}
+// Modal voor taken tonen
+function showTasksModal(date, events) {
+    if (!events || events.length === 0) {
+        alert('Geen taken op deze dag');
+        return;
+    }
+    let modal = document.getElementById('tasksModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'tasksModal';
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100vw';
+        modal.style.height = '100vh';
+        modal.style.background = 'rgba(0,0,0,0.3)';
+        modal.style.display = 'flex';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+        modal.style.zIndex = '9999';
+        document.body.appendChild(modal);
+    }
+    modal.innerHTML = `<div class="task-modal-content" style="background:#fff;border-radius:16px;max-width:400px;width:90vw;padding:0;box-shadow:0 2px 16px rgba(0,0,0,0.15);overflow:hidden;">
+        <div style='display:flex;align-items:center;gap:12px;padding:16px 20px 0 20px;'>
+            <div style='background:#e5dbfa;color:#6b5b95;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:600;'>A</div>
+            <span style='font-weight:600;font-size:18px;'>Taak</span>
+            <button id='closeTasksModal' style='margin-left:auto;background:none;border:none;font-size:22px;cursor:pointer;'>&times;</button>
+        </div>
+        <div style='background:#f4f0fa;display:flex;align-items:center;justify-content:center;height:100px;margin:20px 0;'>
+            <svg width='60' height='60' fill='#d1c4e9' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10'/></svg>
+        </div>
+        <div style='padding:0 20px 20px 20px;'>
+            ${events.map(ev => `
+                <div style='margin-bottom:18px;'>
+                    <div style='font-weight:600;font-size:17px;'>${ev.title}</div>
+                    <div style='color:#888;font-size:14px;'>${ev.start} - ${ev.end}</div>
+                    <div style='margin:8px 0 0 0;font-size:15px;'>Leden moeten deze taak uitvoeren.</div>
+                </div>
+            `).join('')}
+        </div>
+    </div>`;
+    modal.onclick = function(e) { if (e.target === modal) modal.style.display = 'none'; };
+    document.getElementById('closeTasksModal').onclick = function() { modal.style.display = 'none'; };
+    modal.style.display = 'flex';
+}
+// Kleur naar CSS class
+function getEventClass(colorHex) {
+    switch (colorHex) {
+        case '#cccccc':
+            return 'green-event';
+        default:
+            return 'green-event';
+    }
+}
+
+// Render events in een dagcel
+function renderEventsForDay(dayCell, events) {
+    // Toon alleen een blokje, klikbaar voor alle taken
+    if (events.length > 0) {
+        const el = document.createElement('div');
+        el.classList.add('event', getEventClass(events[0].color));
+        el.style.cursor = 'pointer';
+        el.innerHTML = `
+            <h3 style='margin:0;font-size:15px;'>${events.length === 1 ? events[0].title : events.length + ' taken'}</h3>
+            <p style='margin:0;font-size:13px;color:#888;'>Klik voor details</p>
+        `;
+        el.onclick = (e) => {
+            e.stopPropagation();
+            showTasksModal('', events);
+        };
+        dayCell.appendChild(el);
+    }
+}
 // Toggle between week and month view
 const toggleBtns = document.querySelectorAll('.toggle-btn');
 const monthView = document.querySelector('.month-view');
@@ -17,28 +147,27 @@ toggleBtns.forEach(btn => {
             monthView.style.display = 'none';
             weekView.style.display = 'block';
             weekView.classList.add('active');
-            
-            // Show week navigation buttons
+            // Show week navigation
             if (monthNavigation) {
                 monthNavigation.style.display = 'none';
             }
             weekNavigationBtns.forEach(nav => {
                 nav.style.display = 'flex';
             });
-            
+            // Toon weeknavigatie altijd in weekview
+            const weekNav = document.getElementById('weekNavigation');
+            if (weekNav) weekNav.style.display = 'flex';
             // Hide mobile tasks section in week view
             if (mobileTasksSection && window.innerWidth <= 768) {
                 mobileTasksSection.style.display = 'none';
             }
-            
             // Initialize week view
             regenerateWeekView();
-            updateWeekInfo(); // Initialize selected week display
+            updateWeekInfo();
         } else {
             monthView.style.display = 'block';
             weekView.style.display = 'none';
             weekView.classList.remove('active');
-            
             // Show month navigation buttons
             if (monthNavigation) {
                 monthNavigation.style.display = 'flex';
@@ -46,7 +175,9 @@ toggleBtns.forEach(btn => {
             weekNavigationBtns.forEach(nav => {
                 nav.style.display = 'none';
             });
-            
+            // Verberg weeknavigatie in maandview
+            const weekNav = document.getElementById('weekNavigation');
+            if (weekNav) weekNav.style.display = 'none';
             // Show mobile tasks section in month view
             if (mobileTasksSection && window.innerWidth <= 768) {
                 mobileTasksSection.style.display = 'block';
@@ -228,16 +359,14 @@ const weekInfoLabel = document.querySelector('.current-week-info .info-label:las
 
 // Update calendar title with current month
 function updateCalendarTitle() {
-    
-    
     const monthYear = `${monthNames[currentMonth]} ${currentYear}`;
+
     if (calendarTitle) {
-        calendarTitle.textContent = `${loggedInUser.name}'s schema - ${monthYear}`;
+        calendarTitle.textContent = monthYear;
     }
-    
-    // Update week info display
+
     if (weekInfoLabel) {
-        weekInfoLabel.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+        weekInfoLabel.textContent = monthYear;
     }
 }
 
@@ -318,28 +447,44 @@ function regenerateCalendar() {
         daysGrid.appendChild(dayCell);
     }
     
-    // Add current month's days
-    for (let day = 1; day <= daysInMonth; day++) {
-        const dayCell = document.createElement('div');
-        dayCell.className = 'day-cell current-month';
-        
-        // Check if it's today
-        const today = new Date();
-        if (day === today.getDate() && 
-            currentMonth === today.getMonth() && 
-            currentYear === today.getFullYear()) {
-            dayCell.classList.add('today');
-        }
-        
-        // Check if it's weekend (Saturday or Sunday)
-        const dayOfWeek = new Date(currentYear, currentMonth, day).getDay();
-        if (dayOfWeek === 0 || dayOfWeek === 6) {
-            dayCell.classList.add('weekend');
-        }
-        
-        dayCell.textContent = day;
-        daysGrid.appendChild(dayCell);
-    }
+    // Haal taken op en render ze in de juiste dag
+    const year = currentYear;
+    const month = currentMonth;
+    const start = `${year}-${String(month+1).padStart(2,'0')}-01`;
+    const end = `${year}-${String(month+1).padStart(2,'0')}-${String(daysInMonth).padStart(2,'0')}`;
+    fetch(`/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/get_calendar_tasks.php?start=${start}&end=${end}`)
+        .then(res => res.json())
+        .then(tasksByDate => {
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayCell = document.createElement('div');
+                dayCell.className = 'day-cell current-month';
+
+                // Check if it's today
+                const today = new Date();
+                if (day === today.getDate() &&
+                    currentMonth === today.getMonth() &&
+                    currentYear === today.getFullYear()) {
+                    dayCell.classList.add('today');
+                }
+
+                // Check if it's weekend (Saturday or Sunday)
+                const dayOfWeek = new Date(currentYear, currentMonth, day).getDay();
+                if (dayOfWeek === 0 || dayOfWeek === 6) {
+                    dayCell.classList.add('weekend');
+                }
+
+                dayCell.textContent = day;
+
+                // Render events voor deze dag
+                const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                if (tasksByDate[dateKey]) {
+                    renderEventsForDay(dayCell, tasksByDate[dateKey]);
+                    dayCell.classList.add('green'); // optioneel: hele dag kleuren
+                }
+
+                daysGrid.appendChild(dayCell);
+            }
+        });
     
     // Add next month's days to fill the grid
     const totalCells = adjustedFirstDay + daysInMonth;
@@ -436,66 +581,115 @@ function regenerateWeekView() {
     
     // Clear and rebuild desktop week headers
     weekGrid.innerHTML = '';
-    
     const today = new Date();
-    
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 7; i++) {
         const dayDate = new Date(weekStart);
         dayDate.setDate(weekStart.getDate() + i);
-        
         const isToday = dayDate.toDateString() === today.toDateString();
         const dayNumber = dayDate.getDate();
-        
-        // Show month name for today's date, otherwise just the day number
         const displayDate = isToday ? `${monthNames[dayDate.getMonth()]} ${dayNumber}` : dayNumber;
-        
         const dayHeader = document.createElement('div');
         dayHeader.className = 'week-day-header';
         if (isToday) dayHeader.classList.add('active-day');
-        
         dayHeader.innerHTML = `
             <div class="day-label">${daysOfWeek[i]}</div>
             <div class="day-number">${displayDate}</div>
         `;
-        
         weekGrid.appendChild(dayHeader);
     }
-    
+
     // Clear desktop week days container
     if (weekDaysContainer) {
         weekDaysContainer.innerHTML = '';
-        for (let i = 0; i < 6; i++) {
+        // Maak 7 kolommen aan met data-date
+        for (let i = 0; i < 7; i++) {
+            const dayDate = new Date(weekStart);
+            dayDate.setDate(weekStart.getDate() + i);
             const column = document.createElement('div');
             column.className = 'week-day-column';
             weekDaysContainer.appendChild(column);
         }
+        setWeekDates(weekStart);
+        // Haal taken op voor deze week
+        const weekStartStr = `${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,'0')}-${String(weekStart.getDate()).padStart(2,'0')}`;
+        const weekEndDate = new Date(weekStart);
+        weekEndDate.setDate(weekStart.getDate() + 6);
+        const weekEndStr = `${weekEndDate.getFullYear()}-${String(weekEndDate.getMonth()+1).padStart(2,'0')}-${String(weekEndDate.getDate()).padStart(2,'0')}`;
+        fetch(`/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/get_calendar_tasks.php?start=${weekStartStr}&end=${weekEndStr}`)
+            .then(res => res.json())
+            .then(tasksByDate => {
+                populateWeekView(tasksByDate);
+                enableWeekDayClick(tasksByDate); // 👈 nieuw
+            });
     }
     
     // Clear and rebuild mobile week view
     if (mobileWeekView) {
         mobileWeekView.innerHTML = '';
-        
-        for (let i = 0; i < 6; i++) {
-            const dayDate = new Date(weekStart);
-            dayDate.setDate(weekStart.getDate() + i);
-            
-            const dayNumber = dayDate.getDate();
-            
-            const mobileDay = document.createElement('div');
-            mobileDay.className = 'mobile-week-day';
-            mobileDay.innerHTML = `
-                <div class="mobile-day-label">${daysOfWeek[i]}</div>
-                <div class="mobile-day-content">
-                    <div class="mobile-day-number">${dayNumber}</div>
-                </div>
-            `;
-            
-            mobileWeekView.appendChild(mobileDay);
-        }
+        // Haal taken op voor deze week
+        const weekStartStr = `${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,'0')}-${String(weekStart.getDate()).padStart(2,'0')}`;
+        const weekEndDate = new Date(weekStart);
+        weekEndDate.setDate(weekStart.getDate() + 6);
+        const weekEndStr = `${weekEndDate.getFullYear()}-${String(weekEndDate.getMonth()+1).padStart(2,'0')}-${String(weekEndDate.getDate()).padStart(2,'0')}`;
+        fetch(`/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/get_calendar_tasks.php?start=${weekStartStr}&end=${weekEndStr}`)
+            .then(res => res.json())
+            .then(tasksByDate => {
+                for (let i = 0; i < 7; i++) {
+                    const dayDate = new Date(weekStart);
+                    dayDate.setDate(weekStart.getDate() + i);
+                    const dayNumber = dayDate.getDate();
+                    const dateKey = `${dayDate.getFullYear()}-${String(dayDate.getMonth()+1).padStart(2,'0')}-${String(dayDate.getDate()).padStart(2,'0')}`;
+                    const events = tasksByDate[dateKey] || [];
+                    const mobileDay = document.createElement('div');
+                    mobileDay.className = 'mobile-week-day';
+                    let contentClass = '';
+                    if (events.length > 0 && events[0].color === '#cccccc') contentClass = 'green-day';
+                    if (events.length > 0 && events[0].color === '#ffb8d1') contentClass = 'pink-day';
+                    // Genereer de dagcel
+                    mobileDay.innerHTML = `
+                        <div class="mobile-day-label">${daysOfWeek[i]}</div>
+                        <div class="mobile-day-content ${contentClass}">
+                            <div class="mobile-day-number">${dayNumber}</div>
+                            ${events.map((ev, idx) => `
+                                <div class=\"mobile-week-event\" data-idx=\"${idx}\" style=\"cursor:pointer;\">
+                                    <div class=\"event-time\">${ev.start}</div>
+                                    <div class=\"event-title\">${ev.title}</div>
+                                </div>
+                            `).join('')}
+                            ${events.length > 0 ? `<div class=\"event-author\">${events[0].author || ''}</div>` : ''}
+                        </div>
+                    `;
+                    // Click handler op dag zelf (voor dagen zonder taken)
+                    mobileDay.onclick = function(e) {
+                        // Alleen uitvoeren als er niet op een taak geklikt is
+                        if (!e.target.closest('.mobile-week-event')) {
+                            showMobileTasksForDay(dateKey, events);
+                        }
+                    };
+                    // Click handler op elke taak
+                    setTimeout(() => {
+                        const eventDivs = mobileDay.querySelectorAll('.mobile-week-event');
+                        eventDivs.forEach(evDiv => {
+                            evDiv.onclick = function(e) {
+                                e.stopPropagation();
+                                showMobileTasksForDay(dateKey, events);
+                            };
+                        });
+                    }, 0);
+                    mobileWeekView.appendChild(mobileDay);
+                }
+            });
     }
 }
 
 // Initialize with current month
-updateCalendarTitle();
+
+// Init week view direct op juiste week en update info
+document.addEventListener('DOMContentLoaded', function () {
+    updateCalendarTitle();
+    regenerateCalendar();   // 👈 deze ontbrak
+    updateWeekInfo();
+    regenerateWeekView();
+});
 
 console.log('Agenda pagina geladen!');

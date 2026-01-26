@@ -123,7 +123,7 @@ while (count($weekNumbers) < 2) {
                                 <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
                             </svg>
                         </button>
-                        <h2 class="calendar-title"><?php echo htmlspecialchars($userName); ?>'s schema/Mijn schema</h2>
+                        <h2 class="calendar-title"></h2>
                         <button class="month-nav-btn next-month-btn" id="nextMonth" title="Volgende maand">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
                                 <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
@@ -137,7 +137,7 @@ while (count($weekNumbers) < 2) {
                 </div>
 
                 <div class="current-week-info">
-                    <div class="week-navigation" style="display: none;">
+                    <div class="week-navigation" id="weekNavigation" style="display: none;">
                         <button class="month-nav-btn" id="prevWeek" title="Vorige week">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
                                 <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
@@ -544,7 +544,7 @@ while (count($weekNumbers) < 2) {
                 <div class="form-row">
                     <div class="form-group">
                         <label>Datum</label>
-                        <input type="date" name="datum" required>
+                        <input type="date" name="datum" id="datumInput" required>
                     </div>
                     <div class="form-group">
                         <label>Start tijd</label>
@@ -553,6 +553,24 @@ while (count($weekNumbers) < 2) {
                     <div class="form-group">
                         <label>Eind tijd</label>
                         <input type="time" name="end_time" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Dag</label>
+                        <input type="number" name="day" id="dayInput" min="1" max="31" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Week</label>
+                        <input type="number" name="week" id="weekInput" min="1" max="53" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Maand</label>
+                        <input type="number" name="month" id="monthInput" min="1" max="12" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Jaar</label>
+                        <input type="number" name="year" id="yearInput" min="2020" max="2100" readonly>
                     </div>
                 </div>
 
@@ -647,6 +665,39 @@ while (count($weekNumbers) < 2) {
             });
     }
     document.addEventListener('DOMContentLoaded', loadCategories);
+
+    // Vul dag/week/maand/jaar automatisch in op basis van datum
+    document.addEventListener('DOMContentLoaded', function() {
+        const datumInput = document.getElementById('datumInput');
+        const dayInput = document.getElementById('dayInput');
+        const weekInput = document.getElementById('weekInput');
+        const monthInput = document.getElementById('monthInput');
+        const yearInput = document.getElementById('yearInput');
+        if (datumInput) {
+            datumInput.addEventListener('change', function() {
+                if (!this.value) return;
+                const date = new Date(this.value);
+                if (isNaN(date)) return;
+                // Dag
+                if (dayInput) dayInput.value = date.getDate();
+                // Maand (1-12)
+                if (monthInput) monthInput.value = date.getMonth() + 1;
+                // Jaar
+                if (yearInput) yearInput.value = date.getFullYear();
+                // Weeknummer
+                if (weekInput) {
+                    // Bereken ISO weeknummer
+                    const tempDate = new Date(date.getTime());
+                    tempDate.setHours(0,0,0,0);
+                    // Donderdag in deze week bepaalt het weeknummer
+                    tempDate.setDate(tempDate.getDate() + 3 - ((tempDate.getDay() + 6) % 7));
+                    const week1 = new Date(tempDate.getFullYear(),0,4);
+                    const weekNum = 1 + Math.round(((tempDate.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
+                    weekInput.value = weekNum;
+                }
+            });
+        }
+    });
     </script>
 </body>
 

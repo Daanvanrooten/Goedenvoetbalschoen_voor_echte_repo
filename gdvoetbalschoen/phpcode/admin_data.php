@@ -13,18 +13,19 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['user']['role_id']) || $_SESSI
 
 try {
     $conn = getDbConnection();
-    // Haal alle leden op
-    $ledenStmt = $conn->query("SELECT user_id, first_name, last_name, email, username, role_id FROM users");
+    // Haal alle leden op inclusief telefoonnummer
+    $ledenStmt = $conn->query("SELECT user_id, first_name, last_name, email, telefoonnummer, username, role_id FROM users");
     $leden = $ledenStmt->fetchAll();
-
+    $aantalLeden = count($leden);
 
     // Haal alle open taken op (is_active is niet 0/null)
-    $takenStmt = $conn->query("SELECT task_id, title, description, start_date, end_date, is_active FROM tasks WHERE is_active IS NULL OR is_active != 0");
+    $takenStmt = $conn->query("SELECT task_id, title, description, start_time, end_time, is_active FROM tasks WHERE is_active IS NULL OR is_active != 0");
     $taken = $takenStmt->fetchAll();
 
     echo json_encode([
         'success' => true,
         'leden' => $leden,
+        'aantalLeden' => $aantalLeden,
         'open_taken' => $taken
     ]);
 } catch (PDOException $e) {

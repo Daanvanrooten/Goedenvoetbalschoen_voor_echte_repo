@@ -406,7 +406,7 @@ nav {
 
 .week-grid {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(7, 1fr);
     background: #fafafa;
     border-bottom: 2px solid #e0e0e0;
 }
@@ -441,7 +441,7 @@ nav {
 
 .week-days-container {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(7, 1fr);
     min-height: 500px;
 }
 
@@ -776,7 +776,7 @@ nav {
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 968px) {
     /* Show mobile elements */
     .mobile-create-task {
         display: block;
@@ -873,7 +873,7 @@ nav {
     position: relative;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     animation: modalSlideIn 0.3s ease;
-    margin-top: 200px;
+    margin-top: 500px;
 }
 
 @keyframes modalSlideIn {
@@ -1031,7 +1031,7 @@ nav {
 }
 
 /* Mobile responsive voor taak modal */
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 968px) {
     .taak-modal {
         padding: 10px;
     }
@@ -1122,7 +1122,7 @@ nav {
     box-shadow: 0 4px 12px rgba(107, 91, 149, 0.3);
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 968px) {
     .logout-modal-content {
         padding: 30px 24px;
     }
