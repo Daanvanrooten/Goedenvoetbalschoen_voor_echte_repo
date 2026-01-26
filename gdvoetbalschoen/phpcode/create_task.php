@@ -15,6 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+
 $user_id = $_SESSION['user']['id'];
 $title = trim($_POST['taaknaam'] ?? '');
 $category = $_POST['categorie'] ?? null;
@@ -24,6 +25,8 @@ $end_time = $_POST['end_time'] ?? null;
 $herhaling = $_POST['herhaling'] ?? 'eenmalig';
 $maxleden = $_POST['maxleden'] ?? null;
 $beschrijving = trim($_POST['beschrijving'] ?? '');
+// Personeel (array van user_id's)
+$personeel = isset($_POST['personeel']) ? (array)$_POST['personeel'] : [];
 
 // Nieuwe velden voor dag/week/maand/jaar
 $day = isset($_POST['day']) ? intval($_POST['day']) : null;
@@ -54,6 +57,17 @@ try {
     // Voeg slot toe met start en eind uur
     $stmtSlot = $conn->prepare("INSERT INTO task_slots (task_id, slot_date, start_time, end_time, capacity, created_at) VALUES (?, ?, ?, ?, ?, NOW())");
     $stmtSlot->execute([$task_id, $date, $start_time, $end_time, $maxleden ?? 1]);
+    $slot_id = $conn->lastInsertId();
+
+    // Personeel koppelen aan taak (task_registrations)
+    if (!empty($personeel)) {
+        $stmtReg = $conn->prepare("INSERT INTO task_registrations (slot_id, user_id) VALUES (?, ?)");
+        foreach ($personeel as $userId) {
+            if (!empty($userId)) {
+                $stmtReg->execute([$slot_id, $userId]);
+            }
+        }
+    }
 
     echo json_encode(['success' => true, 'message' => 'Taak succesvol opgeslagen!', 'task_id' => $task_id, 'category_id' => $category]);
 } catch (PDOException $e) {

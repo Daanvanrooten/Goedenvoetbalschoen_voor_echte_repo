@@ -486,6 +486,18 @@ while (count($weekNumbers) < 2) {
                         </select>
                     </div>
                 </div>
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label>Personeel toevoegen</label>
+                        <div style="position:relative;">
+                            <input type="text" id="personeelInput" placeholder="Zoek personeel..." autocomplete="off" style="width:100%;">
+                            <div id="personeelSuggestions" class="personeel-suggestions" style="border:1px solid #ccc;display:none;position:absolute;z-index:10;background:#fff;max-height:150px;overflow-y:auto;width:100%;top:100%;left:0;"></div>
+                        </div>
+                        <div id="selectedPersoneel" class="selected-personeel" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;"></div>
+                        <input type="hidden" name="personeel" id="personeelHidden">
+                        <small>Typ om personeel te zoeken en klik om toe te voegen. Klik op een naam onder de input om te verwijderen.</small>
+                    </div>
+                </div>
 
                 <div class="form-row">
                     <div class="form-group">
@@ -595,6 +607,86 @@ while (count($weekNumbers) < 2) {
 
     <script src="/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/js/agenda.js"></script>
     <script>
+        // Personeel zoek/select functionaliteit
+        let personeelLijst = [];
+        let geselecteerdPersoneel = [];
+        function fetchPersoneelLijst() {
+            fetch('/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/leden_lijst.php')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.leden.length) {
+                        personeelLijst = data.leden;
+                    }
+                });
+        }
+        function updatePersoneelHidden() {
+            document.getElementById('personeelHidden').value = geselecteerdPersoneel.map(p => p.user_id).join(',');
+        }
+        function renderSelectedPersoneel() {
+            const container = document.getElementById('selectedPersoneel');
+            container.innerHTML = '';
+            geselecteerdPersoneel.forEach(p => {
+                const chip = document.createElement('span');
+                chip.textContent = `${p.first_name || ''} ${p.last_name || ''}`.trim() || p.username;
+                chip.style = 'background:#e5dbfa;color:#6b5b95;padding:4px 10px;border-radius:16px;cursor:pointer;user-select:none;';
+                chip.title = 'Klik om te verwijderen';
+                chip.onclick = function() {
+                    geselecteerdPersoneel = geselecteerdPersoneel.filter(x => x.user_id !== p.user_id);
+                    renderSelectedPersoneel();
+                    updatePersoneelHidden();
+                };
+                container.appendChild(chip);
+            });
+            updatePersoneelHidden();
+        }
+        function showPersoneelSuggestions(query) {
+            const sugg = document.getElementById('personeelSuggestions');
+            if (!query) {
+                sugg.style.display = 'none';
+                sugg.innerHTML = '';
+                return;
+            }
+            const matches = personeelLijst.filter(lid => {
+                const naam = `${lid.first_name || ''} ${lid.last_name || ''}`.toLowerCase();
+                return naam.includes(query.toLowerCase()) || (lid.username && lid.username.toLowerCase().includes(query.toLowerCase()));
+            }).filter(lid => !geselecteerdPersoneel.some(p => p.user_id === lid.user_id));
+            if (matches.length === 0) {
+                sugg.innerHTML = '<div style="padding:6px;">Geen personeel gevonden</div>';
+                sugg.style.display = 'block';
+                return;
+            }
+            sugg.innerHTML = '';
+            matches.forEach(lid => {
+                const naam = `${lid.first_name || ''} ${lid.last_name || ''}`.trim() || lid.username;
+                const div = document.createElement('div');
+                div.textContent = naam + (lid.username ? ` (${lid.username})` : '');
+                div.style = 'padding:6px;cursor:pointer;';
+                div.onclick = function() {
+                    geselecteerdPersoneel.push(lid);
+                    renderSelectedPersoneel();
+                    sugg.style.display = 'none';
+                    document.getElementById('personeelInput').value = '';
+                };
+                sugg.appendChild(div);
+            });
+            sugg.style.display = 'block';
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchPersoneelLijst();
+            const input = document.getElementById('personeelInput');
+            const sugg = document.getElementById('personeelSuggestions');
+            input.addEventListener('input', function() {
+                showPersoneelSuggestions(this.value);
+            });
+            input.addEventListener('focus', function() {
+                showPersoneelSuggestions(this.value);
+            });
+            document.addEventListener('click', function(e) {
+                if (!input.contains(e.target) && !sugg.contains(e.target)) {
+                    sugg.style.display = 'none';
+                }
+            });
+        });
     // Dynamisch categorieën laden
     function loadCategories() {
         fetch('/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/get_categories.php')

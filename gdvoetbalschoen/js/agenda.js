@@ -177,6 +177,8 @@ function showTasksModal(date, events) {
         modal.style.zIndex = '9999';
         document.body.appendChild(modal);
     }
+    // Zoek slot_id (indien aanwezig) uit events
+    let slotId = events && events[0] && events[0].slot_id ? events[0].slot_id : null;
     modal.innerHTML = `<div class="task-modal-content" style="background:#fff;border-radius:16px;max-width:400px;width:90vw;padding:0;box-shadow:0 2px 16px rgba(0,0,0,0.15);overflow:hidden;">
         <div style='display:flex;align-items:center;gap:12px;padding:16px 20px 0 20px;'>
             <div style='background:#e5dbfa;color:#6b5b95;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:600;'>A</div>
@@ -194,11 +196,30 @@ function showTasksModal(date, events) {
                     <div style='margin:8px 0 0 0;font-size:15px;'>Leden moeten deze taak uitvoeren.</div>
                 </div>
             `).join('')}
+            <div id="taskMembersSection" style="margin-top:18px;"></div>
         </div>
     </div>`;
     modal.onclick = function(e) { if (e.target === modal) modal.style.display = 'none'; };
     document.getElementById('closeTasksModal').onclick = function() { modal.style.display = 'none'; };
     modal.style.display = 'flex';
+
+    // Leden ophalen en tonen
+    if (slotId) {
+        const membersDiv = modal.querySelector('#taskMembersSection');
+        membersDiv.innerHTML = '<em>Leden laden...</em>';
+        fetch(`/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/get_task_members.php?slot_id=${slotId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.leden.length) {
+                    membersDiv.innerHTML = '<b>Leden voor deze taak:</b><ul style="margin:8px 0 0 0;padding-left:18px;">' +
+                        data.leden.map(lid => `<li>${(lid.first_name || '') + ' ' + (lid.last_name || '')} <span style='color:#888;'>(${lid.username})</span></li>`).join('') +
+                        '</ul>';
+                } else {
+                    membersDiv.innerHTML = '<em>Geen leden gekoppeld aan deze taak.</em>';
+                }
+            })
+            .catch(() => { membersDiv.innerHTML = '<em>Fout bij laden van leden.</em>'; });
+    }
 }
 // Kleur naar CSS class
 function getEventClass(colorHex) {

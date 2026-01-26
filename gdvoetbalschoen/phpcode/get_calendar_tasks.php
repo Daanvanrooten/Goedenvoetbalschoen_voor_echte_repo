@@ -8,6 +8,7 @@ $end = isset($_GET['end']) ? $_GET['end'] : '2026-01-31';
 
 $stmt = $pdo->prepare("
     SELECT 
+        ts.slot_id,
         ts.slot_date,
         ts.start_time,
         ts.end_time,
@@ -33,7 +34,8 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         'title' => $row['title'],
         'start' => substr($row['start_time'], 0, 5),
         'end'   => substr($row['end_time'], 0, 5),
-        'color' => $row['color_hex']
+        'color' => $row['color_hex'],
+        'slot_id' => $row['slot_id']
     ];
 }
 header('Content-Type: application/json');
