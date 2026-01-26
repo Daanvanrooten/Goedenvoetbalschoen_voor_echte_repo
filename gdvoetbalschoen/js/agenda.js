@@ -237,12 +237,14 @@ if (createTaskBtn) {
   });
 }
 
-// Sluit modal bij klik buiten de modal content
-taakModal.addEventListener("click", function (e) {
-  if (e.target === taakModal) {
-    closeTaakModal();
-  }
-});
+// Sluit modal bij klik buiten de modal content (alleen voor admins)
+if (taakModal) {
+  taakModal.addEventListener("click", function (e) {
+    if (e.target === taakModal) {
+      closeTaakModal();
+    }
+  });
+}
 
 // File upload click handler
 if (fileUpload && fotoInput) {
@@ -481,9 +483,7 @@ function regenerateCalendar() {
   const month = currentMonth;
   const start = `${year}-${String(month + 1).padStart(2, "0")}-01`;
   const end = `${year}-${String(month + 1).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
-  fetch(
-    `/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/get_calendar_tasks.php?start=${start}&end=${end}`,
-  )
+  fetch(`${baseUrl}/phpcode/get_calendar_tasks.php?start=${start}&end=${end}`)
     .then((res) => res.json())
     .then((tasksByDate) => {
       for (let day = 1; day <= daysInMonth; day++) {
