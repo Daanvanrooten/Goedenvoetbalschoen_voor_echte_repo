@@ -69,14 +69,14 @@ while (count($weekNumbers) < 2) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agenda - Gouden Schoen</title>
-    <link rel="stylesheet" href="/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/css/agenda.css">
+    <link rel="stylesheet" href="../css/agenda.css">
 </head>
 
 <body>
     <header>
         <div class="container">
             <div class="logo">
-                <img src="/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/images/fc_team_zonder_plan.png" alt="FC Team zonder plan logo">
+                <img src="../images/fc_team_zonder_plan.png" alt="FC Team zonder plan logo">
             </div>
             <nav>
                 <a href="../index.php" class="nav-icon home-icon" title="Home">
