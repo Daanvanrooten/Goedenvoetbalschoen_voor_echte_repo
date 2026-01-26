@@ -1,0 +1,32 @@
+=== EMAIL VERIFICATIE ===
+Tijd: 2026-01-23 12:32:59
+Naar: bryvarooijen@gmail.com
+Gebruiker: Bryan van Rooijen
+Verificatiecode: 561291
+Geldig tot: 2026-01-23 12:47:59
+========================
+
+=== EMAIL VERIFICATIE (RESEND) ===
+Tijd: 2026-01-23 12:33:23
+Naar: bryvarooijen@gmail.com
+Gebruiker: Bryan van Rooijen
+Verificatiecode: 473602
+Geldig tot: 2026-01-23 12:48:23
+==================================
+
+=== VERIFICATIECODE ===
+Tijd: 2026-01-26 11:39:19
+Email: bryvarooijen@gmail.com
+Naam: Bryan van Rooijen
+CODE: 716879
+Geldig tot: 2026-01-26 11:54:16
+Email verstuurd: NEE (check dit bestand voor de code!)
+======================
+
+=== NIEUWE CODE (RESEND) ===
+Tijd: 2026-01-26 12:37:51
+Email: bryvarooijen@gmail.com
+CODE: 679278
+Email verstuurd: JA
+============================
+

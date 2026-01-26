@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `goudenvoetbalschoen_database`
+-- Database: `klas4s24_597912`
 --
 
 -- --------------------------------------------------------
@@ -200,7 +200,19 @@ INSERT INTO `users` (`user_id`, `role_id`, `first_name`, `last_name`, `email`, `
 --
 DROP TABLE IF EXISTS `slot_capacity_overview`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `slot_capacity_overview`  AS SELECT `ts`.`slot_id` AS `slot_id`, `ts`.`task_id` AS `task_id`, `ts`.`slot_date` AS `slot_date`, `ts`.`start_time` AS `start_time`, `ts`.`end_time` AS `end_time`, `ts`.`capacity` AS `capacity`, count(`tr`.`registration_id`) AS `registrations`, `ts`.`capacity`- count(`tr`.`registration_id`) AS `spots_left` FROM (`task_slots` `ts` left join `task_registrations` `tr` on(`tr`.`slot_id` = `ts`.`slot_id`)) GROUP BY `ts`.`slot_id`, `ts`.`task_id`, `ts`.`slot_date`, `ts`.`start_time`, `ts`.`end_time`, `ts`.`capacity` ;
+CREATE VIEW `slot_capacity_overview` AS 
+SELECT 
+    `ts`.`slot_id`, 
+    `ts`.`task_id`, 
+    `ts`.`slot_date`, 
+    `ts`.`start_time`, 
+    `ts`.`end_time`, 
+    `ts`.`capacity`, 
+    COUNT(`tr`.`registration_id`) AS `registrations`, 
+    `ts`.`capacity` - COUNT(`tr`.`registration_id`) AS `spots_left` 
+FROM `task_slots` `ts` 
+LEFT JOIN `task_registrations` `tr` ON `tr`.`slot_id` = `ts`.`slot_id` 
+GROUP BY `ts`.`slot_id`, `ts`.`task_id`, `ts`.`slot_date`, `ts`.`start_time`, `ts`.`end_time`, `ts`.`capacity`;
 
 --
 -- Indexen voor geëxporteerde tabellen
@@ -211,46 +223,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 ALTER TABLE `email_verifications`
   ADD PRIMARY KEY (`token_id`),
-  ADD UNIQUE KEY `uniq_email_verifications_token` (`token`),
   ADD KEY `fk_email_verifications_user` (`user_id`);
-
---
--- Indexen voor tabel `roles`
---
-ALTER TABLE `roles`
-  ADD PRIMARY KEY (`role_id`),
-  ADD UNIQUE KEY `name` (`name`);
-
---
--- Indexen voor tabel `tasks`
---
-ALTER TABLE `tasks`
-  ADD PRIMARY KEY (`task_id`),
-  ADD KEY `fk_tasks_category` (`category_id`);
-
---
--- Indexen voor tabel `task_categories`
---
-ALTER TABLE `task_categories`
-  ADD PRIMARY KEY (`category_id`),
-  ADD UNIQUE KEY `uniq_task_categories_name` (`name`);
-
---
--- Indexen voor tabel `task_registrations`
---
-ALTER TABLE `task_registrations`
-  ADD PRIMARY KEY (`registration_id`),
-  ADD UNIQUE KEY `uniq_task_registration` (`slot_id`,`user_id`),
-  ADD KEY `idx_task_registrations_user` (`user_id`),
-  ADD KEY `idx_task_registrations_slot` (`slot_id`);
-
---
--- Indexen voor tabel `task_slots`
---
-ALTER TABLE `task_slots`
-  ADD PRIMARY KEY (`slot_id`),
-  ADD KEY `idx_task_slots_date` (`slot_date`),
-  ADD KEY `idx_task_slots_task` (`task_id`);
 
 --
 -- Indexen voor tabel `users`
@@ -296,39 +269,20 @@ ALTER TABLE `users`
   MODIFY `user_id` int(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- Beperkingen voor geëxporteerde tabellen
+-- AUTO_INCREMENT voor geëxporteerde tabellen
 --
 
 --
--- Beperkingen voor tabel `email_verifications`
+-- AUTO_INCREMENT voor een tabel `email_verifications`
 --
 ALTER TABLE `email_verifications`
-  ADD CONSTRAINT `fk_email_verifications_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
+  MODIFY `token_id` int(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- Beperkingen voor tabel `tasks`
---
-ALTER TABLE `tasks`
-  ADD CONSTRAINT `fk_tasks_category` FOREIGN KEY (`category_id`) REFERENCES `task_categories` (`category_id`) ON DELETE SET NULL;
-
---
--- Beperkingen voor tabel `task_registrations`
---
-ALTER TABLE `task_registrations`
-  ADD CONSTRAINT `fk_task_registrations_slot` FOREIGN KEY (`slot_id`) REFERENCES `task_slots` (`slot_id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_task_registrations_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
-
---
--- Beperkingen voor tabel `task_slots`
---
-ALTER TABLE `task_slots`
-  ADD CONSTRAINT `fk_task_slots_task` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`task_id`) ON DELETE CASCADE;
-
---
--- Beperkingen voor tabel `users`
+-- AUTO_INCREMENT voor een tabel `users`
 --
 ALTER TABLE `users`
-  ADD CONSTRAINT `fk_users_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`);
+  MODIFY `user_id` int(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

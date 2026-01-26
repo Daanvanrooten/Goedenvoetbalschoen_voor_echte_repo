@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once('../phpcode/config.php');
 ?>
 <!DOCTYPE html>
 <html lang="nl">
@@ -64,25 +65,25 @@ session_start();
     <script>
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const errorDiv = document.getElementById('errorMessage');
             const submitBtn = this.querySelector('.auth-btn');
-            
+
             // Disable button
             submitBtn.disabled = true;
             submitBtn.textContent = 'Bezig...';
             errorDiv.style.display = 'none';
-            
+
             const formData = new FormData(this);
-            
+
             try {
-                const response = await fetch('/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/logincode.php', {
+                const response = await fetch('<?php echo $base_url; ?>/phpcode/logincode.php', {
                     method: 'POST',
                     body: formData
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
                     window.location.href = data.redirect;
                 } else {
@@ -93,6 +94,13 @@ session_start();
                     errorDiv.style.marginBottom = '15px';
                     errorDiv.style.backgroundColor = '#ffe6e6';
                     errorDiv.style.borderRadius = '5px';
+
+                    // Als er een redirect naar verificatie pagina is
+                    if (data.redirect) {
+                        setTimeout(() => {
+                            window.location.href = data.redirect;
+                        }, 2000);
+                    }
                 }
             } catch (error) {
                 errorDiv.textContent = 'Er is een fout opgetreden. Probeer het opnieuw.';

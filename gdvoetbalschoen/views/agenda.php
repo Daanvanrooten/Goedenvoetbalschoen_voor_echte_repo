@@ -69,14 +69,14 @@ while (count($weekNumbers) < 2) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agenda - Gouden Schoen</title>
-    <link rel="stylesheet" href="/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/css/agenda.css">
+    <link rel="stylesheet" href="../css/agenda.css">
 </head>
 
 <body>
     <header>
         <div class="container">
             <div class="logo">
-                <img src="/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/images/fc_team_zonder_plan.png" alt="FC Team zonder plan logo">
+                <img src="../images/fc_team_zonder_plan.png" alt="FC Team zonder plan logo">
             </div>
             <nav>
                 <a href="../index.php" class="nav-icon home-icon" title="Home">
@@ -92,7 +92,7 @@ while (count($weekNumbers) < 2) {
                 <div class="nav-icon profile-icon" title="Profiel" style="cursor:pointer;">
                     <div class="profile-circle" id="profileBtn"><?php echo $userInitial; ?></div>
                 </div>
-                
+
             </nav>
         </div>
     </header>
@@ -605,104 +605,24 @@ while (count($weekNumbers) < 2) {
         </div>
     </div>
 
-    <script src="/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/js/agenda.js"></script>
+    <script src="../js/agenda.js"></script>
     <script>
-        // Personeel zoek/select functionaliteit
-        let personeelLijst = [];
-        let geselecteerdPersoneel = [];
-        function fetchPersoneelLijst() {
-            fetch('/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/leden_lijst.php')
+        // Dynamisch categorieën laden
+        function loadCategories() {
+            fetch('../phpcode/get_categories.php')
                 .then(res => res.json())
                 .then(data => {
-                    if (data.success && data.leden.length) {
-                        personeelLijst = data.leden;
+                    const select = document.getElementById('categorieSelect');
+                    if (!select) return;
+                    select.innerHTML = '<option value="">Selecteer categorie...</option>';
+                    if (data.success && data.categories.length) {
+                        data.categories.forEach(cat => {
+                            select.innerHTML += `<option value="${cat.category_id}">${cat.name}</option>`;
+                        });
                     }
                 });
         }
-        function updatePersoneelHidden() {
-            document.getElementById('personeelHidden').value = geselecteerdPersoneel.map(p => p.user_id).join(',');
-        }
-        function renderSelectedPersoneel() {
-            const container = document.getElementById('selectedPersoneel');
-            container.innerHTML = '';
-            geselecteerdPersoneel.forEach(p => {
-                const chip = document.createElement('span');
-                chip.textContent = `${p.first_name || ''} ${p.last_name || ''}`.trim() || p.username;
-                chip.style = 'background:#e5dbfa;color:#6b5b95;padding:4px 10px;border-radius:16px;cursor:pointer;user-select:none;';
-                chip.title = 'Klik om te verwijderen';
-                chip.onclick = function() {
-                    geselecteerdPersoneel = geselecteerdPersoneel.filter(x => x.user_id !== p.user_id);
-                    renderSelectedPersoneel();
-                    updatePersoneelHidden();
-                };
-                container.appendChild(chip);
-            });
-            updatePersoneelHidden();
-        }
-        function showPersoneelSuggestions(query) {
-            const sugg = document.getElementById('personeelSuggestions');
-            if (!query) {
-                sugg.style.display = 'none';
-                sugg.innerHTML = '';
-                return;
-            }
-            const matches = personeelLijst.filter(lid => {
-                const naam = `${lid.first_name || ''} ${lid.last_name || ''}`.toLowerCase();
-                return naam.includes(query.toLowerCase()) || (lid.username && lid.username.toLowerCase().includes(query.toLowerCase()));
-            }).filter(lid => !geselecteerdPersoneel.some(p => p.user_id === lid.user_id));
-            if (matches.length === 0) {
-                sugg.innerHTML = '<div style="padding:6px;">Geen personeel gevonden</div>';
-                sugg.style.display = 'block';
-                return;
-            }
-            sugg.innerHTML = '';
-            matches.forEach(lid => {
-                const naam = `${lid.first_name || ''} ${lid.last_name || ''}`.trim() || lid.username;
-                const div = document.createElement('div');
-                div.textContent = naam + (lid.username ? ` (${lid.username})` : '');
-                div.style = 'padding:6px;cursor:pointer;';
-                div.onclick = function() {
-                    geselecteerdPersoneel.push(lid);
-                    renderSelectedPersoneel();
-                    sugg.style.display = 'none';
-                    document.getElementById('personeelInput').value = '';
-                };
-                sugg.appendChild(div);
-            });
-            sugg.style.display = 'block';
-        }
-        document.addEventListener('DOMContentLoaded', function() {
-            fetchPersoneelLijst();
-            const input = document.getElementById('personeelInput');
-            const sugg = document.getElementById('personeelSuggestions');
-            input.addEventListener('input', function() {
-                showPersoneelSuggestions(this.value);
-            });
-            input.addEventListener('focus', function() {
-                showPersoneelSuggestions(this.value);
-            });
-            document.addEventListener('click', function(e) {
-                if (!input.contains(e.target) && !sugg.contains(e.target)) {
-                    sugg.style.display = 'none';
-                }
-            });
-        });
-    // Dynamisch categorieën laden
-    function loadCategories() {
-        fetch('/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/get_categories.php')
-            .then(res => res.json())
-            .then(data => {
-                const select = document.getElementById('categorieSelect');
-                if (!select) return;
-                select.innerHTML = '<option value="">Selecteer categorie...</option>';
-                if (data.success && data.categories.length) {
-                    data.categories.forEach(cat => {
-                        select.innerHTML += `<option value="${cat.category_id}">${cat.name}</option>`;
-                    });
-                }
-            });
-    }
-    document.addEventListener('DOMContentLoaded', loadCategories);
+        document.addEventListener('DOMContentLoaded', loadCategories);
 
     // Vul dag/week/maand/jaar automatisch in op basis van datum
     document.addEventListener('DOMContentLoaded', function() {
@@ -736,7 +656,6 @@ while (count($weekNumbers) < 2) {
             });
         }
     });
-    
     </script>
     
 </body>
