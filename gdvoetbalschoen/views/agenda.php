@@ -92,7 +92,7 @@ while (count($weekNumbers) < 2) {
                 <div class="nav-icon profile-icon" title="Profiel" style="cursor:pointer;">
                     <div class="profile-circle" id="profileBtn"><?php echo $userInitial; ?></div>
                 </div>
-                
+
             </nav>
         </div>
     </header>
@@ -649,55 +649,55 @@ while (count($weekNumbers) < 2) {
 
     <script src="/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/js/agenda.js"></script>
     <script>
-    // Dynamisch categorieën laden
-    function loadCategories() {
-        fetch('/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/get_categories.php')
-            .then(res => res.json())
-            .then(data => {
-                const select = document.getElementById('categorieSelect');
-                if (!select) return;
-                select.innerHTML = '<option value="">Selecteer categorie...</option>';
-                if (data.success && data.categories.length) {
-                    data.categories.forEach(cat => {
-                        select.innerHTML += `<option value="${cat.category_id}">${cat.name}</option>`;
-                    });
-                }
-            });
-    }
-    document.addEventListener('DOMContentLoaded', loadCategories);
-
-    // Vul dag/week/maand/jaar automatisch in op basis van datum
-    document.addEventListener('DOMContentLoaded', function() {
-        const datumInput = document.getElementById('datumInput');
-        const dayInput = document.getElementById('dayInput');
-        const weekInput = document.getElementById('weekInput');
-        const monthInput = document.getElementById('monthInput');
-        const yearInput = document.getElementById('yearInput');
-        if (datumInput) {
-            datumInput.addEventListener('change', function() {
-                if (!this.value) return;
-                const date = new Date(this.value);
-                if (isNaN(date)) return;
-                // Dag
-                if (dayInput) dayInput.value = date.getDate();
-                // Maand (1-12)
-                if (monthInput) monthInput.value = date.getMonth() + 1;
-                // Jaar
-                if (yearInput) yearInput.value = date.getFullYear();
-                // Weeknummer
-                if (weekInput) {
-                    // Bereken ISO weeknummer
-                    const tempDate = new Date(date.getTime());
-                    tempDate.setHours(0,0,0,0);
-                    // Donderdag in deze week bepaalt het weeknummer
-                    tempDate.setDate(tempDate.getDate() + 3 - ((tempDate.getDay() + 6) % 7));
-                    const week1 = new Date(tempDate.getFullYear(),0,4);
-                    const weekNum = 1 + Math.round(((tempDate.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
-                    weekInput.value = weekNum;
-                }
-            });
+        // Dynamisch categorieën laden
+        function loadCategories() {
+            fetch('/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/get_categories.php')
+                .then(res => res.json())
+                .then(data => {
+                    const select = document.getElementById('categorieSelect');
+                    if (!select) return;
+                    select.innerHTML = '<option value="">Selecteer categorie...</option>';
+                    if (data.success && data.categories.length) {
+                        data.categories.forEach(cat => {
+                            select.innerHTML += `<option value="${cat.category_id}">${cat.name}</option>`;
+                        });
+                    }
+                });
         }
-    });
+        document.addEventListener('DOMContentLoaded', loadCategories);
+
+        // Vul dag/week/maand/jaar automatisch in op basis van datum
+        document.addEventListener('DOMContentLoaded', function() {
+            const datumInput = document.getElementById('datumInput');
+            const dayInput = document.getElementById('dayInput');
+            const weekInput = document.getElementById('weekInput');
+            const monthInput = document.getElementById('monthInput');
+            const yearInput = document.getElementById('yearInput');
+            if (datumInput) {
+                datumInput.addEventListener('change', function() {
+                    if (!this.value) return;
+                    const date = new Date(this.value);
+                    if (isNaN(date)) return;
+                    // Dag
+                    if (dayInput) dayInput.value = date.getDate();
+                    // Maand (1-12)
+                    if (monthInput) monthInput.value = date.getMonth() + 1;
+                    // Jaar
+                    if (yearInput) yearInput.value = date.getFullYear();
+                    // Weeknummer
+                    if (weekInput) {
+                        // Bereken ISO weeknummer
+                        const tempDate = new Date(date.getTime());
+                        tempDate.setHours(0, 0, 0, 0);
+                        // Donderdag in deze week bepaalt het weeknummer
+                        tempDate.setDate(tempDate.getDate() + 3 - ((tempDate.getDay() + 6) % 7));
+                        const week1 = new Date(tempDate.getFullYear(), 0, 4);
+                        const weekNum = 1 + Math.round(((tempDate.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
+                        weekInput.value = weekNum;
+                    }
+                });
+            }
+        });
     </script>
 </body>
 
