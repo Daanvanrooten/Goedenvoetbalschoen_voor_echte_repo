@@ -1,7 +1,7 @@
 // Automatische path detectie - werkt op elke PC
 const currentPath = window.location.pathname;
-const viewsIndex = currentPath.lastIndexOf('/views/');
-const baseUrl = viewsIndex !== -1 ? currentPath.substring(0, viewsIndex) : '';
+const viewsIndex = currentPath.lastIndexOf("/views/");
+const baseUrl = viewsIndex !== -1 ? currentPath.substring(0, viewsIndex) : "";
 
 // Kleur mapping voor week-events
 function getEventClass(colorHex) {
@@ -62,27 +62,27 @@ function enableWeekDayClick(tasksByDate) {
 }
 // Modal voor taken tonen
 function showTasksModal(date, events) {
-    if (!events || events.length === 0) {
-        alert('Geen taken op deze dag');
-        return;
-    }
-    let modal = document.getElementById('tasksModal');
-    if (!modal) {
-        modal = document.createElement('div');
-        modal.id = 'tasksModal';
-        modal.style.position = 'fixed';
-        modal.style.top = '0';
-        modal.style.left = '0';
-        modal.style.width = '100vw';
-        modal.style.height = '100vh';
-        modal.style.background = 'rgba(0,0,0,0.3)';
-        modal.style.display = 'flex';
-        modal.style.alignItems = 'center';
-        modal.style.justifyContent = 'center';
-        modal.style.zIndex = '9999';
-        document.body.appendChild(modal);
-    }
-    modal.innerHTML = `<div class="task-modal-content" style="background:#fff;border-radius:16px;max-width:400px;width:90vw;padding:0;box-shadow:0 2px 16px rgba(0,0,0,0.15);overflow:hidden;">
+  if (!events || events.length === 0) {
+    alert("Geen taken op deze dag");
+    return;
+  }
+  let modal = document.getElementById("tasksModal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "tasksModal";
+    modal.style.position = "fixed";
+    modal.style.top = "0";
+    modal.style.left = "0";
+    modal.style.width = "100vw";
+    modal.style.height = "100vh";
+    modal.style.background = "rgba(0,0,0,0.3)";
+    modal.style.display = "flex";
+    modal.style.alignItems = "center";
+    modal.style.justifyContent = "center";
+    modal.style.zIndex = "9999";
+    document.body.appendChild(modal);
+  }
+  modal.innerHTML = `<div class="task-modal-content" style="background:#fff;border-radius:16px;max-width:400px;width:90vw;padding:0;box-shadow:0 2px 16px rgba(0,0,0,0.15);overflow:hidden;">
         <div style='display:flex;align-items:center;gap:12px;padding:16px 20px 0 20px;'>
             <div style='background:#e5dbfa;color:#6b5b95;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:600;'>A</div>
             <span style='font-weight:600;font-size:18px;'>Taak</span>
@@ -100,12 +100,18 @@ function showTasksModal(date, events) {
                     <div style='color:#888;font-size:14px;'>${ev.start} - ${ev.end}</div>
                     <div style='margin:8px 0 0 0;font-size:15px;'>Leden moeten deze taak uitvoeren.</div>
                 </div>
-            `).join('')}
+            `,
+              )
+              .join("")}
         </div>
     </div>`;
-    modal.onclick = function(e) { if (e.target === modal) modal.style.display = 'none'; };
-    document.getElementById('closeTasksModal').onclick = function() { modal.style.display = 'none'; };
-    modal.style.display = 'flex';
+  modal.onclick = function (e) {
+    if (e.target === modal) modal.style.display = "none";
+  };
+  document.getElementById("closeTasksModal").onclick = function () {
+    modal.style.display = "none";
+  };
+  modal.style.display = "flex";
 }
 // Kleur naar CSS class
 function getEventClass(colorHex) {
@@ -143,56 +149,56 @@ const mobileTasksSection = document.querySelector(".mobile-tasks-section");
 const monthNavigation = document.querySelector(".month-navigation");
 const weekNavigationBtns = document.querySelectorAll(".week-navigation");
 
-toggleBtns.forEach(btn => {
-    btn.addEventListener('click', function() {
-        toggleBtns.forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        
-        const view = this.dataset.view;
-        
-        if (view === 'week') {
-            monthView.style.display = 'none';
-            weekView.style.display = 'block';
-            weekView.classList.add('active');
-            // Show week navigation
-            if (monthNavigation) {
-                monthNavigation.style.display = 'none';
-            }
-            weekNavigationBtns.forEach(nav => {
-                nav.style.display = 'flex';
-            });
-            // Toon weeknavigatie altijd in weekview
-            const weekNav = document.getElementById('weekNavigation');
-            if (weekNav) weekNav.style.display = 'flex';
-            // Hide mobile tasks section in week view
-            if (mobileTasksSection && window.innerWidth <= 768) {
-                mobileTasksSection.style.display = 'none';
-            }
-            // Initialize week view
-            regenerateWeekView();
-            updateWeekInfo();
-        } else {
-            monthView.style.display = 'block';
-            weekView.style.display = 'none';
-            weekView.classList.remove('active');
-            // Show month navigation buttons
-            if (monthNavigation) {
-                monthNavigation.style.display = 'flex';
-            }
-            weekNavigationBtns.forEach(nav => {
-                nav.style.display = 'none';
-            });
-            // Verberg weeknavigatie in maandview
-            const weekNav = document.getElementById('weekNavigation');
-            if (weekNav) weekNav.style.display = 'none';
-            // Show mobile tasks section in month view
-            if (mobileTasksSection && window.innerWidth <= 768) {
-                mobileTasksSection.style.display = 'block';
-            }
-        }
-        
-        console.log('Switched to ' + view + ' view');
-    });
+toggleBtns.forEach((btn) => {
+  btn.addEventListener("click", function () {
+    toggleBtns.forEach((b) => b.classList.remove("active"));
+    this.classList.add("active");
+
+    const view = this.dataset.view;
+
+    if (view === "week") {
+      monthView.style.display = "none";
+      weekView.style.display = "block";
+      weekView.classList.add("active");
+      // Show week navigation
+      if (monthNavigation) {
+        monthNavigation.style.display = "none";
+      }
+      weekNavigationBtns.forEach((nav) => {
+        nav.style.display = "flex";
+      });
+      // Toon weeknavigatie altijd in weekview
+      const weekNav = document.getElementById("weekNavigation");
+      if (weekNav) weekNav.style.display = "flex";
+      // Hide mobile tasks section in week view
+      if (mobileTasksSection && window.innerWidth <= 768) {
+        mobileTasksSection.style.display = "none";
+      }
+      // Initialize week view
+      regenerateWeekView();
+      updateWeekInfo();
+    } else {
+      monthView.style.display = "block";
+      weekView.style.display = "none";
+      weekView.classList.remove("active");
+      // Show month navigation buttons
+      if (monthNavigation) {
+        monthNavigation.style.display = "flex";
+      }
+      weekNavigationBtns.forEach((nav) => {
+        nav.style.display = "none";
+      });
+      // Verberg weeknavigatie in maandview
+      const weekNav = document.getElementById("weekNavigation");
+      if (weekNav) weekNav.style.display = "none";
+      // Show mobile tasks section in month view
+      if (mobileTasksSection && window.innerWidth <= 768) {
+        mobileTasksSection.style.display = "block";
+      }
+    }
+
+    console.log("Switched to " + view + " view");
+  });
 });
 
 // Account button click
@@ -417,66 +423,72 @@ if (nextMonthBtn) {
 
 // Regenerate calendar grid for new month
 function regenerateCalendar() {
-    const daysGrid = document.querySelector('.days-grid');
-    const weekNumbers = document.querySelector('.week-numbers');
-    if (!daysGrid) return;
-    
-    // Get first day of month and number of days
-    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-    const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
-    
-    // Adjust for Monday start (0 = Sunday, make it 6)
-    const adjustedFirstDay = firstDay === 0 ? 6 : firstDay - 1;
-    
-    // Clear existing days
-    daysGrid.innerHTML = '';
-    
-    // Clear and rebuild week numbers
-    if (weekNumbers) {
-        weekNumbers.innerHTML = '<div class="week-header"></div>';
-        
-        // Calculate week numbers for this month
-        const totalDays = adjustedFirstDay + daysInMonth;
-        const weeksToShow = Math.ceil(totalDays / 7);
-        
-        for (let week = 0; week < weeksToShow; week++) {
-            const weekDate = new Date(currentYear, currentMonth, 1 + (week * 7) - adjustedFirstDay);
-            const weekNum = getWeekNumber(weekDate);
-            const weekDiv = document.createElement('div');
-            weekDiv.className = 'week-number';
-            
-            // Check if this is the current week
-            const today = new Date();
-            const currentWeekNum = getWeekNumber(today);
-            if (weekNum === currentWeekNum) {
-                weekDiv.classList.add('current-week');
-            }
-            
-            weekDiv.textContent = weekNum;
-            weekNumbers.appendChild(weekDiv);
-        }
+  const daysGrid = document.querySelector(".days-grid");
+  const weekNumbers = document.querySelector(".week-numbers");
+  if (!daysGrid) return;
+
+  // Get first day of month and number of days
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
+
+  // Adjust for Monday start (0 = Sunday, make it 6)
+  const adjustedFirstDay = firstDay === 0 ? 6 : firstDay - 1;
+
+  // Clear existing days
+  daysGrid.innerHTML = "";
+
+  // Clear and rebuild week numbers
+  if (weekNumbers) {
+    weekNumbers.innerHTML = '<div class="week-header"></div>';
+
+    // Calculate week numbers for this month
+    const totalDays = adjustedFirstDay + daysInMonth;
+    const weeksToShow = Math.ceil(totalDays / 7);
+
+    for (let week = 0; week < weeksToShow; week++) {
+      const weekDate = new Date(
+        currentYear,
+        currentMonth,
+        1 + week * 7 - adjustedFirstDay,
+      );
+      const weekNum = getWeekNumber(weekDate);
+      const weekDiv = document.createElement("div");
+      weekDiv.className = "week-number";
+
+      // Check if this is the current week
+      const today = new Date();
+      const currentWeekNum = getWeekNumber(today);
+      if (weekNum === currentWeekNum) {
+        weekDiv.classList.add("current-week");
+      }
+
+      weekDiv.textContent = weekNum;
+      weekNumbers.appendChild(weekDiv);
     }
-    
-    // Add previous month's days
-    for (let i = adjustedFirstDay - 1; i >= 0; i--) {
-        const dayCell = document.createElement('div');
-        dayCell.className = 'day-cell prev-month';
-        dayCell.textContent = daysInPrevMonth - i;
-        daysGrid.appendChild(dayCell);
-    }
-    
-    // Haal taken op en render ze in de juiste dag
-    const year = currentYear;
-    const month = currentMonth;
-    const start = `${year}-${String(month+1).padStart(2,'0')}-01`;
-    const end = `${year}-${String(month+1).padStart(2,'0')}-${String(daysInMonth).padStart(2,'0')}`;
-    fetch(`/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/get_calendar_tasks.php?start=${start}&end=${end}`)
-        .then(res => res.json())
-        .then(tasksByDate => {
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dayCell = document.createElement('div');
-                dayCell.className = 'day-cell current-month';
+  }
+
+  // Add previous month's days
+  for (let i = adjustedFirstDay - 1; i >= 0; i--) {
+    const dayCell = document.createElement("div");
+    dayCell.className = "day-cell prev-month";
+    dayCell.textContent = daysInPrevMonth - i;
+    daysGrid.appendChild(dayCell);
+  }
+
+  // Haal taken op en render ze in de juiste dag
+  const year = currentYear;
+  const month = currentMonth;
+  const start = `${year}-${String(month + 1).padStart(2, "0")}-01`;
+  const end = `${year}-${String(month + 1).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
+  fetch(
+    `/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/get_calendar_tasks.php?start=${start}&end=${end}`,
+  )
+    .then((res) => res.json())
+    .then((tasksByDate) => {
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dayCell = document.createElement("div");
+        dayCell.className = "day-cell current-month";
 
         // Check if it's today
         const today = new Date();
@@ -503,30 +515,30 @@ function regenerateCalendar() {
           dayCell.classList.add("green"); // optioneel: hele dag kleuren
         }
 
-                daysGrid.appendChild(dayCell);
-            }
-        });
-    
-    // Add next month's days to fill the grid
-    const totalCells = adjustedFirstDay + daysInMonth;
-    const remainingCells = (Math.ceil(totalCells / 7) * 7) - totalCells;
-    
-    for (let day = 1; day <= remainingCells; day++) {
-        const dayCell = document.createElement('div');
-        dayCell.className = 'day-cell prev-month';
-        dayCell.textContent = day;
         daysGrid.appendChild(dayCell);
-    }
-    
-    // Re-add click handlers to new day cells
-    const newDayCells = daysGrid.querySelectorAll('.day-cell');
-    newDayCells.forEach(cell => {
-        cell.addEventListener('click', function() {
-            if (!this.querySelector('.event')) {
-                console.log('Empty day clicked - add new event');
-            }
-        });
+      }
     });
+
+  // Add next month's days to fill the grid
+  const totalCells = adjustedFirstDay + daysInMonth;
+  const remainingCells = Math.ceil(totalCells / 7) * 7 - totalCells;
+
+  for (let day = 1; day <= remainingCells; day++) {
+    const dayCell = document.createElement("div");
+    dayCell.className = "day-cell prev-month";
+    dayCell.textContent = day;
+    daysGrid.appendChild(dayCell);
+  }
+
+  // Re-add click handlers to new day cells
+  const newDayCells = daysGrid.querySelectorAll(".day-cell");
+  newDayCells.forEach((cell) => {
+    cell.addEventListener("click", function () {
+      if (!this.querySelector(".event")) {
+        console.log("Empty day clicked - add new event");
+      }
+    });
+  });
 }
 
 // Helper function to get ISO week number
@@ -586,35 +598,49 @@ function updateWeekInfo() {
 
 // Regenerate week view for current week
 function regenerateWeekView() {
-    const weekGrid = document.querySelector('.week-grid');
-    const weekDaysContainer = document.querySelector('.week-days-container');
-    const mobileWeekView = document.querySelector('.mobile-week-view');
-    
-    if (!weekGrid) return;
-    
-    // Calculate start of week (Sunday)
-    const weekStart = new Date(currentWeekDate);
-    const day = weekStart.getDay();
-    const diff = weekStart.getDate() - day;
-    weekStart.setDate(diff);
-    
-    const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THUR', 'FRI', 'SAT'];
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
-                        'July', 'August', 'September', 'October', 'November', 'December'];
-    
-    // Clear and rebuild desktop week headers
-    weekGrid.innerHTML = '';
-    const today = new Date();
-    for (let i = 0; i < 7; i++) {
-        const dayDate = new Date(weekStart);
-        dayDate.setDate(weekStart.getDate() + i);
-        const isToday = dayDate.toDateString() === today.toDateString();
-        const dayNumber = dayDate.getDate();
-        const displayDate = isToday ? `${monthNames[dayDate.getMonth()]} ${dayNumber}` : dayNumber;
-        const dayHeader = document.createElement('div');
-        dayHeader.className = 'week-day-header';
-        if (isToday) dayHeader.classList.add('active-day');
-        dayHeader.innerHTML = `
+  const weekGrid = document.querySelector(".week-grid");
+  const weekDaysContainer = document.querySelector(".week-days-container");
+  const mobileWeekView = document.querySelector(".mobile-week-view");
+
+  if (!weekGrid) return;
+
+  // Calculate start of week (Sunday)
+  const weekStart = new Date(currentWeekDate);
+  const day = weekStart.getDay();
+  const diff = weekStart.getDate() - day;
+  weekStart.setDate(diff);
+
+  const daysOfWeek = ["SUN", "MON", "TUE", "WED", "THUR", "FRI", "SAT"];
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  // Clear and rebuild desktop week headers
+  weekGrid.innerHTML = "";
+  const today = new Date();
+  for (let i = 0; i < 7; i++) {
+    const dayDate = new Date(weekStart);
+    dayDate.setDate(weekStart.getDate() + i);
+    const isToday = dayDate.toDateString() === today.toDateString();
+    const dayNumber = dayDate.getDate();
+    const displayDate = isToday
+      ? `${monthNames[dayDate.getMonth()]} ${dayNumber}`
+      : dayNumber;
+    const dayHeader = document.createElement("div");
+    dayHeader.className = "week-day-header";
+    if (isToday) dayHeader.classList.add("active-day");
+    dayHeader.innerHTML = `
             <div class="day-label">${daysOfWeek[i]}</div>
             <div class="day-number">${displayDate}</div>
         `;
