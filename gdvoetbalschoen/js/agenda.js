@@ -1,3 +1,103 @@
+// Toon de taken van vandaag bij het laden van de pagina (mobiel)
+document.addEventListener('DOMContentLoaded', function() {
+    // Zoek de taken van vandaag in de globale taken-data (of via fetch als je dat gebruikt)
+    const tasksList = document.getElementById('tasksList');
+    const noTasks = document.getElementById('noTasks');
+    const tasksDateLabel = document.querySelector('.tasks-date');
+    const tasksSection = document.querySelector('.mobile-tasks-section');
+
+    // Zoek in de globale taken-data (vervang dit door je eigen data/fetch indien nodig)
+    let tasksData = window.tasksData || [];
+    // Als je taken via fetch laadt, kun je hier een fetch doen en dan onderstaande code uitvoeren in de .then()
+
+    // Bepaal vandaag
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth() + 1;
+    const day = today.getDate();
+    const todayStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+    // Filter taken voor vandaag
+    const dayTasks = tasksData.filter(t => t.date === todayStr);
+
+    // Update label
+    if (tasksDateLabel) {
+        tasksDateLabel.textContent = `Taken ${today.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' })}`;
+    }
+
+    // Toon taken of geen taken
+    if (dayTasks.length > 0) {
+        tasksList.innerHTML = dayTasks.map(ev => `
+            <div class="task-item">
+                <div class="task-time">${ev.time || ev.start}</div>
+                <div class="task-title">${ev.title}</div>
+            </div>
+        `).join('');
+        tasksList.style.display = '';
+        if (noTasks) noTasks.style.display = 'none';
+    } else {
+        tasksList.innerHTML = '';
+        tasksList.style.display = 'none';
+        if (noTasks) noTasks.style.display = '';
+    }
+    if (tasksSection) tasksSection.style.display = 'block';
+});
+// Dynamisch vullen van de mobiele maandkalender
+function renderMobileMonthCalendar(year, month, tasksByDate) {
+    const mobileCal = document.querySelector('.mobile-calendar');
+    if (!mobileCal) return;
+    const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THUR', 'FRI', 'SAT']; // 7 kolommen
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    // Bepaal op welke dag van de week de 1e van de maand valt (0=Zon, 1=Ma, ...)
+    let firstDay = new Date(year, month, 1).getDay();
+    // Zet op 0=Zon, 1=Ma, ... 4=Do, 5=Vr, 6=Za, maar we tonen alleen 5 kolommen (zo nodig schuiven)
+    // Start altijd op zondag, maar max 5 kolommen
+    let startOffset = firstDay;
+    // Bouw weken
+    let weeks = [];
+    let day = 1;
+    while (day <= daysInMonth) {
+        let week = [];
+        for (let i = 0; i < 7; i++) {
+            if (weeks.length === 0 && i < startOffset && day === 1) {
+                week.push('');
+            } else if (day <= daysInMonth) {
+                week.push(day++);
+            } else {
+                week.push('');
+            }
+        }
+        weeks.push(week);
+    }
+    // Bouw de tabel
+    let html = '<table class="mobile-calendar-table" style="table-layout:fixed;width:100%"><tbody>';
+    // Header
+    html += '<tr>';
+    for (let i = 0; i < 7; i++) {
+        html += `<td class="day-label" style="width:14.28%">${daysOfWeek[i]}</td>`;
+    }
+    html += '</tr>';
+    // Dagen
+    for (let w = 0; w < weeks.length; w++) {
+        html += '<tr>';
+        for (let i = 0; i < 7; i++) {
+            const d = weeks[w][i];
+            if (d) {
+                const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                let eventClass = '';
+                if (tasksByDate && tasksByDate[dateKey] && tasksByDate[dateKey].length > 0) {
+                    eventClass = 'green-cell';
+                }
+                html += `<td class="${eventClass}" style="width:14.28%;height:48px;text-align:center;vertical-align:middle;">${d}</td>`;
+            } else {
+                html += '<td style="width:14.28%;height:48px;"></td>';
+            }
+        }
+        html += '</tr>';
+    }
+    html += '</tbody></table>';
+    mobileCal.innerHTML = html;
+}
 // Kleur mapping voor week-events
 function getEventClass(colorHex) {
     switch (colorHex) {
@@ -182,6 +282,10 @@ toggleBtns.forEach(btn => {
             if (mobileTasksSection && window.innerWidth <= 768) {
                 mobileTasksSection.style.display = 'block';
             }
+            // Update maandtitel ook op mobiel
+            updateCalendarTitle();
+            // Forceer hertekenen van maandweergave (ook mobiel)
+            regenerateCalendar();
         }
         
         console.log('Switched to ' + view + ' view');
@@ -403,12 +507,11 @@ function regenerateCalendar() {
     if (!daysGrid) return;
     
     // Get first day of month and number of days
-    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay(); // 0=Zon, 1=Ma, ...
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
-    
-    // Adjust for Monday start (0 = Sunday, make it 6)
-    const adjustedFirstDay = firstDay === 0 ? 6 : firstDay - 1;
+    // Adjust for Monday start: maandag=0, zondag=6
+    const adjustedFirstDay = (firstDay + 6) % 7;
     
     // Clear existing days
     daysGrid.innerHTML = '';
@@ -484,6 +587,8 @@ function regenerateCalendar() {
 
                 daysGrid.appendChild(dayCell);
             }
+            // Mobiele maandkalender vullen
+            renderMobileMonthCalendar(year, month, tasksByDate);
         });
     
     // Add next month's days to fill the grid
@@ -575,7 +680,7 @@ function regenerateWeekView() {
     const diff = weekStart.getDate() - day;
     weekStart.setDate(diff);
     
-    const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THUR', 'FRI', 'SAT'];
+    const daysOfWeek = ['MA', 'DI', 'WO', 'DO', 'VR', 'ZA', 'ZO'];
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
                         'July', 'August', 'September', 'October', 'November', 'December'];
     
@@ -652,7 +757,7 @@ function regenerateWeekView() {
                             <div class="mobile-day-number">${dayNumber}</div>
                             ${events.map((ev, idx) => `
                                 <div class=\"mobile-week-event\" data-idx=\"${idx}\" style=\"cursor:pointer;\">
-                                    <div class=\"event-time\">${ev.start}</div>
+                                    <div class=\"event-time\">${ev.start} - ${ev.end}</div>
                                     <div class=\"event-title\">${ev.title}</div>
                                 </div>
                             `).join('')}

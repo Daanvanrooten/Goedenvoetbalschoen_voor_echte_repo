@@ -258,69 +258,13 @@ while (count($weekNumbers) < 2) {
                         </div>
                     </div>
 
-                    <!-- Mobile Calendar -->
-                    <div class="mobile-calendar">
-                        <table class="mobile-calendar-table">
-                            <tbody>
-                                <tr>
-                                    <td class="day-label">SUN</td>
-                                    <td>2</td>
-                                    <td>9</td>
-                                    <td>16</td>
-                                    <td>23</td>
-                                    <td class="green-cell">30</td>
-                                </tr>
-                                <tr>
-                                    <td class="day-label">MON</td>
-                                    <td>3</td>
-                                    <td>10</td>
-                                    <td>17</td>
-                                    <td>24</td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td class="day-label">TUE</td>
-                                    <td>4</td>
-                                    <td>11</td>
-                                    <td>18</td>
-                                    <td>25</td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td class="day-label">WED</td>
-                                    <td>5</td>
-                                    <td>12</td>
-                                    <td>19</td>
-                                    <td>26</td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td class="day-label">THUR</td>
-                                    <td>6</td>
-                                    <td>13</td>
-                                    <td>20</td>
-                                    <td>27</td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td class="day-label">FRI</td>
-                                    <td>7</td>
-                                    <td>14</td>
-                                    <td>21</td>
-                                    <td>28</td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td class="day-label">Sat</td>
-                                    <td>1</td>
-                                    <td>8</td>
-                                    <td>15</td>
-                                    <td>22</td>
-                                    <td>29</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <!-- Mobile Calendar: dynamisch gevuld door JS -->
+                    <div class="mobile-calendar"></div>
+                    <noscript>
+                        <div style="padding:1em;color:#b00;background:#fff3f3;border-radius:8px;text-align:center;">
+                            Activeer JavaScript om de kalender te zien.
+                        </div>
+                    </noscript>
                 </div>
 
                 <!-- Week View -->
@@ -336,7 +280,8 @@ while (count($weekNumbers) < 2) {
                             // Ga terug naar zondag
                             $weekStart->modify('-1 day');
 
-                            $daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THUR', 'FRI', 'SAT'];
+                            $daysOfWeek =['MA', 'DI', 'WO', 'DO', 'VR', 'ZA', 'ZO'];
+
 
                             for ($i = 0; $i < 6; $i++): // Toon 6 dagen (zondag t/m vrijdag zoals in design)
                                 $day = clone $weekStart;
@@ -415,21 +360,21 @@ while (count($weekNumbers) < 2) {
                     <!-- Mobile Week View -->
                     <div class="mobile-week-view">
                         <div class="mobile-week-day">
-                            <div class="mobile-day-label">SUN</div>
+                            <div class="mobile-day-label">Ma</div>
                             <div class="mobile-day-content">
                                 <div class="mobile-day-number">30</div>
                             </div>
                         </div>
 
                         <div class="mobile-week-day">
-                            <div class="mobile-day-label">MON</div>
+                            <div class="mobile-day-label">Di</div>
                             <div class="mobile-day-content">
                                 <div class="mobile-day-number">31</div>
                             </div>
                         </div>
 
                         <div class="mobile-week-day">
-                            <div class="mobile-day-label">TUE</div>
+                            <div class="mobile-day-label">Wo</div>
                             <div class="mobile-day-content green-day">
                                 <div class="mobile-day-number">1</div>
                                 <div class="mobile-week-event">
@@ -449,14 +394,14 @@ while (count($weekNumbers) < 2) {
                         </div>
 
                         <div class="mobile-week-day">
-                            <div class="mobile-day-label">WED</div>
+                            <div class="mobile-day-label">Do</div>
                             <div class="mobile-day-content">
                                 <div class="mobile-day-number">2</div>
                             </div>
                         </div>
 
                         <div class="mobile-week-day">
-                            <div class="mobile-day-label">THUR</div>
+                            <div class="mobile-day-label">Vr</div>
                             <div class="mobile-day-content pink-day">
                                 <div class="mobile-day-number">3</div>
                                 <div class="mobile-week-event">
@@ -476,7 +421,7 @@ while (count($weekNumbers) < 2) {
                         </div>
 
                         <div class="mobile-week-day">
-                            <div class="mobile-day-label">FRI</div>
+                            <div class="mobile-day-label">Za</div>
                             <div class="mobile-day-content pink-day">
                                 <div class="mobile-day-number">4</div>
                                 <div class="mobile-week-event">
@@ -698,7 +643,9 @@ while (count($weekNumbers) < 2) {
             });
         }
     });
+    
     </script>
+    
 </body>
 
 </html>
