@@ -102,44 +102,44 @@ while (count($weekNumbers) < 2) {
             <div class="container">
                 <!-- Mobile create task button -->
                 <?php if (isset($user['role_id']) && $user['role_id'] == 2): ?>
-                <div class="mobile-create-task">
-                    <button class="create-task-btn">
-                        + Taak aanmaken
-                    </button>
-                </div>
+                    <div class="mobile-create-task">
+                        <button class="create-task-btn">
+                            + Taak aanmaken
+                        </button>
+                    </div>
                 <?php endif; ?>
 
                 <?php if (isset($user['role_id']) && $user['role_id'] == 2): ?>
-                <div class="calendar-controls">
-                    <button class="account-btn">
-                        Taak aanmaken
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
-                        </svg>
-                    </button>
-                </div>
+                    <div class="calendar-controls">
+                        <button class="account-btn">
+                            Taak aanmaken
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                            </svg>
+                        </button>
+                    </div>
                 <?php endif; ?>
 
                 <div class="calendar-header">
-                    
+
                     <div class="view-toggle">
                         <button class="toggle-btn" data-view="week">week</button>
                         <button class="toggle-btn active" data-view="month">maand</button>
                     </div>
                 </div>
                 <div class="month-navigation">
-                        <button class="month-nav-btn prev-month-btn" id="prevMonth" title="Vorige maand">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-                            </svg>
-                        </button>
-                        <h2 class="calendar-title"></h2>
-                        <button class="month-nav-btn next-month-btn" id="nextMonth" title="Volgende maand">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
-                            </svg>
-                        </button>
-                    </div>
+                    <button class="month-nav-btn prev-month-btn" id="prevMonth" title="Vorige maand">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                        </svg>
+                    </button>
+                    <h2 class="calendar-title"></h2>
+                    <button class="month-nav-btn next-month-btn" id="nextMonth" title="Volgende maand">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                        </svg>
+                    </button>
+                </div>
 
                 <div class="current-week-info">
                     <div class="week-navigation" id="weekNavigation" style="display: none;">
@@ -285,7 +285,7 @@ while (count($weekNumbers) < 2) {
                             // Ga terug naar zondag
                             $weekStart->modify('-1 day');
 
-                            $daysOfWeek =['MA', 'DI', 'WO', 'DO', 'VR', 'ZA', 'ZO'];
+                            $daysOfWeek = ['MA', 'DI', 'WO', 'DO', 'VR', 'ZA', 'ZO'];
 
 
                             for ($i = 0; $i < 6; $i++): // Toon 6 dagen (zondag t/m vrijdag zoals in design)
@@ -473,126 +473,126 @@ while (count($weekNumbers) < 2) {
     </main>
 
     <?php if (isset($user['role_id']) && $user['role_id'] == 2): ?>
-    <!-- Taak Aanmaken Modal -->
-    <div id="taakModal" class="taak-modal">
-        <div class="taak-modal-content">
-            <h2 class="taak-modal-title">Taak aanmaken</h2>
-            <form id="taakForm" class="taak-form">
-                <!-- ...bestaande formulier velden... -->
-                <?php /* De volledige inhoud van het formulier blijft ongewijzigd */ ?>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Taak naam</label>
-                        <input type="text" name="taaknaam" placeholder="Placeholder" required>
+        <!-- Taak Aanmaken Modal -->
+        <div id="taakModal" class="taak-modal">
+            <div class="taak-modal-content">
+                <h2 class="taak-modal-title">Taak aanmaken</h2>
+                <form id="taakForm" class="taak-form">
+                    <!-- ...bestaande formulier velden... -->
+                    <?php /* De volledige inhoud van het formulier blijft ongewijzigd */ ?>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Taak naam</label>
+                            <input type="text" name="taaknaam" placeholder="Placeholder" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Categorie</label>
+                            <select name="categorie" id="categorieSelect" required>
+                                <option value="">Selecteer categorie...</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Categorie</label>
-                        <select name="categorie" id="categorieSelect" required>
-                            <option value="">Selecteer categorie...</option>
-                        </select>
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label>Personeel toevoegen</label>
+                            <div style="position:relative;">
+                                <input type="text" id="personeelInput" placeholder="Zoek personeel..." autocomplete="off" style="width:100%;">
+                                <div id="personeelSuggestions" class="personeel-suggestions" style="border:1px solid #ccc;display:none;position:absolute;z-index:10;background:#fff;max-height:150px;overflow-y:auto;width:100%;top:100%;left:0;"></div>
+                            </div>
+                            <div id="selectedPersoneel" class="selected-personeel" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;"></div>
+                            <input type="hidden" name="personeel" id="personeelHidden">
+                            <small>Typ om personeel te zoeken en klik om toe te voegen. Klik op een naam onder de input om te verwijderen.</small>
+                        </div>
                     </div>
-                </div>
-                <div class="form-row">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Datum</label>
+                            <input type="date" name="datum" id="datumInput" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Start tijd</label>
+                            <input type="time" name="start_time" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Eind tijd</label>
+                            <input type="time" name="end_time" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Dag</label>
+                            <input type="number" name="day" id="dayInput" min="1" max="31" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Week</label>
+                            <input type="number" name="week" id="weekInput" min="1" max="53" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Maand</label>
+                            <input type="number" name="month" id="monthInput" min="1" max="12" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Jaar</label>
+                            <input type="number" name="year" id="yearInput" min="2020" max="2100" readonly>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Herhaling</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="herhaling" value="eenmalig" checked>
+                                    <span>Eenmalig</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="herhaling" value="dagelijks">
+                                    <span>Dagelijks</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="herhaling" value="wekelijks">
+                                    <span>Wekelijks</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="herhaling" value="maandelijks">
+                                    <span>Maandelijks</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Max aantal leden</label>
+                            <select name="maxleden">
+                                <option value="">Selecteer aantal</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="form-group full-width">
-                        <label>Personeel toevoegen</label>
-                        <div style="position:relative;">
-                            <input type="text" id="personeelInput" placeholder="Zoek personeel..." autocomplete="off" style="width:100%;">
-                            <div id="personeelSuggestions" class="personeel-suggestions" style="border:1px solid #ccc;display:none;position:absolute;z-index:10;background:#fff;max-height:150px;overflow-y:auto;width:100%;top:100%;left:0;"></div>
-                        </div>
-                        <div id="selectedPersoneel" class="selected-personeel" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;"></div>
-                        <input type="hidden" name="personeel" id="personeelHidden">
-                        <small>Typ om personeel te zoeken en klik om toe te voegen. Klik op een naam onder de input om te verwijderen.</small>
+                        <label>Beschrijving</label>
+                        <textarea name="beschrijving" placeholder="Placeholder" rows="4"></textarea>
                     </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Datum</label>
-                        <input type="date" name="datum" id="datumInput" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Start tijd</label>
-                        <input type="time" name="start_time" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Eind tijd</label>
-                        <input type="time" name="end_time" required>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Dag</label>
-                        <input type="number" name="day" id="dayInput" min="1" max="31" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label>Week</label>
-                        <input type="number" name="week" id="weekInput" min="1" max="53" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label>Maand</label>
-                        <input type="number" name="month" id="monthInput" min="1" max="12" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label>Jaar</label>
-                        <input type="number" name="year" id="yearInput" min="2020" max="2100" readonly>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Herhaling</label>
-                        <div class="radio-group">
-                            <label class="radio-label">
-                                <input type="radio" name="herhaling" value="eenmalig" checked>
-                                <span>Eenmalig</span>
-                            </label>
-                            <label class="radio-label">
-                                <input type="radio" name="herhaling" value="dagelijks">
-                                <span>Dagelijks</span>
-                            </label>
-                            <label class="radio-label">
-                                <input type="radio" name="herhaling" value="wekelijks">
-                                <span>Wekelijks</span>
-                            </label>
-                            <label class="radio-label">
-                                <input type="radio" name="herhaling" value="maandelijks">
-                                <span>Maandelijks</span>
-                            </label>
+                    <div class="form-group full-width">
+                        <label>Foto toevoegen</label>
+                        <div class="file-upload">
+                            <div class="upload-icon">
+                                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <p>Voeg foto toe</p>
+                            </div>
+                            <input type="file" name="foto" accept="image/*" style="display: none;" id="fotoInput">
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>Max aantal leden</label>
-                        <select name="maxleden">
-                            <option value="">Selecteer aantal</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="10">10</option>
-                        </select>
+                    <div class="form-actions">
+                        <button type="submit" class="submit-btn">Taak aanmaken</button>
                     </div>
-                </div>
-                <div class="form-group full-width">
-                    <label>Beschrijving</label>
-                    <textarea name="beschrijving" placeholder="Placeholder" rows="4"></textarea>
-                </div>
-                <div class="form-group full-width">
-                    <label>Foto toevoegen</label>
-                    <div class="file-upload">
-                        <div class="upload-icon">
-                            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                            <p>Voeg foto toe</p>
-                        </div>
-                        <input type="file" name="foto" accept="image/*" style="display: none;" id="fotoInput">
-                    </div>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="submit-btn">Taak aanmaken</button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
-    </div>
     <?php endif; ?>
 
     <!-- Uitloggen Modal -->
@@ -610,9 +610,9 @@ while (count($weekNumbers) < 2) {
     <script src="../js/agenda.js"></script>
     <script>
         // Detecteer base URL voor dynamische fetch calls
-        const isLocal = window.location.hostname.includes('localhost') || 
-                        window.location.hostname.includes('127.0.0.1') || 
-                        window.location.hostname.includes('webroot.local');
+        const isLocal = window.location.hostname.includes('localhost') ||
+            window.location.hostname.includes('127.0.0.1') ||
+            window.location.hostname.includes('webroot.local');
         const baseUrl = isLocal ? '/goudenvoetbalschoen/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen' : '';
 
         // Dynamisch categorieën laden
@@ -632,40 +632,40 @@ while (count($weekNumbers) < 2) {
         }
         document.addEventListener('DOMContentLoaded', loadCategories);
 
-    // Vul dag/week/maand/jaar automatisch in op basis van datum
-    document.addEventListener('DOMContentLoaded', function() {
-        const datumInput = document.getElementById('datumInput');
-        const dayInput = document.getElementById('dayInput');
-        const weekInput = document.getElementById('weekInput');
-        const monthInput = document.getElementById('monthInput');
-        const yearInput = document.getElementById('yearInput');
-        if (datumInput) {
-            datumInput.addEventListener('change', function() {
-                if (!this.value) return;
-                const date = new Date(this.value);
-                if (isNaN(date)) return;
-                // Dag
-                if (dayInput) dayInput.value = date.getDate();
-                // Maand (1-12)
-                if (monthInput) monthInput.value = date.getMonth() + 1;
-                // Jaar
-                if (yearInput) yearInput.value = date.getFullYear();
-                // Weeknummer
-                if (weekInput) {
-                    // Bereken ISO weeknummer
-                    const tempDate = new Date(date.getTime());
-                    tempDate.setHours(0,0,0,0);
-                    // Donderdag in deze week bepaalt het weeknummer
-                    tempDate.setDate(tempDate.getDate() + 3 - ((tempDate.getDay() + 6) % 7));
-                    const week1 = new Date(tempDate.getFullYear(),0,4);
-                    const weekNum = 1 + Math.round(((tempDate.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
-                    weekInput.value = weekNum;
-                }
-            });
-        }
-    });
+        // Vul dag/week/maand/jaar automatisch in op basis van datum
+        document.addEventListener('DOMContentLoaded', function() {
+            const datumInput = document.getElementById('datumInput');
+            const dayInput = document.getElementById('dayInput');
+            const weekInput = document.getElementById('weekInput');
+            const monthInput = document.getElementById('monthInput');
+            const yearInput = document.getElementById('yearInput');
+            if (datumInput) {
+                datumInput.addEventListener('change', function() {
+                    if (!this.value) return;
+                    const date = new Date(this.value);
+                    if (isNaN(date)) return;
+                    // Dag
+                    if (dayInput) dayInput.value = date.getDate();
+                    // Maand (1-12)
+                    if (monthInput) monthInput.value = date.getMonth() + 1;
+                    // Jaar
+                    if (yearInput) yearInput.value = date.getFullYear();
+                    // Weeknummer
+                    if (weekInput) {
+                        // Bereken ISO weeknummer
+                        const tempDate = new Date(date.getTime());
+                        tempDate.setHours(0, 0, 0, 0);
+                        // Donderdag in deze week bepaalt het weeknummer
+                        tempDate.setDate(tempDate.getDate() + 3 - ((tempDate.getDay() + 6) % 7));
+                        const week1 = new Date(tempDate.getFullYear(), 0, 4);
+                        const weekNum = 1 + Math.round(((tempDate.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
+                        weekInput.value = weekNum;
+                    }
+                });
+            }
+        });
     </script>
-    
+
 </body>
 
 </html>
