@@ -647,11 +647,11 @@ while (count($weekNumbers) < 2) {
         </div>
     </div>
 
-    <script src="/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/js/agenda.js"></script>
+    <script src="../js/agenda.js"></script>
     <script>
         // Dynamisch categorieën laden
         function loadCategories() {
-            fetch('/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/get_categories.php')
+            fetch('../phpcode/get_categories.php')
                 .then(res => res.json())
                 .then(data => {
                     const select = document.getElementById('categorieSelect');
