@@ -6,15 +6,15 @@
  * Vul hier je SMTP gegevens in voor het versturen van emails
  */
 
-// SMTP Configuratie
-define('SMTP_HOST', 'smtp.gmail.com');           // Gmail SMTP server
-define('SMTP_PORT', 587);                         // 587 voor TLS
-define('SMTP_SECURE', 'tls');                     // TLS encryption
-define('SMTP_USERNAME', 'jouw-email@gmail.com'); // ⚠️ VERANDER DIT: Je volledige Gmail adres
-define('SMTP_PASSWORD', 'xxxx xxxx xxxx xxxx');  // ⚠️ VERANDER DIT: Je 16-cijferige App Password van Gmail
+// SMTP Configuratie - OUTLOOK/HOTMAIL (Geen App Password nodig!)
+define('SMTP_HOST', 'smtp-mail.outlook.com');     // Outlook SMTP server
+define('SMTP_PORT', 587);                          // 587 voor TLS
+define('SMTP_SECURE', 'tls');                      // TLS encryption
+define('SMTP_USERNAME', 'jouw-email@outlook.com'); // ⚠️ VERANDER: Je Outlook/Hotmail adres
+define('SMTP_PASSWORD', 'jouw-wachtwoord');        // ⚠️ VERANDER: Je NORMALE wachtwoord
 
 // Email Afzender
-define('MAIL_FROM_EMAIL', 'jouw-email@gmail.com'); // ⚠️ VERANDER DIT: Zelfde email als hierboven
+define('MAIL_FROM_EMAIL', 'jouw-email@outlook.com'); // ⚠️ VERANDER: Zelfde email als hierboven
 define('MAIL_FROM_NAME', 'FC Team zonder plan');
 
 // Debug mode (zet op false in productie)
