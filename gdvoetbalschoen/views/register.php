@@ -79,6 +79,13 @@ require_once('../phpcode/config.php');
     </main>
 
     <script>
+        // detecteer of we lokaal of online zijn
+        const isLocal = window.location.hostname.includes('localhost') || 
+                        window.location.hostname.includes('127.0.0.1') || 
+                        window.location.hostname.includes('webroot.local');
+        
+        const baseUrl = isLocal ? '/goudenvoetbalschoen/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen' : '';
+
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -93,7 +100,7 @@ require_once('../phpcode/config.php');
             const formData = new FormData(this);
 
             try {
-                const response = await fetch('<?php echo $base_url; ?>/phpcode/registercode.php', {
+                const response = await fetch(baseUrl + '/phpcode/registercode.php', {
                     method: 'POST',
                     body: formData
                 });

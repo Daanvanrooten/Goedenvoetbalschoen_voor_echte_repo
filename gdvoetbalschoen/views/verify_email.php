@@ -143,6 +143,13 @@ $maskedEmail = substr($emailParts[0], 0, 3) . '***@' . $emailParts[1];
     </main>
 
     <script>
+        // detecteer of we lokaal of online zijn
+        const isLocal = window.location.hostname.includes('localhost') || 
+                        window.location.hostname.includes('127.0.0.1') || 
+                        window.location.hostname.includes('webroot.local');
+        
+        const baseUrl = isLocal ? '/goudenvoetbalschoen/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen' : '';
+
         // Auto-focus op code input
         document.getElementById('verification_code').focus();
 
@@ -167,7 +174,7 @@ $maskedEmail = substr($emailParts[0], 0, 3) . '***@' . $emailParts[1];
             const formData = new FormData(this);
 
             try {
-                const response = await fetch('<?php echo $base_url; ?>/phpcode/verify_email_code.php', {
+                const response = await fetch(baseUrl + '/phpcode/verify_email_code.php', {
                     method: 'POST',
                     body: formData
                 });
@@ -217,7 +224,7 @@ $maskedEmail = substr($emailParts[0], 0, 3) . '***@' . $emailParts[1];
             successDiv.style.display = 'none';
 
             try {
-                const response = await fetch('<?php echo $base_url; ?>/phpcode/resend_verification.php', {
+                const response = await fetch(baseUrl + '/phpcode/resend_verification.php', {
                     method: 'POST'
                 });
 
