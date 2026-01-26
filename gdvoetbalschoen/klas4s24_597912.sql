@@ -149,15 +149,6 @@ CREATE TABLE `users` (
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Gegevens worden geëxporteerd voor tabel `users`
---
-
-INSERT INTO `users` (`user_id`, `role_id`, `first_name`, `last_name`, `email`, `telefoonnummer`, `username`, `password_hash`, `is_active`, `is_email_verified`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Daan', 'van Rooten', 'djaanvanrooten@gmail.com', '', 'admin', '$2y$10$vCl3g3wQh01LlFASuZ3o7.FpmqjL5IvcfqZh.n4rLxASYXxlawjZS', 1, 0, '2026-01-22 11:11:27', NULL),
-(2, 2, 'Daan', 'van Rooten', 'daanvanrooten@gmail.com', '', 'Daan', '$2y$10$4M7./LSCZfowvCA9jU1/GewpbW7bX/UjGdGLD63xZvLX5cF.rAQAe', 1, 0, '2026-01-22 11:13:23', NULL),
-(5, 1, 'Daan', 'van Rooten', 'daa12321312nvanrooten@gmail.com', '0648228072', 'Daan231', '$2y$10$eAF2K9FdgaLArrm0f1meMesntL6s6W4YPJ3ceBtm2V0FS4XsTxnt6', 1, 0, '2026-01-23 10:20:48', NULL);
-
 -- --------------------------------------------------------
 
 --
@@ -165,11 +156,30 @@ INSERT INTO `users` (`user_id`, `role_id`, `first_name`, `last_name`, `email`, `
 --
 DROP TABLE IF EXISTS `slot_capacity_overview`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`klas4s24_597912`@`localhost` SQL SECURITY DEFINER VIEW `slot_capacity_overview`  AS SELECT `ts`.`slot_id` AS `slot_id`, `ts`.`task_id` AS `task_id`, `ts`.`slot_date` AS `slot_date`, `ts`.`start_time` AS `start_time`, `ts`.`end_time` AS `end_time`, `ts`.`capacity` AS `capacity`, count(`tr`.`registration_id`) AS `registrations`, `ts`.`capacity`- count(`tr`.`registration_id`) AS `spots_left` FROM (`task_slots` `ts` left join `task_registrations` `tr` on(`tr`.`slot_id` = `ts`.`slot_id`)) GROUP BY `ts`.`slot_id`, `ts`.`task_id`, `ts`.`slot_date`, `ts`.`start_time`, `ts`.`end_time`, `ts`.`capacity` ;
+CREATE VIEW `slot_capacity_overview` AS 
+SELECT 
+    `ts`.`slot_id`, 
+    `ts`.`task_id`, 
+    `ts`.`slot_date`, 
+    `ts`.`start_time`, 
+    `ts`.`end_time`, 
+    `ts`.`capacity`, 
+    COUNT(`tr`.`registration_id`) AS `registrations`, 
+    `ts`.`capacity` - COUNT(`tr`.`registration_id`) AS `spots_left` 
+FROM `task_slots` `ts` 
+LEFT JOIN `task_registrations` `tr` ON `tr`.`slot_id` = `ts`.`slot_id` 
+GROUP BY `ts`.`slot_id`, `ts`.`task_id`, `ts`.`slot_date`, `ts`.`start_time`, `ts`.`end_time`, `ts`.`capacity`;
 
 --
 -- Indexen voor geëxporteerde tabellen
 --
+
+--
+-- Indexen voor tabel `email_verifications`
+--
+ALTER TABLE `email_verifications`
+  ADD PRIMARY KEY (`token_id`),
+  ADD KEY `fk_email_verifications_user` (`user_id`);
 
 --
 -- Indexen voor tabel `users`
@@ -185,10 +195,16 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT voor een tabel `email_verifications`
+--
+ALTER TABLE `email_verifications`
+  MODIFY `token_id` int(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT voor een tabel `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `user_id` int(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
