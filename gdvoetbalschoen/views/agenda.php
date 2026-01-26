@@ -184,78 +184,38 @@ while (count($weekNumbers) < 2) {
                             <!-- Week 1 -->
                             <div class="day-cell prev-month"></div>
                             <div class="day-cell prev-month"></div>
-                            <div class="day-cell current-month green">
-                                <div class="event green-event">
-                                    <h3>5-Minute Workouts for Busy People</h3>
-                                    <p>Robert Fox</p>
-                                </div>
-                            </div>
+                            <div class="day-cell current-month">1</div>
                             <div class="day-cell current-month">2</div>
                             <div class="day-cell current-month">3</div>
-                            <div class="day-cell current-month pink">
-                                <div class="event pink-event">
-                                    <h3>How to Start Exercising as a Beginner</h3>
-                                    <p>Annette Black</p>
-                                </div>
-                            </div>
+                            <div class="day-cell current-month"></div>
                             <div class="day-cell weekend">5</div>
 
                             <!-- Week 2 -->
                             <div class="day-cell current-month">6</div>
-                            <div class="day-cell current-month green">
-                                <div class="event green-event">
-                                    <h3>Best Stretches to Improve Flexibility</h3>
-                                    <p>Dianne Russell</p>
-                                </div>
-                            </div>
+                            <div class="day-cell current-month">7</div>
                             <div class="day-cell current-month">8</div>
-                            <div class="day-cell current-month pink">9</div>
+                            <div class="day-cell current-month">9</div>
                             <div class="day-cell current-month">10</div>
                             <div class="day-cell current-month">11</div>
                             <div class="day-cell weekend">12</div>
 
                             <!-- Week 3 -->
                             <div class="day-cell current-month">13</div>
-                            <div class="day-cell current-month pink">
-                                <div class="event pink-event">
-                                    <h3>How to Stay Motivated to Work Out</h3>
-                                    <p>Kristin Watson</p>
-                                </div>
-                            </div>
+                            <div class="day-cell current-month">14</div>
                             <div class="day-cell current-month">15</div>
                             <div class="day-cell current-month">16</div>
                             <div class="day-cell current-month">17</div>
-                            <div class="day-cell current-month pink">
-                                <div class="event pink-event">
-                                    <h3>The Benefits of Walking Every Day</h3>
-                                    <p>Devon Lane</p>
-                                </div>
-                            </div>
+                            <div class="day-cell current-month">18</div>
                             <div class="day-cell weekend">19</div>
 
                             <!-- Week 4 -->
-                            <div class="day-cell current-month yellow">
-                                <div class="event yellow-event">
-                                    <h3>Strength Training vs. Cardio: Which is Better?</h3>
-                                    <p>Eleanor Pena</p>
-                                </div>
-                            </div>
+                            <div class="day-cell current-month">20</div>
                             <div class="day-cell current-month">21</div>
                             <div class="day-cell current-month">22</div>
-                            <div class="day-cell current-month green">
-                                <div class="event green-event">
-                                    <h3>Simple Exercises to Reduce Back Pain</h3>
-                                    <p>Jane Cooper</p>
-                                </div>
-                            </div>
+                            <div class="day-cell current-month">23</div>
                             <div class="day-cell current-month">24</div>
                             <div class="day-cell current-month">25</div>
-                            <div class="day-cell current-month pink">
-                                <div class="event pink-event">
-                                    <h3>How to Create a Workout Routine That Works for You</h3>
-                                    <p>Marvin McKinney</p>
-                                </div>
-                            </div>
+                            <div class="day-cell current-month">26</div>
 
                             <!-- Week 5 -->
                             <div class="day-cell current-month">27</div>

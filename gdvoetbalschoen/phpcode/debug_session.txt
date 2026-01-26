@@ -1,9 +1,9 @@
 Array
 (
-    [id] => 2
-    [first_name] => Daan
-    [last_name] => van Rooten
-    [email] => daanvanrooten@gmail.com
-    [username] => Daan
-    [role_id] => 2
+    [id] => 6
+    [first_name] => Dano
+    [last_name] => Root
+    [email] => daa1232121312312nvanrooten@gmail.com
+    [username] => Danoroot
+    [role_id] => 1
 )
