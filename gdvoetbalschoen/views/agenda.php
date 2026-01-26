@@ -609,9 +609,15 @@ while (count($weekNumbers) < 2) {
 
     <script src="../js/agenda.js"></script>
     <script>
+        // Detecteer base URL voor dynamische fetch calls
+        const isLocal = window.location.hostname.includes('localhost') || 
+                        window.location.hostname.includes('127.0.0.1') || 
+                        window.location.hostname.includes('webroot.local');
+        const baseUrl = isLocal ? '/goudenvoetbalschoen/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen' : '';
+
         // Dynamisch categorieën laden
         function loadCategories() {
-            fetch('../phpcode/get_categories.php')
+            fetch(baseUrl + '/phpcode/get_categories.php')
                 .then(res => res.json())
                 .then(data => {
                     const select = document.getElementById('categorieSelect');
