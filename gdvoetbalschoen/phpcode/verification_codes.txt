@@ -30,3 +30,26 @@ CODE: 679278
 Email verstuurd: JA
 ============================
 
+=== VERIFICATIECODE ===
+Tijd: 2026-01-26 13:59:50
+Email: bryvarooijen@gmail.com
+Naam: Bryan van Rooijen
+CODE: 806095
+Geldig tot: 2026-01-26 14:14:50
+Email verstuurd: JA
+======================
+
+=== NIEUWE CODE (RESEND) ===
+Tijd: 2026-01-26 14:00:02
+Email: bryvarooijen@gmail.com
+CODE: 970310
+Email verstuurd: JA
+============================
+
+=== NIEUWE CODE (RESEND) ===
+Tijd: 2026-01-26 14:01:38
+Email: bryvarooijen@gmail.com
+CODE: 563122
+Email verstuurd: JA
+============================
+
