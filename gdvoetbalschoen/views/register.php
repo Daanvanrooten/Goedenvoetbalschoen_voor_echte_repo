@@ -80,10 +80,10 @@ require_once('../phpcode/config.php');
 
     <script>
         // detecteer of we lokaal of online zijn
-        const isLocal = window.location.hostname.includes('localhost') || 
-                        window.location.hostname.includes('127.0.0.1') || 
-                        window.location.hostname.includes('webroot.local');
-        
+        const isLocal = window.location.hostname.includes('localhost') ||
+            window.location.hostname.includes('127.0.0.1') ||
+            window.location.hostname.includes('webroot.local');
+
         const baseUrl = isLocal ? '/goudenvoetbalschoen/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen' : '';
 
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
