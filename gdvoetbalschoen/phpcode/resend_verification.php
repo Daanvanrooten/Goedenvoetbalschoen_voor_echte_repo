@@ -46,13 +46,13 @@ try {
     $message .= "Je nieuwe verificatiecode is: $verificationCode\n\n";
     $message .= "Deze code is 15 minuten geldig.\n\n";
     $message .= "Groetjes,\nFC Team zonder plan";
-    
+
     $headers = "From: noreply@fcteam.nl\r\n";
     $headers .= "Content-Type: text/plain; charset=UTF-8";
-    
+
     // Verstuur email
     $emailSent = @mail($email, $subject, $message, $headers);
-    
+
     // Log ALTIJD de code (backup)
     $debugMessage = "=== NIEUWE CODE (RESEND) ===\n";
     $debugMessage .= "Tijd: " . date('Y-m-d H:i:s') . "\n";

@@ -113,20 +113,20 @@ try {
     ");
     $stmt->execute([$userId, $verificationCode, $expiresAt]);
 
-// SIMPELE EMAIL VERSTUREN
+    // SIMPELE EMAIL VERSTUREN
     $subject = "Je verificatiecode: $verificationCode";
     $message = "Hallo $voornaam,\n\n";
     $message .= "Bedankt voor je registratie bij FC Team zonder plan!\n\n";
     $message .= "Je verificatiecode is: $verificationCode\n\n";
     $message .= "Deze code is 15 minuten geldig.\n\n";
     $message .= "Groetjes,\nFC Team zonder plan";
-    
+
     $headers = "From: noreply@fcteam.nl\r\n";
     $headers .= "Content-Type: text/plain; charset=UTF-8";
-    
+
     // Verstuur email
     $emailSent = @mail($email, $subject, $message, $headers);
-    
+
     // Log ALTIJD de code (backup)
     $debugMessage = "=== VERIFICATIECODE ===\n";
     $debugMessage .= "Tijd: " . date('Y-m-d H:i:s') . "\n";
