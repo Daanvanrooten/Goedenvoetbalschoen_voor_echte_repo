@@ -7,14 +7,14 @@
  */
 
 // SMTP Configuratie
-define('SMTP_HOST', 'smtp.gmail.com');           // Bijv: smtp.gmail.com, smtp.office365.com, smtp-mail.outlook.com
-define('SMTP_PORT', 587);                         // 587 voor TLS, 465 voor SSL
-define('SMTP_SECURE', 'tls');                     // 'tls' of 'ssl'
-define('SMTP_USERNAME', 'jouw-email@gmail.com'); // Je volledige email adres
-define('SMTP_PASSWORD', 'jouw-app-wachtwoord');  // Voor Gmail: App Password (niet je gewone wachtwoord!)
+define('SMTP_HOST', 'smtp.gmail.com');           // Gmail SMTP server
+define('SMTP_PORT', 587);                         // 587 voor TLS
+define('SMTP_SECURE', 'tls');                     // TLS encryption
+define('SMTP_USERNAME', 'jouw-email@gmail.com'); // ⚠️ VERANDER DIT: Je volledige Gmail adres
+define('SMTP_PASSWORD', 'xxxx xxxx xxxx xxxx');  // ⚠️ VERANDER DIT: Je 16-cijferige App Password van Gmail
 
 // Email Afzender
-define('MAIL_FROM_EMAIL', 'jouw-email@gmail.com');
+define('MAIL_FROM_EMAIL', 'jouw-email@gmail.com'); // ⚠️ VERANDER DIT: Zelfde email als hierboven
 define('MAIL_FROM_NAME', 'FC Team zonder plan');
 
 // Debug mode (zet op false in productie)
