@@ -53,3 +53,12 @@ CODE: 563122
 Email verstuurd: JA
 ============================
 
+=== VERIFICATIECODE ===
+Tijd: 2026-01-26 14:17:24
+Email: daa123212131221312312nvanrooten@gmail.com
+Naam: Danoo Roott
+CODE: 595209
+Geldig tot: 2026-01-26 14:32:24
+Email verstuurd: JA
+======================
+
