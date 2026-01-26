@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function renderMobileMonthCalendar(year, month, tasksByDate) {
     const mobileCal = document.querySelector('.mobile-calendar');
     if (!mobileCal) return;
-    const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THUR', 'FRI', 'SAT']; // 7 kolommen
+    const daysOfWeek = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za']; // 7 kolommen
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     // Bepaal op welke dag van de week de 1e van de maand valt (0=Zon, 1=Ma, ...)
     let firstDay = new Date(year, month, 1).getDay();
@@ -701,7 +701,7 @@ function regenerateWeekView() {
     const diff = weekStart.getDate() - day;
     weekStart.setDate(diff);
     
-    const daysOfWeek = ['MA', 'DI', 'WO', 'DO', 'VR', 'ZA', 'ZO'];
+    const daysOfWeek = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'];
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
                         'July', 'August', 'September', 'October', 'November', 'December'];
     
