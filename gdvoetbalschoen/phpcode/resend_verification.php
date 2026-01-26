@@ -40,18 +40,9 @@ try {
     ");
     $stmt->execute([$userId, $verificationCode, $expiresAt]);
 
-    // SIMPELE EMAIL VERSTUREN
-    $subject = "Je nieuwe verificatiecode: $verificationCode";
-    $message = "Hallo $firstName,\n\n";
-    $message .= "Je nieuwe verificatiecode is: $verificationCode\n\n";
-    $message .= "Deze code is 15 minuten geldig.\n\n";
-    $message .= "Groetjes,\nFC Team zonder plan";
-
-    $headers = "From: noreply@fcteam.nl\r\n";
-    $headers .= "Content-Type: text/plain; charset=UTF-8";
-
     // Verstuur email
-    $emailSent = @mail($email, $subject, $message, $headers);
+    require_once __DIR__ . '/email_sender.php';
+    $emailSent = sendVerificationEmail($email, $firstName, $verificationCode);
 
     // Log ALTIJD de code (backup)
     $debugMessage = "=== NIEUWE CODE (RESEND) ===\n";
