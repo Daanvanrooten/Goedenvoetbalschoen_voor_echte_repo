@@ -64,8 +64,7 @@ try {
 
     echo json_encode([
         'success' => true,
-        'message' => 'Nieuwe verificatiecode verzonden naar je email!',
-        'verification_code' => $verificationCode // Tijdelijk voor testing
+        'message' => 'Nieuwe verificatiecode verzonden naar je email!'
     ]);
 } catch (PDOException $e) {
     error_log("Resend verificatie fout: " . $e->getMessage());

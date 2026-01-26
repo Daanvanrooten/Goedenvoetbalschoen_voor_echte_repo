@@ -100,12 +100,7 @@ session_start();
                 const data = await response.json();
 
                 if (data.success) {
-                    // Toon de verificatiecode tijdelijk voor testing
-                    if (data.verification_code) {
-                        alert(data.message + '\n\nVERIFICATIECODE (voor testing): ' + data.verification_code);
-                    } else {
-                        alert(data.message);
-                    }
+                    // Direct doorsturen naar verificatie pagina
                     window.location.href = data.redirect;
                 } else {
                     errorDiv.textContent = data.message;

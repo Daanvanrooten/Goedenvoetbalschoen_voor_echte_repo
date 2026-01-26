@@ -149,8 +149,7 @@ try {
     echo json_encode([
         'success' => true,
         'message' => 'Account aangemaakt! Controleer je email voor de verificatiecode.',
-        'redirect' => 'verify_email.php',
-        'verification_code' => $verificationCode // Tijdelijk voor testing, verwijder later
+        'redirect' => 'verify_email.php'
     ]);
 } catch (PDOException $e) {
     error_log("Registratie fout: " . $e->getMessage());
