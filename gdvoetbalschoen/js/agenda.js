@@ -741,6 +741,111 @@ function regenerateWeekView() {
   }
 }
 
+// Personeel zoeken en selecteren
+const personeelInput = document.getElementById("personeelInput");
+const personeelSuggestions = document.getElementById("personeelSuggestions");
+const selectedPersoneelDiv = document.getElementById("selectedPersoneel");
+const personeelHidden = document.getElementById("personeelHidden");
+let selectedUsers = []; // Array met geselecteerde user_id's
+
+if (personeelInput) {
+  // Zoek gebruikers terwijl je typt
+  personeelInput.addEventListener("input", function () {
+    const search = this.value.trim();
+
+    if (search.length < 2) {
+      personeelSuggestions.style.display = "none";
+      return;
+    }
+
+    fetch(
+      `${baseUrl}/phpcode/get_users.php?search=${encodeURIComponent(search)}`,
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.users.length > 0) {
+          personeelSuggestions.innerHTML = "";
+          data.users.forEach((user) => {
+            // Skip als al geselecteerd
+            if (selectedUsers.find((u) => u.user_id === user.user_id)) return;
+
+            const roleLabel = user.role_id == 2 ? "Admin" : "User";
+            const div = document.createElement("div");
+            div.style.padding = "8px 12px";
+            div.style.cursor = "pointer";
+            div.style.borderBottom = "1px solid #eee";
+            div.innerHTML = `<strong>${user.first_name} ${user.last_name}</strong> <span style="color:#888;font-size:13px;">(${roleLabel})</span>`;
+
+            div.addEventListener("click", function () {
+              addSelectedUser(user);
+              personeelInput.value = "";
+              personeelSuggestions.style.display = "none";
+            });
+
+            div.addEventListener("mouseenter", function () {
+              this.style.background = "#f0f0f0";
+            });
+            div.addEventListener("mouseleave", function () {
+              this.style.background = "#fff";
+            });
+
+            personeelSuggestions.appendChild(div);
+          });
+          personeelSuggestions.style.display = "block";
+        } else {
+          personeelSuggestions.style.display = "none";
+        }
+      })
+      .catch((err) => {
+        console.error("Fout bij ophalen gebruikers:", err);
+      });
+  });
+
+  // Sluit suggestions bij klik buiten
+  document.addEventListener("click", function (e) {
+    if (e.target !== personeelInput) {
+      personeelSuggestions.style.display = "none";
+    }
+  });
+}
+
+function addSelectedUser(user) {
+  // Voeg toe aan array
+  selectedUsers.push(user);
+
+  // Maak badge
+  const badge = document.createElement("span");
+  badge.style.background = "#e5dbfa";
+  badge.style.color = "#6b5b95";
+  badge.style.padding = "4px 8px";
+  badge.style.borderRadius = "4px";
+  badge.style.fontSize = "14px";
+  badge.style.cursor = "pointer";
+  badge.dataset.userId = user.user_id;
+  badge.textContent = `${user.first_name} ${user.last_name}`;
+
+  badge.addEventListener("click", function () {
+    removeSelectedUser(user.user_id);
+    badge.remove();
+  });
+
+  selectedPersoneelDiv.appendChild(badge);
+
+  // Update hidden input met comma-separated user_id's
+  updatePersoneelHidden();
+}
+
+function removeSelectedUser(userId) {
+  selectedUsers = selectedUsers.filter((u) => u.user_id !== userId);
+  updatePersoneelHidden();
+}
+
+function updatePersoneelHidden() {
+  if (personeelHidden) {
+    personeelHidden.value = selectedUsers.map((u) => u.user_id).join(",");
+  }
+}
+
 // Initialize with current month
 
 // Init week view direct op juiste week en update info
