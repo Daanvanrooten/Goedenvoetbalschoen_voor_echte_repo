@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once('../phpcode/config.php');
 ?>
 <!DOCTYPE html>
 <html lang="nl">
@@ -76,7 +77,7 @@ session_start();
             const formData = new FormData(this);
 
             try {
-                const response = await fetch('/goudenvoetbalschoen/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/logincode.php', {
+                const response = await fetch('<?php echo $base_url; ?>/phpcode/logincode.php', {
                     method: 'POST',
                     body: formData
                 });

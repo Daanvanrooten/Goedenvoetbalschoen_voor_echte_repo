@@ -197,7 +197,19 @@ INSERT INTO `users` (`user_id`, `role_id`, `first_name`, `last_name`, `email`, `
 --
 DROP TABLE IF EXISTS `slot_capacity_overview`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `slot_capacity_overview`  AS SELECT `ts`.`slot_id` AS `slot_id`, `ts`.`task_id` AS `task_id`, `ts`.`slot_date` AS `slot_date`, `ts`.`start_time` AS `start_time`, `ts`.`end_time` AS `end_time`, `ts`.`capacity` AS `capacity`, count(`tr`.`registration_id`) AS `registrations`, `ts`.`capacity`- count(`tr`.`registration_id`) AS `spots_left` FROM (`task_slots` `ts` left join `task_registrations` `tr` on(`tr`.`slot_id` = `ts`.`slot_id`)) GROUP BY `ts`.`slot_id`, `ts`.`task_id`, `ts`.`slot_date`, `ts`.`start_time`, `ts`.`end_time`, `ts`.`capacity` ;
+CREATE VIEW `slot_capacity_overview` AS 
+SELECT 
+    `ts`.`slot_id`, 
+    `ts`.`task_id`, 
+    `ts`.`slot_date`, 
+    `ts`.`start_time`, 
+    `ts`.`end_time`, 
+    `ts`.`capacity`, 
+    COUNT(`tr`.`registration_id`) AS `registrations`, 
+    `ts`.`capacity` - COUNT(`tr`.`registration_id`) AS `spots_left` 
+FROM `task_slots` `ts` 
+LEFT JOIN `task_registrations` `tr` ON `tr`.`slot_id` = `ts`.`slot_id` 
+GROUP BY `ts`.`slot_id`, `ts`.`task_id`, `ts`.`slot_date`, `ts`.`start_time`, `ts`.`end_time`, `ts`.`capacity`;
 
 --
 -- Indexen voor geëxporteerde tabellen

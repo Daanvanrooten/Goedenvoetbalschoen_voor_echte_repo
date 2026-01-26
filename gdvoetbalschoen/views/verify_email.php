@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once('../phpcode/config.php');
 
 // Check of er een pending verification is
 if (!isset($_SESSION['pending_verification'])) {
@@ -166,7 +167,7 @@ $maskedEmail = substr($emailParts[0], 0, 3) . '***@' . $emailParts[1];
             const formData = new FormData(this);
 
             try {
-                const response = await fetch('/goudenvoetbalschoen/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/verify_email_code.php', {
+                const response = await fetch('<?php echo $base_url; ?>/phpcode/verify_email_code.php', {
                     method: 'POST',
                     body: formData
                 });
@@ -216,7 +217,7 @@ $maskedEmail = substr($emailParts[0], 0, 3) . '***@' . $emailParts[1];
             successDiv.style.display = 'none';
 
             try {
-                const response = await fetch('/goudenvoetbalschoen/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/resend_verification.php', {
+                const response = await fetch('<?php echo $base_url; ?>/phpcode/resend_verification.php', {
                     method: 'POST'
                 });
 
