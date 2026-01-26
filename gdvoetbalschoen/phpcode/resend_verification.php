@@ -40,18 +40,32 @@ try {
     ");
     $stmt->execute([$userId, $verificationCode, $expiresAt]);
 
-    // Verstuur email met verificatiecode
-    require_once __DIR__ . '/email_functions.php';
-    $emailSent = sendVerificationEmail($email, "$firstName $lastName", $verificationCode);
+    // SIMPELE EMAIL VERSTUREN
+    $subject = "Je nieuwe verificatiecode: $verificationCode";
+    $message = "Hallo $firstName,\n\n";
+    $message .= "Je nieuwe verificatiecode is: $verificationCode\n\n";
+    $message .= "Deze code is 15 minuten geldig.\n\n";
+    $message .= "Groetjes,\nFC Team zonder plan";
     
-    // Log voor debug
-    $debugMessage = "=== EMAIL VERIFICATIE (RESEND) ===\n";
+    $headers = "From: noreply@fcteam.nl\r\n";
+    $headers .= "Content-Type: text/plain; charset=UTF-8";
+    
+    // Verstuur email
+    $emailSent = @mail($email, $subject, $message, $headers);
+    
+    // Log ALTIJD de code (backup)
+    $debugMessage = "=== NIEUWE CODE (RESEND) ===\n";
     $debugMessage .= "Tijd: " . date('Y-m-d H:i:s') . "\n";
-    $debugMessage .= "Naar: $email\n";
-    $debugMessage .= "Gebruiker: $firstName $lastName\n";
-    $debugMessage .= "Verificatiecode: $verificationCode\n";
-    $debugMessage .= "Geldig tot: $expiresAt\n";
-    $debugMessage .= "Email verzonden: " . ($emailSent ? 'JA' : 'NEE') . "\n";
+    $debugMessage .= "Email: $email\n";
+    $debugMessage .= "CODE: $verificationCode\n";
+    $debugMessage .= "Email verstuurd: " . ($emailSent ? 'JA' : 'NEE (check dit bestand!)') . "\n";
+    $debugMessage .= "============================\n\n";
+    file_put_contents(__DIR__ . '/verification_codes.txt', $debugMessage, FILE_APPEND);
+
+    echo json_encode([
+        'success' => true,
+        'message' => 'Nieuwe verificatiecode verzonden naar je email!',
+        'verification_code' => $verificationCode // Tijdelijk voor testing
     ]);
 } catch (PDOException $e) {
     error_log("Resend verificatie fout: " . $e->getMessage());
