@@ -583,6 +583,9 @@ while (count($weekNumbers) < 2) {
 
     <script src="../js/agenda.js"></script>
     <script>
+        // User role voor admin checks
+        const userIsAdmin = <?php echo (isset($user['role_id']) && $user['role_id'] == 2) ? 'true' : 'false'; ?>;
+
         // Gebruik de baseUrl uit agenda.js (al geladen hierboven)
         // Dynamisch categorieën laden
         function loadCategories() {

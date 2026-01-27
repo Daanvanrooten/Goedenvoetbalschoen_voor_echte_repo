@@ -29,6 +29,7 @@ if ($isAdmin) {
             ts.start_time,
             ts.end_time,
             t.title,
+            t.task_id,
             tc.color_hex,
             t.frequency
         FROM task_slots ts
@@ -51,6 +52,7 @@ if ($isAdmin) {
             ts.start_time,
             ts.end_time,
             t.title,
+            t.task_id,
             tc.color_hex,
             t.frequency
         FROM task_slots ts
@@ -78,6 +80,7 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         'end'   => substr($row['end_time'], 0, 5),
         'color' => $row['color_hex'],
         'slot_id' => $row['slot_id'],
+        'task_id' => $row['task_id'],
         'frequency' => $row['frequency']
     ];
 }
@@ -137,6 +140,7 @@ while ($task = $monthlyStmt->fetch(PDO::FETCH_ASSOC)) {
                     'end'   => isset($task['end_time']) ? substr($task['end_time'], 0, 5) : '',
                     'color' => $task['color_hex'],
                     'slot_id' => null,
+                    'task_id' => $task['task_id'],
                     'frequency' => 'MONTHLY'
                 ];
             }
@@ -201,6 +205,7 @@ while ($task = $weeklyStmt->fetch(PDO::FETCH_ASSOC)) {
                     'end'   => isset($task['end_time']) ? substr($task['end_time'], 0, 5) : '',
                     'color' => $task['color_hex'],
                     'slot_id' => null,
+                    'task_id' => $task['task_id'],
                     'frequency' => 'WEEKLY'
                 ];
             }
@@ -254,6 +259,7 @@ while ($task = $dailyStmt->fetch(PDO::FETCH_ASSOC)) {
                 'end'   => isset($task['end_time']) ? substr($task['end_time'], 0, 5) : '',
                 'color' => $task['color_hex'],
                 'slot_id' => null,
+                'task_id' => $task['task_id'],
                 'frequency' => 'DAILY'
             ];
         }

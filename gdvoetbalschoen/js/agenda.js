@@ -82,23 +82,43 @@ function showTasksModal(date, events) {
     modal.style.zIndex = "9999";
     document.body.appendChild(modal);
   }
-  modal.innerHTML = `<div class="task-modal-content" style="background:#fff;border-radius:16px;max-width:400px;width:90vw;padding:0;box-shadow:0 2px 16px rgba(0,0,0,0.15);overflow:hidden;">
+
+  const isAdmin = typeof userIsAdmin !== "undefined" && userIsAdmin === true;
+
+  modal.innerHTML = `<div class="task-modal-content" style="background:#fff;border-radius:16px;max-width:500px;width:90vw;padding:0;box-shadow:0 2px 16px rgba(0,0,0,0.15);overflow:hidden;">
         <div style='display:flex;align-items:center;gap:12px;padding:16px 20px 0 20px;'>
             <div style='background:#e5dbfa;color:#6b5b95;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:600;'>A</div>
-            <span style='font-weight:600;font-size:18px;'>Taak</span>
+            <span style='font-weight:600;font-size:18px;'>Taak Details</span>
             <button id='closeTasksModal' style='margin-left:auto;background:none;border:none;font-size:22px;cursor:pointer;'>&times;</button>
         </div>
         <div style='background:#f4f0fa;display:flex;align-items:center;justify-content:center;height:100px;margin:20px 0;'>
             <svg width='60' height='60' fill='#d1c4e9' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10'/></svg>
         </div>
-        <div style='padding:0 20px 20px 20px;'>
+        <div style='padding:0 20px 20px 20px;max-height:400px;overflow-y:auto;'>
             ${events
               .map(
-                (ev) => `
-                <div style='margin-bottom:18px;'>
-                    <div style='font-weight:600;font-size:17px;'>${ev.title}</div>
-                    <div style='color:#888;font-size:14px;'>${ev.start} - ${ev.end}</div>
-                    <div style='margin:8px 0 0 0;font-size:15px;'>Leden moeten deze taak uitvoeren.</div>
+                (ev, idx) => `
+                <div class='task-item-modal' style='margin-bottom:18px;padding:16px;background:#f9f9f9;border-radius:8px;position:relative;' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}'>
+                    <div style='font-weight:600;font-size:17px;margin-bottom:6px;'>${ev.title}</div>
+                    <div style='color:#888;font-size:14px;margin-bottom:8px;'>
+                        <span style='display:inline-block;margin-right:12px;'>🕐 ${ev.start} - ${ev.end}</span>
+                        ${ev.frequency ? `<span style='background:#e5dbfa;color:#6b5b95;padding:2px 8px;border-radius:4px;font-size:12px;'>${ev.frequency}</span>` : ""}
+                    </div>
+                    <div style='margin:8px 0 0 0;font-size:15px;color:#666;'>Toegewezen aan leden</div>
+                    ${
+                      isAdmin && (ev.slot_id || ev.task_id)
+                        ? `
+                    <div style='margin-top:12px;display:flex;gap:8px;'>
+                        <button class='edit-task-btn' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-frequency='${ev.frequency || ""}' style='flex:1;background:#6b5b95;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;'>
+                            ✏️ Bewerken
+                        </button>
+                        <button class='delete-task-btn' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-frequency='${ev.frequency || ""}' style='flex:1;background:#dc3545;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;'>
+                            🗑️ Verwijderen
+                        </button>
+                    </div>
+                    `
+                        : ""
+                    }
                 </div>
             `,
               )
@@ -111,8 +131,197 @@ function showTasksModal(date, events) {
   document.getElementById("closeTasksModal").onclick = function () {
     modal.style.display = "none";
   };
+
+  // Event listeners voor edit en delete knoppen
+  if (isAdmin) {
+    modal.querySelectorAll(".edit-task-btn").forEach((btn) => {
+      btn.onclick = function () {
+        const slotId = this.dataset.slotId || null;
+        const taskId = this.dataset.taskId || null;
+        const frequency = this.dataset.frequency || null;
+        const task = events.find(
+          (e) => e.slot_id == slotId || e.task_id == taskId,
+        );
+        editTask(slotId, taskId, frequency, task);
+      };
+    });
+
+    modal.querySelectorAll(".delete-task-btn").forEach((btn) => {
+      btn.onclick = function () {
+        const slotId = this.dataset.slotId || null;
+        const taskId = this.dataset.taskId || null;
+        const frequency = this.dataset.frequency || null;
+        deleteTask(slotId, taskId, frequency);
+      };
+    });
+  }
+
   modal.style.display = "flex";
 }
+
+// Delete task functie (alleen voor admins)
+function deleteTask(slotId, taskId, frequency) {
+  let confirmMsg = "Weet je zeker dat je deze taak wilt verwijderen?";
+
+  // Voor frequency taken: waarschuwing dat alle herhalingen verwijderd worden
+  if (
+    frequency &&
+    (frequency === "DAILY" || frequency === "WEEKLY" || frequency === "MONTHLY")
+  ) {
+    confirmMsg = `Deze taak herhaalt zich ${frequency === "DAILY" ? "dagelijks" : frequency === "WEEKLY" ? "wekelijks" : "maandelijks"}. Weet je zeker dat je ALLE herhalingen wilt verwijderen?`;
+  }
+
+  if (!confirm(confirmMsg)) {
+    return;
+  }
+
+  const formData = new FormData();
+  if (slotId) {
+    formData.append("slot_id", slotId);
+  }
+  if (taskId) {
+    formData.append("task_id", taskId);
+  }
+
+  fetch(`${baseUrl}/phpcode/delete_task.php`, {
+    method: "POST",
+    body: formData,
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success) {
+        alert(data.message);
+        // Sluit modal
+        const modal = document.getElementById("tasksModal");
+        if (modal) modal.style.display = "none";
+        // Refresh calendar
+        regenerateCalendar();
+        regenerateWeekView();
+      } else {
+        alert("Fout: " + data.message);
+      }
+    })
+    .catch((err) => {
+      console.error("Delete error:", err);
+      alert("Er ging iets fout bij het verwijderen");
+    });
+}
+
+// Edit task functie (alleen voor admins)
+function editTask(slotId, taskId, frequency, task) {
+  // Sluit de huidige modal
+  const modal = document.getElementById("tasksModal");
+  if (modal) modal.style.display = "none";
+
+  // Maak een edit modal
+  let editModal = document.getElementById("editTaskModal");
+  if (!editModal) {
+    editModal = document.createElement("div");
+    editModal.id = "editTaskModal";
+    editModal.style.position = "fixed";
+    editModal.style.top = "0";
+    editModal.style.left = "0";
+    editModal.style.width = "100vw";
+    editModal.style.height = "100vh";
+    editModal.style.background = "rgba(0,0,0,0.3)";
+    editModal.style.display = "flex";
+    editModal.style.alignItems = "center";
+    editModal.style.justifyContent = "center";
+    editModal.style.zIndex = "10000";
+    document.body.appendChild(editModal);
+  }
+
+  const isFrequencyTask =
+    frequency &&
+    (frequency === "DAILY" ||
+      frequency === "WEEKLY" ||
+      frequency === "MONTHLY");
+  const frequencyLabel =
+    frequency === "DAILY"
+      ? "dagelijks"
+      : frequency === "WEEKLY"
+        ? "wekelijks"
+        : frequency === "MONTHLY"
+          ? "maandelijks"
+          : "";
+
+  editModal.innerHTML = `
+    <div style='background:#fff;border-radius:16px;max-width:500px;width:90vw;padding:24px;box-shadow:0 2px 16px rgba(0,0,0,0.15);'>
+      <h2 style='margin:0 0 20px 0;font-size:20px;'>Taak Bewerken</h2>
+      ${isFrequencyTask ? `<div style='background:#fff3cd;border:1px solid #ffc107;padding:12px;border-radius:6px;margin-bottom:16px;font-size:14px;color:#856404;'>⚠️ Deze taak herhaalt zich ${frequencyLabel}. Wijzigingen worden op ALLE herhalingen toegepast.</div>` : ""}
+      <form id='editTaskForm'>
+        <div style='margin-bottom:16px;'>
+          <label style='display:block;margin-bottom:6px;font-weight:600;'>Taak naam</label>
+          <input type='text' id='editTitle' value='${task.title}' style='width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;' required>
+        </div>
+        <div style='margin-bottom:16px;display:flex;gap:12px;'>
+          <div style='flex:1;'>
+            <label style='display:block;margin-bottom:6px;font-weight:600;'>Start tijd</label>
+            <input type='time' id='editStartTime' value='${task.start}' style='width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;' required>
+          </div>
+          <div style='flex:1;'>
+            <label style='display:block;margin-bottom:6px;font-weight:600;'>Eind tijd</label>
+            <input type='time' id='editEndTime' value='${task.end}' style='width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;' required>
+          </div>
+        </div>
+        <div style='display:flex;gap:12px;margin-top:20px;'>
+          <button type='button' id='cancelEdit' style='flex:1;padding:10px;background:#ccc;border:none;border-radius:6px;cursor:pointer;font-size:14px;'>Annuleren</button>
+          <button type='submit' style='flex:1;padding:10px;background:#6b5b95;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px;'>Opslaan</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  editModal.style.display = "flex";
+
+  document.getElementById("cancelEdit").onclick = function () {
+    editModal.style.display = "none";
+  };
+
+  editModal.onclick = function (e) {
+    if (e.target === editModal) editModal.style.display = "none";
+  };
+
+  document.getElementById("editTaskForm").onsubmit = function (e) {
+    e.preventDefault();
+
+    const formData = new FormData();
+    if (slotId) {
+      formData.append("slot_id", slotId);
+    }
+    if (taskId) {
+      formData.append("task_id", taskId);
+    }
+    formData.append("title", document.getElementById("editTitle").value);
+    formData.append(
+      "start_time",
+      document.getElementById("editStartTime").value,
+    );
+    formData.append("end_time", document.getElementById("editEndTime").value);
+
+    fetch(`${baseUrl}/phpcode/update_task.php`, {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          alert(data.message);
+          editModal.style.display = "none";
+          // Refresh calendar
+          regenerateCalendar();
+          regenerateWeekView();
+        } else {
+          alert("Fout: " + data.message);
+        }
+      })
+      .catch((err) => {
+        console.error("Update error:", err);
+        alert("Er ging iets fout bij het updaten");
+      });
+  };
+}
+
 // Kleur naar CSS class
 function getEventClass(colorHex) {
   switch (colorHex) {
