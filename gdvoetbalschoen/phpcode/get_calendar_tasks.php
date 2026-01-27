@@ -149,21 +149,24 @@ while ($task = $monthlyStmt->fetch(PDO::FETCH_ASSOC)) {
 // 3. Haal alle wekelijkse taken op
 if ($isAdmin) {
     $weeklyStmt = $pdo->prepare("
-        SELECT t.*, tc.color_hex
+        SELECT t.*, tc.color_hex, ts.slot_date as first_slot_date
         FROM tasks t
         LEFT JOIN task_categories tc ON tc.category_id = t.category_id
+        LEFT JOIN task_slots ts ON ts.task_id = t.task_id
         WHERE t.frequency = 'WEEKLY' AND t.is_active = 1
+        GROUP BY t.task_id
     ");
     $weeklyStmt->execute();
 } else {
     $weeklyStmt = $pdo->prepare("
-        SELECT DISTINCT t.*, tc.color_hex
+        SELECT DISTINCT t.*, tc.color_hex, ts.slot_date as first_slot_date
         FROM tasks t
         LEFT JOIN task_categories tc ON tc.category_id = t.category_id
         INNER JOIN task_slots ts ON ts.task_id = t.task_id
         INNER JOIN task_registrations tr ON tr.slot_id = ts.slot_id
         WHERE t.frequency = 'WEEKLY' AND t.is_active = 1
         AND tr.user_id = :user_id
+        GROUP BY t.task_id
     ");
     $weeklyStmt->execute([':user_id' => $currentUserId]);
 }
@@ -172,7 +175,11 @@ while ($task = $weeklyStmt->fetch(PDO::FETCH_ASSOC)) {
     $startDate = new DateTime($start);
     $endDate = new DateTime($end);
     $current = clone $startDate;
-    $weekDay = isset($task['day']) ? (int)$task['day'] : null; // 1=maandag, 7=zondag
+    
+    // Gebruik de eerste slot_date om de dag van de week te bepalen
+    $firstSlotDate = isset($task['first_slot_date']) ? new DateTime($task['first_slot_date']) : null;
+    $weekDay = $firstSlotDate ? (int)$firstSlotDate->format('N') : null; // 1=maandag, 7=zondag
+    
     while ($current <= $endDate) {
         // Check of deze dag van de week klopt
         if ($weekDay !== null && (int)$current->format('N') === $weekDay) {
@@ -180,7 +187,8 @@ while ($task = $weeklyStmt->fetch(PDO::FETCH_ASSOC)) {
             $alreadyExists = false;
             if (isset($tasksByDate[$dateStr])) {
                 foreach ($tasksByDate[$dateStr] as $existing) {
-                    if ($existing['frequency'] === 'WEEKLY' && $existing['title'] === $task['title']) {
+                    // Skip als deze taak al bestaat op deze datum (via slot of frequency)
+                    if ($existing['title'] === $task['title']) {
                         $alreadyExists = true;
                         break;
                     }
@@ -232,7 +240,8 @@ while ($task = $dailyStmt->fetch(PDO::FETCH_ASSOC)) {
         $alreadyExists = false;
         if (isset($tasksByDate[$dateStr])) {
             foreach ($tasksByDate[$dateStr] as $existing) {
-                if ($existing['frequency'] === 'DAILY' && $existing['title'] === $task['title']) {
+                // Skip als deze taak al bestaat op deze datum (via slot of frequency)
+                if ($existing['title'] === $task['title']) {
                     $alreadyExists = true;
                     break;
                 }
