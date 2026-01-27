@@ -892,78 +892,79 @@ function regenerateCalendar() {
     });
   });
 
-  // Generate mobile calendar
+  // Generate mobile calendar - horizontal layout with weekdays as rows
   const mobileCalendar = document.querySelector(".mobile-calendar");
   if (mobileCalendar) {
     mobileCalendar.innerHTML = "";
 
-    // Create mobile calendar table
+    // Create mobile calendar table with horizontal layout
     const table = document.createElement("table");
     table.className = "mobile-calendar-table";
 
-    // Create header row
-    const thead = document.createElement("thead");
-    const headerRow = document.createElement("tr");
-    const daysOfWeek = ["Zo", "Ma", "Di", "Wo", "Do", "Vr", "Za"];
-    daysOfWeek.forEach((dayName) => {
-      const th = document.createElement("th");
-      th.textContent = dayName;
-      headerRow.appendChild(th);
-    });
-    thead.appendChild(headerRow);
-    table.appendChild(thead);
-
-    // Create body with weeks
     const tbody = document.createElement("tbody");
-    const totalCellsForMobile = adjustedFirstDay + daysInMonth;
-    const weeksCount = Math.ceil(totalCellsForMobile / 7);
 
-    let dayCounter = 1 - adjustedFirstDay;
+    // Days of week labels
+    const daysOfWeek = ["SUN", "MON", "TUE", "WED", "THUR", "FRI", "Sat"];
 
-    for (let week = 0; week < weeksCount; week++) {
-      const weekRow = document.createElement("tr");
+    // Build array of all days with their weekday
+    const calendarDays = [];
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(currentYear, currentMonth, day);
+      const weekday = date.getDay(); // 0 = Sunday, 6 = Saturday
+      calendarDays.push({ day, weekday, date });
+    }
 
-      for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
-        const td = document.createElement("td");
+    // Group days by weekday (0-6)
+    const daysByWeekday = [[], [], [], [], [], [], []];
+    calendarDays.forEach(({ day, weekday, date }) => {
+      const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      const hasTasks = tasksByDate[dateKey] && tasksByDate[dateKey].length > 0;
+      const isToday =
+        day === today.getDate() &&
+        currentMonth === today.getMonth() &&
+        currentYear === today.getFullYear();
 
-        if (dayCounter > 0 && dayCounter <= daysInMonth) {
-          const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(dayCounter).padStart(2, "0")}`;
-          const hasTasks =
-            tasksByDate[dateKey] && tasksByDate[dateKey].length > 0;
+      daysByWeekday[weekday].push({ day, date, dateKey, hasTasks, isToday });
+    });
 
-          // Create day label
-          const dayLabel = document.createElement("div");
-          dayLabel.className = "day-label";
-          dayLabel.textContent = dayCounter;
+    // Create one row per weekday
+    for (let weekday = 0; weekday < 7; weekday++) {
+      const weekdayRow = document.createElement("tr");
 
-          // Check if it's today
-          if (
-            dayCounter === today.getDate() &&
-            currentMonth === today.getMonth() &&
-            currentYear === today.getFullYear()
-          ) {
-            dayLabel.classList.add("today");
-          }
+      // First cell: weekday label
+      const labelCell = document.createElement("td");
+      labelCell.className = "day-label";
+      labelCell.textContent = daysOfWeek[weekday];
+      weekdayRow.appendChild(labelCell);
 
-          td.appendChild(dayLabel);
+      // Add cells for each occurrence of this weekday in the month
+      const daysForThisWeekday = daysByWeekday[weekday];
+      daysForThisWeekday.forEach(({ day, dateKey, hasTasks, isToday }) => {
+        const dayCell = document.createElement("td");
+        dayCell.textContent = day;
 
-          // Add green indicator if there are tasks
-          if (hasTasks) {
-            td.classList.add("green-cell");
-
-            // Make it clickable to show tasks
-            td.style.cursor = "pointer";
-            td.addEventListener("click", () => {
-              showTasksModal(tasksByDate[dateKey], dateKey);
-            });
-          }
+        // Add green background if there are tasks
+        if (hasTasks) {
+          dayCell.classList.add("green-cell");
         }
 
-        weekRow.appendChild(td);
-        dayCounter++;
-      }
+        // Add today class if it's today
+        if (isToday) {
+          dayCell.classList.add("today");
+        }
 
-      tbody.appendChild(weekRow);
+        // Make clickable to show tasks
+        if (hasTasks) {
+          dayCell.style.cursor = "pointer";
+          dayCell.addEventListener("click", () => {
+            showTasksModal(tasksByDate[dateKey], dateKey);
+          });
+        }
+
+        weekdayRow.appendChild(dayCell);
+      });
+
+      tbody.appendChild(weekdayRow);
     }
 
     table.appendChild(tbody);
