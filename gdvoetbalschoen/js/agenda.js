@@ -246,18 +246,40 @@ function editTask(slotId, taskId, frequency, task) {
           : "";
 
   editModal.innerHTML = `
-    <div style='background:#fff;border-radius:16px;max-width:500px;width:90vw;padding:24px;box-shadow:0 2px 16px rgba(0,0,0,0.15);'>
+    <div style='background:#fff;border-radius:16px;max-width:500px;width:90vw;padding:24px;box-shadow:0 2px 16px rgba(0,0,0,0.15);max-height:90vh;overflow-y:auto;'>
       <h2 style='margin:0 0 20px 0;font-size:20px;'>Taak Bewerken</h2>
       ${isFrequencyTask ? `<div style='background:#fff3cd;border:1px solid #ffc107;padding:12px;border-radius:6px;margin-bottom:16px;font-size:14px;color:#856404;'>⚠️ Deze taak herhaalt zich ${frequencyLabel}. Wijzigingen worden op ALLE herhalingen toegepast.</div>` : ""}
       <form id='editTaskForm'>
         <div style='margin-bottom:16px;'>
           <label style='display:block;margin-bottom:6px;font-weight:600;'>Taak naam</label>
-          <input type='text' id='editTitle' value='${task.title}' style='width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;' required>
+          <input type='text' id='editTitle' value='${task.title}' style='width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box;' required>
         </div>
         <div style='margin-bottom:16px;display:flex;gap:12px;'>
           <div style='flex:1;'>
             <label style='display:block;margin-bottom:6px;font-weight:600;'>Start tijd</label>
-            <input type='time' id='editStartTime' value='${task.start}' style='width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;' required>
+            <input type='time' id='editStartTime' value='${task.start}' style='width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box;' required>
+          </div>
+          <div style='flex:1;'>
+            <label style='display:block;margin-bottom:6px;font-weight:600;'>Eind tijd</label>
+            <input type='time' id='editEndTime' value='${task.end}' style='width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box;' required>
+          </div>
+        </div>
+        ${slotId ? `
+        <div style='margin-bottom:16px;'>
+          <label style='display:block;margin-bottom:6px;font-weight:600;'>Personeel toevoegen</label>
+          <div style='position:relative;'>
+            <input type='text' id='editPersoneelInput' placeholder='Zoek personeel...' autocomplete='off' style='width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box;'>
+            <div id='editPersoneelSuggestions' style='display:none;position:absolute;z-index:10;background:#fff;border:1px solid #ddd;border-radius:6px;width:100%;max-height:150px;overflow-y:auto;margin-top:4px;'></div>
+          </div>
+          <div id='editSelectedPersoneel' style='margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;'></div>
+          <input type='hidden' id='editPersoneelHidden'>
+          <small style='color:#888;font-size:13px;'>Typ om personeel te zoeken en klik om toe te voegen</small>
+        </div>
+        ` : ''}
+        <div style='display:flex;gap:12px;margin-top:20px;'>
+          <button type='button' id='cancelEdit' style='flex:1;padding:10px;background:#ccc;border:none;border-radius:6px;cursor:pointer;font-size:14px;'>Annuleren</button>
+          <button type='submit' style='flex:1;padding:10px;background:#6b5b95;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px;'>Opslaan</button>
+        </div>
           </div>
           <div style='flex:1;'>
             <label style='display:block;margin-bottom:6px;font-weight:600;'>Eind tijd</label>
@@ -274,6 +296,97 @@ function editTask(slotId, taskId, frequency, task) {
 
   editModal.style.display = "flex";
 
+  // Initialiseer personeel selector (alleen als slotId bestaat)
+  let editSelectedUsers = [];
+  
+  if (slotId) {
+    const editPersoneelInput = document.getElementById('editPersoneelInput');
+    const editPersoneelSuggestions = document.getElementById('editPersoneelSuggestions');
+    const editSelectedPersoneelDiv = document.getElementById('editSelectedPersoneel');
+    const editPersoneelHidden = document.getElementById('editPersoneelHidden');
+    
+    // Laad huidige toegewezen personeel
+    fetch(`${baseUrl}/phpcode/get_assigned_users.php?slot_id=${slotId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.assigned) {
+          data.assigned.forEach(user => {
+            addEditSelectedUser(user);
+          });
+        }
+      })
+      .catch(err => console.error('Error loading assigned users:', err));
+    
+    // Zoekfunctionaliteit
+    editPersoneelInput.addEventListener('input', function() {
+      const search = this.value.trim();
+      
+      if (search.length < 2) {
+        editPersoneelSuggestions.style.display = 'none';
+        return;
+      }
+      
+      fetch(`${baseUrl}/phpcode/get_users.php?search=${encodeURIComponent(search)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.users.length > 0) {
+            editPersoneelSuggestions.innerHTML = '';
+            data.users.forEach(user => {
+              if (editSelectedUsers.find(u => u.user_id === user.user_id)) return;
+              
+              const roleLabel = user.role_id == 2 ? 'Admin' : 'User';
+              const div = document.createElement('div');
+              div.style.padding = '8px 12px';
+              div.style.cursor = 'pointer';
+              div.style.borderBottom = '1px solid #eee';
+              div.innerHTML = `<strong>${user.first_name} ${user.last_name}</strong> <span style="color:#888;font-size:13px;">(${roleLabel})</span>`;
+              
+              div.addEventListener('click', function() {
+                addEditSelectedUser(user);
+                editPersoneelInput.value = '';
+                editPersoneelSuggestions.style.display = 'none';
+              });
+              
+              div.addEventListener('mouseenter', function() { this.style.background = '#f0f0f0'; });
+              div.addEventListener('mouseleave', function() { this.style.background = '#fff'; });
+              
+              editPersoneelSuggestions.appendChild(div);
+            });
+            editPersoneelSuggestions.style.display = 'block';
+          } else {
+            editPersoneelSuggestions.style.display = 'none';
+          }
+        });
+    });
+    
+    function addEditSelectedUser(user) {
+      editSelectedUsers.push(user);
+      
+      const badge = document.createElement('span');
+      badge.style.background = '#e5dbfa';
+      badge.style.color = '#6b5b95';
+      badge.style.padding = '4px 8px';
+      badge.style.borderRadius = '4px';
+      badge.style.fontSize = '14px';
+      badge.style.cursor = 'pointer';
+      badge.dataset.userId = user.user_id;
+      badge.textContent = `${user.first_name} ${user.last_name}`;
+      
+      badge.addEventListener('click', function() {
+        editSelectedUsers = editSelectedUsers.filter(u => u.user_id !== user.user_id);
+        badge.remove();
+        updateEditPersoneelHidden();
+      });
+      
+      editSelectedPersoneelDiv.appendChild(badge);
+      updateEditPersoneelHidden();
+    }
+    
+    function updateEditPersoneelHidden() {
+      editPersoneelHidden.value = editSelectedUsers.map(u => u.user_id).join(',');
+    }
+  }
+
   document.getElementById("cancelEdit").onclick = function () {
     editModal.style.display = "none";
   };
@@ -288,6 +401,11 @@ function editTask(slotId, taskId, frequency, task) {
     const formData = new FormData();
     if (slotId) {
       formData.append("slot_id", slotId);
+      // Voeg personeel toe als het veld bestaat
+      const personeelHidden = document.getElementById('editPersoneelHidden');
+      if (personeelHidden) {
+        formData.append("personeel", personeelHidden.value);
+      }
     }
     if (taskId) {
       formData.append("task_id", taskId);

@@ -28,6 +28,7 @@ $title = isset($_POST['title']) ? trim($_POST['title']) : null;
 $start_time = isset($_POST['start_time']) ? $_POST['start_time'] : null;
 $end_time = isset($_POST['end_time']) ? $_POST['end_time'] : null;
 $slot_date = isset($_POST['slot_date']) ? $_POST['slot_date'] : null;
+$personeel = isset($_POST['personeel']) ? $_POST['personeel'] : null; // Comma-separated user IDs
 
 if (!$task_id && !$slot_id) {
     http_response_code(400);
@@ -87,6 +88,26 @@ try {
             $params[] = $slot_id;
             $stmt = $conn->prepare("UPDATE task_slots SET " . implode(', ', $updates) . " WHERE slot_id = ?");
             $stmt->execute($params);
+        }
+    }
+    
+    // Update personeel assignments als slot_id gegeven is
+    if ($slot_id && $personeel !== null) {
+        // Verwijder alle huidige assignments voor deze slot
+        $stmt = $conn->prepare("DELETE FROM task_registrations WHERE slot_id = ?");
+        $stmt->execute([$slot_id]);
+        
+        // Voeg nieuwe assignments toe
+        if (!empty($personeel)) {
+            $userIds = array_filter(array_map('trim', explode(',', $personeel)));
+            if (!empty($userIds)) {
+                $stmtReg = $conn->prepare("INSERT INTO task_registrations (slot_id, user_id) VALUES (?, ?)");
+                foreach ($userIds as $userId) {
+                    if (is_numeric($userId) && $userId > 0) {
+                        $stmtReg->execute([$slot_id, intval($userId)]);
+                    }
+                }
+            }
         }
     }
 
