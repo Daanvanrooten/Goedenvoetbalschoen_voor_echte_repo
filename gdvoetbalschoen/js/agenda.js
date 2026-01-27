@@ -264,7 +264,9 @@ function editTask(slotId, taskId, frequency, task) {
             <input type='time' id='editEndTime' value='${task.end}' style='width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box;' required>
           </div>
         </div>
-        ${slotId ? `
+        ${
+          slotId
+            ? `
         <div style='margin-bottom:16px;'>
           <label style='display:block;margin-bottom:6px;font-weight:600;'>Personeel toevoegen</label>
           <div style='position:relative;'>
@@ -275,7 +277,9 @@ function editTask(slotId, taskId, frequency, task) {
           <input type='hidden' id='editPersoneelHidden'>
           <small style='color:#888;font-size:13px;'>Typ om personeel te zoeken en klik om toe te voegen</small>
         </div>
-        ` : ''}
+        `
+            : ""
+        }
         <div style='display:flex;gap:12px;margin-top:20px;'>
           <button type='button' id='cancelEdit' style='flex:1;padding:10px;background:#ccc;border:none;border-radius:6px;cursor:pointer;font-size:14px;'>Annuleren</button>
           <button type='submit' style='flex:1;padding:10px;background:#6b5b95;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px;'>Opslaan</button>
@@ -298,92 +302,107 @@ function editTask(slotId, taskId, frequency, task) {
 
   // Initialiseer personeel selector (alleen als slotId bestaat)
   let editSelectedUsers = [];
-  
+
   if (slotId) {
-    const editPersoneelInput = document.getElementById('editPersoneelInput');
-    const editPersoneelSuggestions = document.getElementById('editPersoneelSuggestions');
-    const editSelectedPersoneelDiv = document.getElementById('editSelectedPersoneel');
-    const editPersoneelHidden = document.getElementById('editPersoneelHidden');
-    
+    const editPersoneelInput = document.getElementById("editPersoneelInput");
+    const editPersoneelSuggestions = document.getElementById(
+      "editPersoneelSuggestions",
+    );
+    const editSelectedPersoneelDiv = document.getElementById(
+      "editSelectedPersoneel",
+    );
+    const editPersoneelHidden = document.getElementById("editPersoneelHidden");
+
     // Laad huidige toegewezen personeel
     fetch(`${baseUrl}/phpcode/get_assigned_users.php?slot_id=${slotId}`)
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         if (data.success && data.assigned) {
-          data.assigned.forEach(user => {
+          data.assigned.forEach((user) => {
             addEditSelectedUser(user);
           });
         }
       })
-      .catch(err => console.error('Error loading assigned users:', err));
-    
+      .catch((err) => console.error("Error loading assigned users:", err));
+
     // Zoekfunctionaliteit
-    editPersoneelInput.addEventListener('input', function() {
+    editPersoneelInput.addEventListener("input", function () {
       const search = this.value.trim();
-      
+
       if (search.length < 2) {
-        editPersoneelSuggestions.style.display = 'none';
+        editPersoneelSuggestions.style.display = "none";
         return;
       }
-      
-      fetch(`${baseUrl}/phpcode/get_users.php?search=${encodeURIComponent(search)}`)
-        .then(res => res.json())
-        .then(data => {
+
+      fetch(
+        `${baseUrl}/phpcode/get_users.php?search=${encodeURIComponent(search)}`,
+      )
+        .then((res) => res.json())
+        .then((data) => {
           if (data.success && data.users.length > 0) {
-            editPersoneelSuggestions.innerHTML = '';
-            data.users.forEach(user => {
-              if (editSelectedUsers.find(u => u.user_id === user.user_id)) return;
-              
-              const roleLabel = user.role_id == 2 ? 'Admin' : 'User';
-              const div = document.createElement('div');
-              div.style.padding = '8px 12px';
-              div.style.cursor = 'pointer';
-              div.style.borderBottom = '1px solid #eee';
+            editPersoneelSuggestions.innerHTML = "";
+            data.users.forEach((user) => {
+              if (editSelectedUsers.find((u) => u.user_id === user.user_id))
+                return;
+
+              const roleLabel = user.role_id == 2 ? "Admin" : "User";
+              const div = document.createElement("div");
+              div.style.padding = "8px 12px";
+              div.style.cursor = "pointer";
+              div.style.borderBottom = "1px solid #eee";
               div.innerHTML = `<strong>${user.first_name} ${user.last_name}</strong> <span style="color:#888;font-size:13px;">(${roleLabel})</span>`;
-              
-              div.addEventListener('click', function() {
+
+              div.addEventListener("click", function () {
                 addEditSelectedUser(user);
-                editPersoneelInput.value = '';
-                editPersoneelSuggestions.style.display = 'none';
+                editPersoneelInput.value = "";
+                editPersoneelSuggestions.style.display = "none";
               });
-              
-              div.addEventListener('mouseenter', function() { this.style.background = '#f0f0f0'; });
-              div.addEventListener('mouseleave', function() { this.style.background = '#fff'; });
-              
+
+              div.addEventListener("mouseenter", function () {
+                this.style.background = "#f0f0f0";
+              });
+              div.addEventListener("mouseleave", function () {
+                this.style.background = "#fff";
+              });
+
               editPersoneelSuggestions.appendChild(div);
             });
-            editPersoneelSuggestions.style.display = 'block';
+            editPersoneelSuggestions.style.display = "block";
           } else {
-            editPersoneelSuggestions.style.display = 'none';
+            editPersoneelSuggestions.style.display = "none";
           }
         });
     });
-    
+
     function addEditSelectedUser(user) {
       editSelectedUsers.push(user);
-      
-      const badge = document.createElement('span');
-      badge.style.background = '#e5dbfa';
-      badge.style.color = '#6b5b95';
-      badge.style.padding = '4px 8px';
-      badge.style.borderRadius = '4px';
-      badge.style.fontSize = '14px';
-      badge.style.cursor = 'pointer';
+
+      const badge = document.createElement("span");
+      badge.style.background = "#e5dbfa";
+      badge.style.color = "#6b5b95";
+      badge.style.padding = "4px 8px";
+      badge.style.borderRadius = "4px";
+      badge.style.fontSize = "14px";
+      badge.style.cursor = "pointer";
       badge.dataset.userId = user.user_id;
       badge.textContent = `${user.first_name} ${user.last_name}`;
-      
-      badge.addEventListener('click', function() {
-        editSelectedUsers = editSelectedUsers.filter(u => u.user_id !== user.user_id);
+
+      badge.addEventListener("click", function () {
+        editSelectedUsers = editSelectedUsers.filter(
+          (u) => u.user_id !== user.user_id,
+        );
         badge.remove();
         updateEditPersoneelHidden();
       });
-      
+
       editSelectedPersoneelDiv.appendChild(badge);
       updateEditPersoneelHidden();
     }
-    
+
     function updateEditPersoneelHidden() {
-      editPersoneelHidden.value = editSelectedUsers.map(u => u.user_id).join(',');
+      editPersoneelHidden.value = editSelectedUsers
+        .map((u) => u.user_id)
+        .join(",");
     }
   }
 
@@ -402,7 +421,7 @@ function editTask(slotId, taskId, frequency, task) {
     if (slotId) {
       formData.append("slot_id", slotId);
       // Voeg personeel toe als het veld bestaat
-      const personeelHidden = document.getElementById('editPersoneelHidden');
+      const personeelHidden = document.getElementById("editPersoneelHidden");
       if (personeelHidden) {
         formData.append("personeel", personeelHidden.value);
       }

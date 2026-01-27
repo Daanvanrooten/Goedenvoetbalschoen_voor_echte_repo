@@ -90,13 +90,13 @@ try {
             $stmt->execute($params);
         }
     }
-    
+
     // Update personeel assignments als slot_id gegeven is
     if ($slot_id && $personeel !== null) {
         // Verwijder alle huidige assignments voor deze slot
         $stmt = $conn->prepare("DELETE FROM task_registrations WHERE slot_id = ?");
         $stmt->execute([$slot_id]);
-        
+
         // Voeg nieuwe assignments toe
         if (!empty($personeel)) {
             $userIds = array_filter(array_map('trim', explode(',', $personeel)));

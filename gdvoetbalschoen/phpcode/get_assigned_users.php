@@ -20,7 +20,7 @@ if (!$slot_id) {
 
 try {
     $conn = getDbConnection();
-    
+
     // Haal toegewezen personeel op voor deze slot
     $stmt = $conn->prepare("
         SELECT u.user_id, u.first_name, u.last_name, u.email, u.role_id
@@ -31,7 +31,7 @@ try {
     ");
     $stmt->execute([$slot_id]);
     $assigned = $stmt->fetchAll();
-    
+
     echo json_encode([
         'success' => true,
         'assigned' => $assigned
