@@ -88,5 +88,83 @@ while ($task = $monthlyStmt->fetch(PDO::FETCH_ASSOC)) {
     }
 }
 
+// 3. Haal alle wekelijkse taken op
+$weeklyStmt = $pdo->prepare("
+    SELECT t.*, tc.color_hex
+    FROM tasks t
+    LEFT JOIN task_categories tc ON tc.category_id = t.category_id
+    WHERE t.frequency = 'WEEKLY' AND t.is_active = 1
+");
+$weeklyStmt->execute();
+while ($task = $weeklyStmt->fetch(PDO::FETCH_ASSOC)) {
+    $startDate = new DateTime($start);
+    $endDate = new DateTime($end);
+    $current = clone $startDate;
+    $weekDay = isset($task['day']) ? (int)$task['day'] : null; // 1=maandag, 7=zondag
+    while ($current <= $endDate) {
+        // Check of deze dag van de week klopt
+        if ($weekDay !== null && (int)$current->format('N') === $weekDay) {
+            $dateStr = $current->format('Y-m-d');
+            $alreadyExists = false;
+            if (isset($tasksByDate[$dateStr])) {
+                foreach ($tasksByDate[$dateStr] as $existing) {
+                    if ($existing['frequency'] === 'WEEKLY' && $existing['title'] === $task['title']) {
+                        $alreadyExists = true;
+                        break;
+                    }
+                }
+            }
+            if (!$alreadyExists) {
+                $tasksByDate[$dateStr][] = [
+                    'title' => $task['title'],
+                    'start' => isset($task['start_time']) ? substr($task['start_time'], 0, 5) : '',
+                    'end'   => isset($task['end_time']) ? substr($task['end_time'], 0, 5) : '',
+                    'color' => $task['color_hex'],
+                    'slot_id' => null,
+                    'frequency' => 'WEEKLY'
+                ];
+            }
+        }
+        $current->modify('+1 day');
+    }
+}
+
+// 4. Haal alle dagelijkse taken op
+$dailyStmt = $pdo->prepare("
+    SELECT t.*, tc.color_hex
+    FROM tasks t
+    LEFT JOIN task_categories tc ON tc.category_id = t.category_id
+    WHERE t.frequency = 'DAILY' AND t.is_active = 1
+");
+$dailyStmt->execute();
+while ($task = $dailyStmt->fetch(PDO::FETCH_ASSOC)) {
+    $startDate = new DateTime($start);
+    $endDate = new DateTime($end);
+    $current = clone $startDate;
+    while ($current <= $endDate) {
+        $dateStr = $current->format('Y-m-d');
+        $alreadyExists = false;
+        if (isset($tasksByDate[$dateStr])) {
+            foreach ($tasksByDate[$dateStr] as $existing) {
+                if ($existing['frequency'] === 'DAILY' && $existing['title'] === $task['title']) {
+                    $alreadyExists = true;
+                    break;
+                }
+            }
+        }
+        if (!$alreadyExists) {
+            $tasksByDate[$dateStr][] = [
+                'title' => $task['title'],
+                'start' => isset($task['start_time']) ? substr($task['start_time'], 0, 5) : '',
+                'end'   => isset($task['end_time']) ? substr($task['end_time'], 0, 5) : '',
+                'color' => $task['color_hex'],
+                'slot_id' => null,
+                'frequency' => 'DAILY'
+            ];
+        }
+        $current->modify('+1 day');
+    }
+}
+
 header('Content-Type: application/json');
 echo json_encode($tasksByDate);
