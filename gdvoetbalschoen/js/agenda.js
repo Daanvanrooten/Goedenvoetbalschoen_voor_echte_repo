@@ -891,6 +891,83 @@ function regenerateCalendar() {
       }
     });
   });
+
+  // Generate mobile calendar
+  const mobileCalendar = document.querySelector(".mobile-calendar");
+  if (mobileCalendar) {
+    mobileCalendar.innerHTML = "";
+
+    // Create mobile calendar table
+    const table = document.createElement("table");
+    table.className = "mobile-calendar-table";
+
+    // Create header row
+    const thead = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+    const daysOfWeek = ["Zo", "Ma", "Di", "Wo", "Do", "Vr", "Za"];
+    daysOfWeek.forEach((dayName) => {
+      const th = document.createElement("th");
+      th.textContent = dayName;
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    // Create body with weeks
+    const tbody = document.createElement("tbody");
+    const totalCellsForMobile = adjustedFirstDay + daysInMonth;
+    const weeksCount = Math.ceil(totalCellsForMobile / 7);
+
+    let dayCounter = 1 - adjustedFirstDay;
+
+    for (let week = 0; week < weeksCount; week++) {
+      const weekRow = document.createElement("tr");
+
+      for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+        const td = document.createElement("td");
+
+        if (dayCounter > 0 && dayCounter <= daysInMonth) {
+          const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(dayCounter).padStart(2, "0")}`;
+          const hasTasks = tasksByDate[dateKey] && tasksByDate[dateKey].length > 0;
+
+          // Create day label
+          const dayLabel = document.createElement("div");
+          dayLabel.className = "day-label";
+          dayLabel.textContent = dayCounter;
+
+          // Check if it's today
+          if (
+            dayCounter === today.getDate() &&
+            currentMonth === today.getMonth() &&
+            currentYear === today.getFullYear()
+          ) {
+            dayLabel.classList.add("today");
+          }
+
+          td.appendChild(dayLabel);
+
+          // Add green indicator if there are tasks
+          if (hasTasks) {
+            td.classList.add("green-cell");
+            
+            // Make it clickable to show tasks
+            td.style.cursor = "pointer";
+            td.addEventListener("click", () => {
+              showTasksModal(tasksByDate[dateKey], dateKey);
+            });
+          }
+        }
+
+        weekRow.appendChild(td);
+        dayCounter++;
+      }
+
+      tbody.appendChild(weekRow);
+    }
+
+    table.appendChild(tbody);
+    mobileCalendar.appendChild(table);
+  }
 }
 
 // Helper function to get ISO week number
