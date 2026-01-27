@@ -130,9 +130,15 @@ function renderEventsForDay(dayCell, events) {
     const el = document.createElement("div");
     el.classList.add("event", getEventClass(events[0].color));
     el.style.cursor = "pointer";
+    let freqLabel = "";
+    if (events.length === 1 && events[0].frequency) {
+      if (events[0].frequency === "DAILY") freqLabel = "Dagelijks";
+      else if (events[0].frequency === "WEEKLY") freqLabel = "Wekelijks";
+      else if (events[0].frequency === "MONTHLY") freqLabel = "Maandelijks";
+    }
     el.innerHTML = `
             <h3 style='margin:0;font-size:15px;'>${events.length === 1 ? events[0].title : events.length + " taken"}</h3>
-            <p style='margin:0;font-size:13px;color:#888;'>Klik voor details</p>
+            <p style='margin:0;font-size:13px;color:#888;'>${freqLabel ? freqLabel : "Klik voor details"}</p>
         `;
     el.onclick = (e) => {
       e.stopPropagation();
