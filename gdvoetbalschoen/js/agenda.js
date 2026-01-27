@@ -98,7 +98,7 @@ function showTasksModal(date, events) {
             ${events
               .map(
                 (ev, idx) => `
-                <div class='task-item-modal' style='margin-bottom:18px;padding:16px;background:#f9f9f9;border-radius:8px;position:relative;' data-slot-id='${ev.slot_id || ""}'>
+                <div class='task-item-modal' style='margin-bottom:18px;padding:16px;background:#f9f9f9;border-radius:8px;position:relative;' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}'>
                     <div style='font-weight:600;font-size:17px;margin-bottom:6px;'>${ev.title}</div>
                     <div style='color:#888;font-size:14px;margin-bottom:8px;'>
                         <span style='display:inline-block;margin-right:12px;'>🕐 ${ev.start} - ${ev.end}</span>
@@ -106,13 +106,13 @@ function showTasksModal(date, events) {
                     </div>
                     <div style='margin:8px 0 0 0;font-size:15px;color:#666;'>Toegewezen aan leden</div>
                     ${
-                      isAdmin && ev.slot_id
+                      isAdmin && (ev.slot_id || ev.task_id)
                         ? `
                     <div style='margin-top:12px;display:flex;gap:8px;'>
-                        <button class='edit-task-btn' data-slot-id='${ev.slot_id}' style='flex:1;background:#6b5b95;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;'>
+                        <button class='edit-task-btn' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-frequency='${ev.frequency || ""}' style='flex:1;background:#6b5b95;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;'>
                             ✏️ Bewerken
                         </button>
-                        <button class='delete-task-btn' data-slot-id='${ev.slot_id}' style='flex:1;background:#dc3545;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;'>
+                        <button class='delete-task-btn' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-frequency='${ev.frequency || ""}' style='flex:1;background:#dc3545;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;'>
                             🗑️ Verwijderen
                         </button>
                     </div>
@@ -136,18 +136,20 @@ function showTasksModal(date, events) {
   if (isAdmin) {
     modal.querySelectorAll(".edit-task-btn").forEach((btn) => {
       btn.onclick = function () {
-        const slotId = this.dataset.slotId;
-        editTask(
-          slotId,
-          events.find((e) => e.slot_id == slotId),
-        );
+        const slotId = this.dataset.slotId || null;
+        const taskId = this.dataset.taskId || null;
+        const frequency = this.dataset.frequency || null;
+        const task = events.find((e) => e.slot_id == slotId || e.task_id == taskId);
+        editTask(slotId, taskId, frequency, task);
       };
     });
 
     modal.querySelectorAll(".delete-task-btn").forEach((btn) => {
       btn.onclick = function () {
-        const slotId = this.dataset.slotId;
-        deleteTask(slotId);
+        const slotId = this.dataset.slotId || null;
+        const taskId = this.dataset.taskId || null;
+        const frequency = this.dataset.frequency || null;
+        deleteTask(slotId, taskId, frequency);
       };
     });
   }
@@ -156,13 +158,25 @@ function showTasksModal(date, events) {
 }
 
 // Delete task functie (alleen voor admins)
-function deleteTask(slotId) {
-  if (!confirm("Weet je zeker dat je deze taak wilt verwijderen?")) {
+function deleteTask(slotId, taskId, frequency) {
+  let confirmMsg = "Weet je zeker dat je deze taak wilt verwijderen?";
+  
+  // Voor frequency taken: waarschuwing dat alle herhalingen verwijderd worden
+  if (frequency && (frequency === 'DAILY' || frequency === 'WEEKLY' || frequency === 'MONTHLY')) {
+    confirmMsg = `Deze taak herhaalt zich ${frequency === 'DAILY' ? 'dagelijks' : frequency === 'WEEKLY' ? 'wekelijks' : 'maandelijks'}. Weet je zeker dat je ALLE herhalingen wilt verwijderen?`;
+  }
+  
+  if (!confirm(confirmMsg)) {
     return;
   }
 
   const formData = new FormData();
-  formData.append("slot_id", slotId);
+  if (slotId) {
+    formData.append("slot_id", slotId);
+  }
+  if (taskId) {
+    formData.append("task_id", taskId);
+  }
 
   fetch(`${baseUrl}/phpcode/delete_task.php`, {
     method: "POST",
@@ -189,7 +203,7 @@ function deleteTask(slotId) {
 }
 
 // Edit task functie (alleen voor admins)
-function editTask(slotId, task) {
+function editTask(slotId, taskId, frequency, task) {
   // Sluit de huidige modal
   const modal = document.getElementById("tasksModal");
   if (modal) modal.style.display = "none";
@@ -211,10 +225,14 @@ function editTask(slotId, task) {
     editModal.style.zIndex = "10000";
     document.body.appendChild(editModal);
   }
+  
+  const isFrequencyTask = frequency && (frequency === 'DAILY' || frequency === 'WEEKLY' || frequency === 'MONTHLY');
+  const frequencyLabel = frequency === 'DAILY' ? 'dagelijks' : frequency === 'WEEKLY' ? 'wekelijks' : frequency === 'MONTHLY' ? 'maandelijks' : '';
 
   editModal.innerHTML = `
     <div style='background:#fff;border-radius:16px;max-width:500px;width:90vw;padding:24px;box-shadow:0 2px 16px rgba(0,0,0,0.15);'>
       <h2 style='margin:0 0 20px 0;font-size:20px;'>Taak Bewerken</h2>
+      ${isFrequencyTask ? `<div style='background:#fff3cd;border:1px solid #ffc107;padding:12px;border-radius:6px;margin-bottom:16px;font-size:14px;color:#856404;'>⚠️ Deze taak herhaalt zich ${frequencyLabel}. Wijzigingen worden op ALLE herhalingen toegepast.</div>` : ''}
       <form id='editTaskForm'>
         <div style='margin-bottom:16px;'>
           <label style='display:block;margin-bottom:6px;font-weight:600;'>Taak naam</label>
@@ -252,7 +270,12 @@ function editTask(slotId, task) {
     e.preventDefault();
 
     const formData = new FormData();
-    formData.append("slot_id", slotId);
+    if (slotId) {
+      formData.append("slot_id", slotId);
+    }
+    if (taskId) {
+      formData.append("task_id", taskId);
+    }
     formData.append("title", document.getElementById("editTitle").value);
     formData.append(
       "start_time",

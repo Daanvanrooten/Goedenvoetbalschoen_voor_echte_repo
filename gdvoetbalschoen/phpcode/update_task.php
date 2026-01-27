@@ -38,13 +38,34 @@ if (!$task_id && !$slot_id) {
 try {
     $conn = getDbConnection();
 
-    // Update task title als gegeven
+    // Update task title en times als task_id gegeven is
     if ($task_id && $title) {
         $stmt = $conn->prepare("UPDATE tasks SET title = ? WHERE task_id = ?");
         $stmt->execute([$title, $task_id]);
     }
+    
+    // Update task times (voor frequency-based tasks)
+    if ($task_id && ($start_time || $end_time)) {
+        $updates = [];
+        $params = [];
+        
+        if ($start_time) {
+            $updates[] = "start_time = ?";
+            $params[] = $start_time;
+        }
+        if ($end_time) {
+            $updates[] = "end_time = ?";
+            $params[] = $end_time;
+        }
+        
+        if (!empty($updates)) {
+            $params[] = $task_id;
+            $stmt = $conn->prepare("UPDATE tasks SET " . implode(', ', $updates) . " WHERE task_id = ?");
+            $stmt->execute($params);
+        }
+    }
 
-    // Update slot times als gegeven
+    // Update slot times als slot_id gegeven is (voor specifieke slots)
     if ($slot_id && ($start_time || $end_time || $slot_date)) {
         $updates = [];
         $params = [];
