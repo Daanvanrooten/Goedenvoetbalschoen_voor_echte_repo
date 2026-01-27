@@ -139,7 +139,9 @@ function showTasksModal(date, events) {
         const slotId = this.dataset.slotId || null;
         const taskId = this.dataset.taskId || null;
         const frequency = this.dataset.frequency || null;
-        const task = events.find((e) => e.slot_id == slotId || e.task_id == taskId);
+        const task = events.find(
+          (e) => e.slot_id == slotId || e.task_id == taskId,
+        );
         editTask(slotId, taskId, frequency, task);
       };
     });
@@ -160,12 +162,15 @@ function showTasksModal(date, events) {
 // Delete task functie (alleen voor admins)
 function deleteTask(slotId, taskId, frequency) {
   let confirmMsg = "Weet je zeker dat je deze taak wilt verwijderen?";
-  
+
   // Voor frequency taken: waarschuwing dat alle herhalingen verwijderd worden
-  if (frequency && (frequency === 'DAILY' || frequency === 'WEEKLY' || frequency === 'MONTHLY')) {
-    confirmMsg = `Deze taak herhaalt zich ${frequency === 'DAILY' ? 'dagelijks' : frequency === 'WEEKLY' ? 'wekelijks' : 'maandelijks'}. Weet je zeker dat je ALLE herhalingen wilt verwijderen?`;
+  if (
+    frequency &&
+    (frequency === "DAILY" || frequency === "WEEKLY" || frequency === "MONTHLY")
+  ) {
+    confirmMsg = `Deze taak herhaalt zich ${frequency === "DAILY" ? "dagelijks" : frequency === "WEEKLY" ? "wekelijks" : "maandelijks"}. Weet je zeker dat je ALLE herhalingen wilt verwijderen?`;
   }
-  
+
   if (!confirm(confirmMsg)) {
     return;
   }
@@ -225,14 +230,25 @@ function editTask(slotId, taskId, frequency, task) {
     editModal.style.zIndex = "10000";
     document.body.appendChild(editModal);
   }
-  
-  const isFrequencyTask = frequency && (frequency === 'DAILY' || frequency === 'WEEKLY' || frequency === 'MONTHLY');
-  const frequencyLabel = frequency === 'DAILY' ? 'dagelijks' : frequency === 'WEEKLY' ? 'wekelijks' : frequency === 'MONTHLY' ? 'maandelijks' : '';
+
+  const isFrequencyTask =
+    frequency &&
+    (frequency === "DAILY" ||
+      frequency === "WEEKLY" ||
+      frequency === "MONTHLY");
+  const frequencyLabel =
+    frequency === "DAILY"
+      ? "dagelijks"
+      : frequency === "WEEKLY"
+        ? "wekelijks"
+        : frequency === "MONTHLY"
+          ? "maandelijks"
+          : "";
 
   editModal.innerHTML = `
     <div style='background:#fff;border-radius:16px;max-width:500px;width:90vw;padding:24px;box-shadow:0 2px 16px rgba(0,0,0,0.15);'>
       <h2 style='margin:0 0 20px 0;font-size:20px;'>Taak Bewerken</h2>
-      ${isFrequencyTask ? `<div style='background:#fff3cd;border:1px solid #ffc107;padding:12px;border-radius:6px;margin-bottom:16px;font-size:14px;color:#856404;'>⚠️ Deze taak herhaalt zich ${frequencyLabel}. Wijzigingen worden op ALLE herhalingen toegepast.</div>` : ''}
+      ${isFrequencyTask ? `<div style='background:#fff3cd;border:1px solid #ffc107;padding:12px;border-radius:6px;margin-bottom:16px;font-size:14px;color:#856404;'>⚠️ Deze taak herhaalt zich ${frequencyLabel}. Wijzigingen worden op ALLE herhalingen toegepast.</div>` : ""}
       <form id='editTaskForm'>
         <div style='margin-bottom:16px;'>
           <label style='display:block;margin-bottom:6px;font-weight:600;'>Taak naam</label>
