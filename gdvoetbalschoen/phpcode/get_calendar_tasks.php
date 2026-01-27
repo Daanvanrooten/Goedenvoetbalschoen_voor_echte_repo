@@ -175,11 +175,11 @@ while ($task = $weeklyStmt->fetch(PDO::FETCH_ASSOC)) {
     $startDate = new DateTime($start);
     $endDate = new DateTime($end);
     $current = clone $startDate;
-    
+
     // Gebruik de eerste slot_date om de dag van de week te bepalen
     $firstSlotDate = isset($task['first_slot_date']) ? new DateTime($task['first_slot_date']) : null;
     $weekDay = $firstSlotDate ? (int)$firstSlotDate->format('N') : null; // 1=maandag, 7=zondag
-    
+
     while ($current <= $endDate) {
         // Check of deze dag van de week klopt
         if ($weekDay !== null && (int)$current->format('N') === $weekDay) {
