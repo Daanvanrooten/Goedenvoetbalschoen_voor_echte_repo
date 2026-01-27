@@ -928,7 +928,8 @@ function regenerateCalendar() {
 
         if (dayCounter > 0 && dayCounter <= daysInMonth) {
           const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(dayCounter).padStart(2, "0")}`;
-          const hasTasks = tasksByDate[dateKey] && tasksByDate[dateKey].length > 0;
+          const hasTasks =
+            tasksByDate[dateKey] && tasksByDate[dateKey].length > 0;
 
           // Create day label
           const dayLabel = document.createElement("div");
@@ -949,7 +950,7 @@ function regenerateCalendar() {
           // Add green indicator if there are tasks
           if (hasTasks) {
             td.classList.add("green-cell");
-            
+
             // Make it clickable to show tasks
             td.style.cursor = "pointer";
             td.addEventListener("click", () => {

@@ -290,7 +290,7 @@ nav {
     color: #666;
     border-bottom: 1px solid #e0e0e0;
     transition: all 0.3s;
-    
+
 }
 
 .week-number.current-week {
@@ -811,6 +811,7 @@ nav {
 }
 
 @media (max-width: 968px) {
+
     /* Show mobile elements */
     .mobile-create-task {
         display: block;
@@ -915,6 +916,7 @@ nav {
         transform: translateY(-20px);
         opacity: 0;
     }
+
     to {
         transform: translateY(0);
         opacity: 1;
