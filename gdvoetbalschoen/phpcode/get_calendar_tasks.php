@@ -147,13 +147,27 @@ while ($task = $monthlyStmt->fetch(PDO::FETCH_ASSOC)) {
 }
 
 // 3. Haal alle wekelijkse taken op
-$weeklyStmt = $pdo->prepare("
-    SELECT t.*, tc.color_hex
-    FROM tasks t
-    LEFT JOIN task_categories tc ON tc.category_id = t.category_id
-    WHERE t.frequency = 'WEEKLY' AND t.is_active = 1
-");
-$weeklyStmt->execute();
+if ($isAdmin) {
+    $weeklyStmt = $pdo->prepare("
+        SELECT t.*, tc.color_hex
+        FROM tasks t
+        LEFT JOIN task_categories tc ON tc.category_id = t.category_id
+        WHERE t.frequency = 'WEEKLY' AND t.is_active = 1
+    ");
+    $weeklyStmt->execute();
+} else {
+    $weeklyStmt = $pdo->prepare("
+        SELECT DISTINCT t.*, tc.color_hex
+        FROM tasks t
+        LEFT JOIN task_categories tc ON tc.category_id = t.category_id
+        INNER JOIN task_slots ts ON ts.task_id = t.task_id
+        INNER JOIN task_registrations tr ON tr.slot_id = ts.slot_id
+        WHERE t.frequency = 'WEEKLY' AND t.is_active = 1
+        AND tr.user_id = :user_id
+    ");
+    $weeklyStmt->execute([':user_id' => $currentUserId]);
+}
+
 while ($task = $weeklyStmt->fetch(PDO::FETCH_ASSOC)) {
     $startDate = new DateTime($start);
     $endDate = new DateTime($end);
@@ -188,13 +202,27 @@ while ($task = $weeklyStmt->fetch(PDO::FETCH_ASSOC)) {
 }
 
 // 4. Haal alle dagelijkse taken op
-$dailyStmt = $pdo->prepare("
-    SELECT t.*, tc.color_hex
-    FROM tasks t
-    LEFT JOIN task_categories tc ON tc.category_id = t.category_id
-    WHERE t.frequency = 'DAILY' AND t.is_active = 1
-");
-$dailyStmt->execute();
+if ($isAdmin) {
+    $dailyStmt = $pdo->prepare("
+        SELECT t.*, tc.color_hex
+        FROM tasks t
+        LEFT JOIN task_categories tc ON tc.category_id = t.category_id
+        WHERE t.frequency = 'DAILY' AND t.is_active = 1
+    ");
+    $dailyStmt->execute();
+} else {
+    $dailyStmt = $pdo->prepare("
+        SELECT DISTINCT t.*, tc.color_hex
+        FROM tasks t
+        LEFT JOIN task_categories tc ON tc.category_id = t.category_id
+        INNER JOIN task_slots ts ON ts.task_id = t.task_id
+        INNER JOIN task_registrations tr ON tr.slot_id = ts.slot_id
+        WHERE t.frequency = 'DAILY' AND t.is_active = 1
+        AND tr.user_id = :user_id
+    ");
+    $dailyStmt->execute([':user_id' => $currentUserId]);
+}
+
 while ($task = $dailyStmt->fetch(PDO::FETCH_ASSOC)) {
     $startDate = new DateTime($start);
     $endDate = new DateTime($end);
