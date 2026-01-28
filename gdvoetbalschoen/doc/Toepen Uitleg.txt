@@ -1,0 +1,9 @@
+1. dag week jaar maand moet eruit bij taak aanmaken
+
+2.taak herhalen zorg voor een eind datum bij frequency
+
+3. herhalen van de dagen moet je er voor zorgen dat je mensen kan linken aan de taak
+
+4. gebruiker moeten zich kunnen inschrijven aan taken
+
+
