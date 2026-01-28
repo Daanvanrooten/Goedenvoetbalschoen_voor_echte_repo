@@ -512,18 +512,7 @@ while (count($weekNumbers) < 2) {
                         <label>Beschrijving</label>
                         <textarea name="beschrijving" placeholder="Placeholder" rows="4"></textarea>
                     </div>
-                    <div class="form-group full-width">
-                        <label>Foto toevoegen</label>
-                        <div class="file-upload">
-                            <div class="upload-icon">
-                                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                                <p>Voeg foto toe</p>
-                            </div>
-                            <input type="file" name="foto" accept="image/*" style="display: none;" id="fotoInput">
-                        </div>
-                    </div>
+                    
                     <div class="form-actions">
                         <button type="submit" class="submit-btn">Taak aanmaken</button>
                     </div>
