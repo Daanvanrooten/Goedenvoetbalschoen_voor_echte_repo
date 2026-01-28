@@ -1,5 +1,5 @@
 <?php
-require_once 'db_connection.php';
+require_once '../../config/db_connection.php';
 header('Content-Type: application/json');
 
 $slot_id = isset($_GET['slot_id']) ? intval($_GET['slot_id']) : 0;

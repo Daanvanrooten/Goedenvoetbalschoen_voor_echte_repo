@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once('../phpcode/config.php');
+require_once('../config/config.php');
 ?>
 <!DOCTYPE html>
 <html lang="nl">
@@ -9,14 +9,14 @@ require_once('../phpcode/config.php');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Gouden Schoen</title>
-    <link rel="stylesheet" href="../css/login_register.css">
+    <link rel="stylesheet" href="../assets/css/login_register.css">
 </head>
 
 <body>
     <header>
         <div class="container">
             <div class="logo">
-                <img src="../images/fc_team_zonder_plan.png" alt="FC Team zonder plan logo">
+                <img src="../assets/images/fc_team_zonder_plan.png" alt="FC Team zonder plan logo">
                 <span class="logo-text">FC Team zonder plan</span>
             </div>
             <nav>
@@ -103,7 +103,7 @@ require_once('../phpcode/config.php');
             const formData = new FormData(this);
 
             try {
-                const response = await fetch(baseUrl + '/phpcode/registercode.php', {
+                const response = await fetch(baseUrl + '/auth/registercode.php', {
                     method: 'POST',
                     body: formData
                 });

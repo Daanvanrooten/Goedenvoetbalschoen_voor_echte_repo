@@ -23,7 +23,7 @@ $totalPages = 1;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leden Beheer - Gouden Schoen</title>
-    <link rel="stylesheet" href="../css/ledenbeheer.css">
+    <link rel="stylesheet" href="../assets/css/ledenbeheer.css">
 </head>
 
 <body>
@@ -83,37 +83,39 @@ $totalPages = 1;
                         </tr>
                     </thead>
                     <tbody id="ledenTableBody">
-                        <tr><td colspan="5">Laden...</td></tr>
+                        <tr>
+                            <td colspan="5">Laden...</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
-                </table>
-            </div>
+            </table>
+        </div>
 
-            <!-- Pagination -->
-            <div class="pagination">
-                <button class="page-btn prev-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-                    </svg>
-                    Previous
-                </button>
-                <div class="page-numbers">
-                    <button class="page-num">1</button>
-                    <button class="page-num active">2</button>
-                    <button class="page-num">3</button>
-                    <button class="page-num">4</button>
-                    <button class="page-num">5</button>
-                    <span class="dots">...</span>
-                    <button class="page-num">11</button>
-                </div>
-                <button class="page-btn next-btn">
-                    Next
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                        <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
-                    </svg>
-                </button>
+        <!-- Pagination -->
+        <div class="pagination">
+            <button class="page-btn prev-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                </svg>
+                Previous
+            </button>
+            <div class="page-numbers">
+                <button class="page-num">1</button>
+                <button class="page-num active">2</button>
+                <button class="page-num">3</button>
+                <button class="page-num">4</button>
+                <button class="page-num">5</button>
+                <span class="dots">...</span>
+                <button class="page-num">11</button>
             </div>
+            <button class="page-btn next-btn">
+                Next
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                </svg>
+            </button>
+        </div>
         </div>
     </main>
 
@@ -134,27 +136,27 @@ $totalPages = 1;
         </div>
     </div>
 
-    <script src="../js/ledenbeheer.js"></script>
+    <script src="../assets/js/ledenbeheer.js"></script>
     <script>
-    // Dynamische leden ophalen en paginering
-    document.addEventListener('DOMContentLoaded', function() {
-        const ledenBody = document.getElementById('ledenTableBody');
-        const ledenAantalBadge = document.getElementById('ledenAantalBadge');
-        const pagination = document.querySelector('.pagination');
-        let currentPage = 1;
-        const perPage = 10;
+        // Dynamische leden ophalen en paginering
+        document.addEventListener('DOMContentLoaded', function() {
+            const ledenBody = document.getElementById('ledenTableBody');
+            const ledenAantalBadge = document.getElementById('ledenAantalBadge');
+            const pagination = document.querySelector('.pagination');
+            let currentPage = 1;
+            const perPage = 10;
 
-        function fetchLeden(page = 1) {
-            fetch(`../phpcode/leden_lijst_paginated.php?page=${page}&perPage=${perPage}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        ledenBody.innerHTML = '';
-                        if (ledenAantalBadge && typeof data.aantal !== 'undefined') {
-                            ledenAantalBadge.textContent = data.aantal;
-                        }
-                        data.leden.forEach(lid => {
-                            ledenBody.innerHTML += `
+            function fetchLeden(page = 1) {
+                fetch(`../api/members/leden_lijst_paginated.php?page=${page}&perPage=${perPage}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            ledenBody.innerHTML = '';
+                            if (ledenAantalBadge && typeof data.aantal !== 'undefined') {
+                                ledenAantalBadge.textContent = data.aantal;
+                            }
+                            data.leden.forEach(lid => {
+                                ledenBody.innerHTML += `
                                 <tr>
                                     <td class="checkbox-col"><input type="checkbox" name="member[]" value="${lid.user_id}"></td>
                                     <td class="author-col">
@@ -180,103 +182,106 @@ $totalPages = 1;
                                     </td>
                                 </tr>
                             `;
-                        });
-                        if (data.leden.length === 0) ledenBody.innerHTML = '<tr><td colspan="5">Geen leden gevonden</td></tr>';
-                        renderPagination(data.page, data.totalPages);
-                    } else {
-                        ledenBody.innerHTML = '<tr><td colspan="5">Fout: ' + data.message + '</td></tr>';
-                    }
-                })
-                .catch(err => {
-                    ledenBody.innerHTML = '<tr><td colspan="5">Fout bij ophalen</td></tr>';
-                });
-        }
-
-        function renderPagination(page, totalPages) {
-            let html = '';
-            html += `<button class="page-btn prev-btn" ${page === 1 ? 'disabled' : ''}>Previous</button>`;
-            let start = Math.max(1, page - 2);
-            let end = Math.min(totalPages, page + 2);
-            if (start > 1) html += `<button class="page-num">1</button>${start > 2 ? '<span class="dots">...</span>' : ''}`;
-            for (let i = start; i <= end; i++) {
-                html += `<button class="page-num${i === page ? ' active' : ''}">${i}</button>`;
+                            });
+                            if (data.leden.length === 0) ledenBody.innerHTML = '<tr><td colspan="5">Geen leden gevonden</td></tr>';
+                            renderPagination(data.page, data.totalPages);
+                        } else {
+                            ledenBody.innerHTML = '<tr><td colspan="5">Fout: ' + data.message + '</td></tr>';
+                        }
+                    })
+                    .catch(err => {
+                        ledenBody.innerHTML = '<tr><td colspan="5">Fout bij ophalen</td></tr>';
+                    });
             }
-            if (end < totalPages) html += `${end < totalPages - 1 ? '<span class="dots">...</span>' : ''}<button class="page-num">${totalPages}</button>`;
-            html += `<button class="page-btn next-btn" ${page === totalPages ? 'disabled' : ''}>Next</button>`;
-            pagination.innerHTML = html;
 
-            // Event listeners
-            pagination.querySelector('.prev-btn').onclick = function() {
-                if (page > 1) {
-                    currentPage = page - 1;
-                    fetchLeden(currentPage);
+            function renderPagination(page, totalPages) {
+                let html = '';
+                html += `<button class="page-btn prev-btn" ${page === 1 ? 'disabled' : ''}>Previous</button>`;
+                let start = Math.max(1, page - 2);
+                let end = Math.min(totalPages, page + 2);
+                if (start > 1) html += `<button class="page-num">1</button>${start > 2 ? '<span class="dots">...</span>' : ''}`;
+                for (let i = start; i <= end; i++) {
+                    html += `<button class="page-num${i === page ? ' active' : ''}">${i}</button>`;
                 }
-            };
-            pagination.querySelector('.next-btn').onclick = function() {
-                if (page < totalPages) {
-                    currentPage = page + 1;
-                    fetchLeden(currentPage);
-                }
-            };
-            pagination.querySelectorAll('.page-num').forEach(btn => {
-                btn.onclick = function() {
-                    const num = parseInt(this.textContent);
-                    if (!isNaN(num) && num !== page) {
-                        currentPage = num;
+                if (end < totalPages) html += `${end < totalPages - 1 ? '<span class="dots">...</span>' : ''}<button class="page-num">${totalPages}</button>`;
+                html += `<button class="page-btn next-btn" ${page === totalPages ? 'disabled' : ''}>Next</button>`;
+                pagination.innerHTML = html;
+
+                // Event listeners
+                pagination.querySelector('.prev-btn').onclick = function() {
+                    if (page > 1) {
+                        currentPage = page - 1;
                         fetchLeden(currentPage);
                     }
                 };
-            });
-        }
-
-        fetchLeden(currentPage);
-
-        // Modal admin beheer logica (ongewijzigd)
-        const adminModal = document.getElementById('adminModal');
-        const closeModalBtn = document.getElementById('closeModal');
-        const cancelBtn = document.getElementById('cancelBtn');
-        const confirmBtn = document.getElementById('confirmBtn');
-        let selectedUserId = null;
-        let selectedRole = null;
-        let selectedName = '';
-
-        ledenBody.addEventListener('click', function(e) {
-            const moreBtn = e.target.closest('.more-btn');
-            if (moreBtn) {
-                selectedUserId = moreBtn.dataset.memberId;
-                selectedRole = parseInt(moreBtn.dataset.role);
-                selectedName = moreBtn.dataset.memberName;
-                // Pas modal tekst aan
-                document.querySelector('.modal-title').textContent = 'Admin beheer';
-                if (selectedRole === 2) {
-                    document.querySelector('.modal-text').textContent = `Wil je ${selectedName} geen admin meer maken?`;
-                } else {
-                    document.querySelector('.modal-text').textContent = `Wil je ${selectedName} admin maken?`;
-                }
-                adminModal.classList.add('active');
+                pagination.querySelector('.next-btn').onclick = function() {
+                    if (page < totalPages) {
+                        currentPage = page + 1;
+                        fetchLeden(currentPage);
+                    }
+                };
+                pagination.querySelectorAll('.page-num').forEach(btn => {
+                    btn.onclick = function() {
+                        const num = parseInt(this.textContent);
+                        if (!isNaN(num) && num !== page) {
+                            currentPage = num;
+                            fetchLeden(currentPage);
+                        }
+                    };
+                });
             }
-        });
-        function closeAdminModal() {
-            adminModal.classList.remove('active');
-        }
-        closeModalBtn.addEventListener('click', closeAdminModal);
-        cancelBtn.addEventListener('click', closeAdminModal);
-        confirmBtn.addEventListener('click', function() {
-            if (!selectedUserId) return;
-            const newRole = selectedRole === 2 ? 1 : 2;
-            fetch('../phpcode/update_role.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `user_id=${selectedUserId}&role_id=${newRole}`
-            })
-            .then(res => res.json())
-            .then(data => {
-                alert(data.message);
-                closeAdminModal();
-                window.location.reload();
+
+            fetchLeden(currentPage);
+
+            // Modal admin beheer logica (ongewijzigd)
+            const adminModal = document.getElementById('adminModal');
+            const closeModalBtn = document.getElementById('closeModal');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const confirmBtn = document.getElementById('confirmBtn');
+            let selectedUserId = null;
+            let selectedRole = null;
+            let selectedName = '';
+
+            ledenBody.addEventListener('click', function(e) {
+                const moreBtn = e.target.closest('.more-btn');
+                if (moreBtn) {
+                    selectedUserId = moreBtn.dataset.memberId;
+                    selectedRole = parseInt(moreBtn.dataset.role);
+                    selectedName = moreBtn.dataset.memberName;
+                    // Pas modal tekst aan
+                    document.querySelector('.modal-title').textContent = 'Admin beheer';
+                    if (selectedRole === 2) {
+                        document.querySelector('.modal-text').textContent = `Wil je ${selectedName} geen admin meer maken?`;
+                    } else {
+                        document.querySelector('.modal-text').textContent = `Wil je ${selectedName} admin maken?`;
+                    }
+                    adminModal.classList.add('active');
+                }
+            });
+
+            function closeAdminModal() {
+                adminModal.classList.remove('active');
+            }
+            closeModalBtn.addEventListener('click', closeAdminModal);
+            cancelBtn.addEventListener('click', closeAdminModal);
+            confirmBtn.addEventListener('click', function() {
+                if (!selectedUserId) return;
+                const newRole = selectedRole === 2 ? 1 : 2;
+                fetch('../api/users/update_role.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: `user_id=${selectedUserId}&role_id=${newRole}`
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        alert(data.message);
+                        closeAdminModal();
+                        window.location.reload();
+                    });
             });
         });
-    });
     </script>
 </body>
 

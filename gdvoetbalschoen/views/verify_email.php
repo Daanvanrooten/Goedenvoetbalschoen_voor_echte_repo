@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once('../phpcode/config.php');
+require_once('../config/config.php');
 
 // Check of er een pending verification is
 if (!isset($_SESSION['pending_verification'])) {
@@ -23,7 +23,7 @@ $maskedEmail = substr($emailParts[0], 0, 3) . '***@' . $emailParts[1];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Email Verificatie - Gouden Schoen</title>
-    <link rel="stylesheet" href="../css/login_register.css">
+    <link rel="stylesheet" href="../assets/css/login_register.css">
     <style>
         .verification-info {
             text-align: center;
@@ -89,7 +89,7 @@ $maskedEmail = substr($emailParts[0], 0, 3) . '***@' . $emailParts[1];
     <header>
         <div class="container">
             <div class="logo">
-                <img src="../images/fc_team_zonder_plan.png" alt="FC Team zonder plan logo">
+                <img src="../assets/images/fc_team_zonder_plan.png" alt="FC Team zonder plan logo">
                 <span class="logo-text">FC Team zonder plan</span>
             </div>
             <nav>
@@ -177,7 +177,7 @@ $maskedEmail = substr($emailParts[0], 0, 3) . '***@' . $emailParts[1];
             const formData = new FormData(this);
 
             try {
-                const response = await fetch(baseUrl + '/phpcode/verify_email_code.php', {
+                const response = await fetch(baseUrl + '/auth/verify_email_code.php', {
                     method: 'POST',
                     body: formData
                 });
@@ -227,7 +227,7 @@ $maskedEmail = substr($emailParts[0], 0, 3) . '***@' . $emailParts[1];
             successDiv.style.display = 'none';
 
             try {
-                const response = await fetch(baseUrl + '/phpcode/resend_verification.php', {
+                const response = await fetch(baseUrl + '/auth/resend_verification.php', {
                     method: 'POST'
                 });
 

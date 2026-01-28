@@ -13,7 +13,7 @@ $userName = $user['voornaam'] . ' ' . $user['achternaam'];
 
 // Agenda events - dit zou normaal uit een database komen
 $events = [
-    [   
+    [
         'date' => '2025-04-01',
         'title' => '5-Minute Workouts for Busy People',
         'author' => 'Robert Fox',
@@ -70,14 +70,14 @@ $events = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agenda - Gouden Schoen</title>
-    <link rel="stylesheet" href="../css/agenda.css">
+    <link rel="stylesheet" href="../assets/css/agenda.css">
 </head>
 
 <body>
     <header>
         <div class="container">
             <div class="logo">
-                <img src="../images/fc_team_zonder_plan.png" alt="FC Team zonder plan logo">
+                <img src="../assets/images/fc_team_zonder_plan.png" alt="FC Team zonder plan logo">
             </div>
             <nav>
                 <a href="../index.php" class="nav-icon home-icon" title="Home">
@@ -253,7 +253,7 @@ $events = [
         </section>
     </main>
 
-    <script src="../js/agenda.js"></script>
+    <script src="../assets/js/agenda.js"></script>
 </body>
 
 </html>

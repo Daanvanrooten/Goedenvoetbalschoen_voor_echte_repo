@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../phpcode/db_connection.php';
+require_once '../../config/db_connection.php';
 
 // Check of gebruiker is ingelogd
 if (!isset($_SESSION['user'])) {

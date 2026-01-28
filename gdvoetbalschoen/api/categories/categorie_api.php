@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'db_connection.php';
+require_once '../../config/db_connection.php';
 header('Content-Type: application/json');
 if (!isset($_SESSION['user']) || $_SESSION['user']['role_id'] != 2) {
     echo json_encode(['success' => false, 'message' => 'Geen toegang']);

@@ -69,14 +69,14 @@ while (count($weekNumbers) < 2) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agenda - Gouden Schoen</title>
-    <link rel="stylesheet" href="../css/agenda.css">
+    <link rel="stylesheet" href="../assets/css/agenda.css">
 </head>
 
 <body>
     <header>
         <div class="container">
             <div class="logo">
-                <img src="../images/fc_team_zonder_plan.png" alt="FC Team zonder plan logo">
+                <img src="../assets/images/fc_team_zonder_plan.png" alt="FC Team zonder plan logo">
             </div>
             <nav>
                 <a href="../index.php" class="nav-icon home-icon" title="Home">
@@ -543,7 +543,7 @@ while (count($weekNumbers) < 2) {
         </div>
     </div>
 
-    <script src="../js/agenda.js"></script>
+    <script src="../assets/js/agenda.js"></script>
     <script>
         // User role voor admin checks
         const userIsAdmin = <?php echo (isset($user['role_id']) && $user['role_id'] == 2) ? 'true' : 'false'; ?>;
@@ -551,7 +551,7 @@ while (count($weekNumbers) < 2) {
         // Gebruik de baseUrl uit agenda.js (al geladen hierboven)
         // Dynamisch categorieën laden
         function loadCategories() {
-            fetch(baseUrl + '/phpcode/get_categories.php')
+            fetch(baseUrl + '/api/categories/get_categories.php')
                 .then(res => res.json())
                 .then(data => {
                     const select = document.getElementById('categorieSelect');
