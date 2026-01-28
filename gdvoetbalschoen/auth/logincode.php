@@ -1,26 +1,42 @@
 <?php
+
+/**
+ * LOGINCODE.PHP - Verwerkt login verzoeken van gebruikers
+ * 
+ * Dit script checkt of:
+ * 1. De gebruikersnaam bestaat in de database
+ * 2. Het wachtwoord correct is
+ * 3. Het account actief is
+ * 4. De email is geverifieerd
+ * 
+ * Als alles klopt wordt de gebruiker ingelogd en doorgestuurd
+ */
+
+// Start de sessie - nodig om gebruiker ingelogd te houden
 session_start();
+
+// Maak connectie met database
 require_once '../config/db_connection.php';
 
+// Zeg dat we JSON terug sturen (geen HTML)
 header('Content-Type: application/json');
 
+// Check of dit een POST request is (formulier versturen)
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['success' => false, 'message' => 'Methode niet toegestaan']);
     exit;
 }
 
-// Haal POST data op
+// Haal login data op
 $username = trim($_POST['username'] ?? '');
 $password = $_POST['password'] ?? '';
 
 // Validatie
 $errors = [];
-
 if (empty($username)) {
     $errors[] = 'Gebruikersnaam is verplicht';
 }
-
 if (empty($password)) {
     $errors[] = 'Wachtwoord is verplicht';
 }
@@ -34,7 +50,7 @@ if (!empty($errors)) {
 try {
     $conn = getDbConnection();
 
-    // Haal gebruiker op met username
+    // Zoek gebruiker in database
     $stmt = $conn->prepare("
         SELECT user_id, role_id, first_name, last_name, email, username, password_hash, is_active, is_email_verified 
         FROM users 
@@ -43,23 +59,23 @@ try {
     $stmt->execute([$username]);
     $user = $stmt->fetch();
 
-    // Check of gebruiker bestaat
+    // Check 1: bestaat gebruiker?
     if (!$user) {
         http_response_code(401);
         echo json_encode(['success' => false, 'message' => 'Gebruikersnaam of wachtwoord is onjuist']);
         exit;
     }
 
-    // Check of account actief is
+    // Check 2: is account actief?
     if (!$user['is_active']) {
         http_response_code(401);
         echo json_encode(['success' => false, 'message' => 'Account is gedeactiveerd. Neem contact op met de beheerder.']);
         exit;
     }
 
-    // Check of email geverifieerd is
+    // Check 3: is email geverifieerd?
     if (!$user['is_email_verified']) {
-        // Sla tijdelijk info op voor verificatie
+        // Sla info op en stuur naar verificatie pagina
         $_SESSION['pending_verification'] = [
             'user_id' => $user['user_id'],
             'email' => $user['email'],
@@ -75,14 +91,15 @@ try {
         exit;
     }
 
-    // Verifieer wachtwoord
+    // Check 4: wachtwoord correct?
     if (!password_verify($password, $user['password_hash'])) {
         http_response_code(401);
         echo json_encode(['success' => false, 'message' => 'Gebruikersnaam of wachtwoord is onjuist']);
         exit;
     }
 
-    // Login succesvol - sla gebruiker op in sessie
+    // ===== ALLES KLOPT! LOG GEBRUIKER IN =====
+    // Sla gebruikersgegevens op in sessie (blijft bewaard tijdens surfen)
     $_SESSION['user'] = [
         'id' => $user['user_id'],
         'first_name' => $user['first_name'],
@@ -92,17 +109,22 @@ try {
         'role_id' => $user['role_id']
     ];
 
-    // DEBUG: Toon sessie voor troubleshooting
+    // DEBUG: Log sessie naar bestand (handig voor troubleshooting)
     file_put_contents(__DIR__ . '/debug_session.txt', print_r($_SESSION['user'], true));
 
-    // Bepaal redirect op basis van rol
+    // Bepaal waar de gebruiker naartoe moet
+    // role_id 2 = admin -> admin dashboard
+    // anders -> agenda pagina
     $redirect = ($user['role_id'] == 2) ? '../views/admin_dashboard.php' : 'agenda.php';
+
+    // Stuur success response terug
     echo json_encode([
         'success' => true,
         'message' => 'Login succesvol!',
         'redirect' => $redirect
     ]);
 } catch (PDOException $e) {
+    // Als er een database fout is, log deze en stuur error terug
     error_log("Login fout: " . $e->getMessage());
     http_response_code(500);
     echo json_encode([

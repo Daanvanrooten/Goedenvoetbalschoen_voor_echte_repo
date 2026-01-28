@@ -1,29 +1,37 @@
 <?php
-// email config voor online server
-// lokaal wordt geen email verstuurd, alleen gelogd
 
+/**
+ * EMAIL SENDER - Verstuurt verificatie emails naar gebruikers
+ * 
+ * Dit bestand zorgt ervoor dat nieuwe gebruikers een verificatiecode ontvangen
+ * Lokaal (op je eigen PC) worden geen echte emails verstuurd, alleen gelogd
+ * Online wordt PHPMailer gebruikt om echte emails te versturen via Gmail SMTP
+ */
+
+// Functie om verificatie email te versturen
 function sendVerificationEmail($toEmail, $toName, $verificationCode)
 {
-    // check of we online zijn
+    // Check of we online zijn of lokaal werken
+    // Lokale hosts krijgen GEEN echte email, dat voorkomt errors tijdens development
     $isOnline = !in_array($_SERVER['HTTP_HOST'], ['localhost', '127.0.0.1', 'webroot.local']);
 
     if (!$isOnline) {
-        // lokaal - skip email
+        // Lokaal skippen we email versturen, anders krijgen we errors
+        // Code wordt toch in verification_codes.txt gezet dus geen probleem
         return true;
     }
 
-    // PHPMailer gebruiken voor online
+    // Online -> gebruik PHPMailer om echte emails te sturen
     require_once __DIR__ . '/../vendor/autoload.php';
-
     $mail = new PHPMailer\PHPMailer\PHPMailer(true);
 
     try {
-        // SMTP instellingen - vul jouw gegevens in
+        // SMTP setup voor Gmail
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
         $mail->Username = 'bryvarooijen@gmail.com';
-        $mail->Password = 'tpfyvtpbegpenfmb';
+        $mail->Password = 'tpfyvtpbegpenfmb';  // app-specifiek wachtwoord
         $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
 
@@ -31,7 +39,7 @@ function sendVerificationEmail($toEmail, $toName, $verificationCode)
         $mail->setFrom('noreply@fcteam.nl', 'FC Team zonder plan');
         $mail->addAddress($toEmail, $toName);
 
-        // Content
+        // Email content
         $mail->isHTML(false);
         $mail->Subject = "Je verificatiecode: $verificationCode";
         $mail->Body = "Hallo $toName,\n\n";
