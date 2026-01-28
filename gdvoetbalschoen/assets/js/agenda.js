@@ -914,10 +914,14 @@ function regenerateCalendar() {
     // Definieer 'today' zodat deze beschikbaar is
     const today = new Date();
     // Gebruik window.tasksByDate als fallback als tasksByDate niet bestaat
-    const safeTasksByDate = typeof tasksByDate !== 'undefined' ? tasksByDate : (window.tasksByDate || {});
+    const safeTasksByDate =
+      typeof tasksByDate !== "undefined"
+        ? tasksByDate
+        : window.tasksByDate || {};
     calendarDays.forEach(({ day, weekday, date }) => {
       const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-      const hasTasks = safeTasksByDate[dateKey] && safeTasksByDate[dateKey].length > 0;
+      const hasTasks =
+        safeTasksByDate[dateKey] && safeTasksByDate[dateKey].length > 0;
       const isToday =
         day === today.getDate() &&
         currentMonth === today.getMonth() &&
