@@ -522,8 +522,8 @@ toggleBtns.forEach((btn) => {
       // Toon weeknavigatie altijd in weekview
       const weekNav = document.getElementById("weekNavigation");
       if (weekNav) weekNav.style.display = "flex";
-      // Hide mobile tasks section in week view
-      if (mobileTasksSection && window.innerWidth <= 768) {
+      // Hide mobile tasks section in week view (telefoon)
+      if (mobileTasksSection) {
         mobileTasksSection.style.display = "none";
       }
       // Initialize week view
@@ -759,6 +759,63 @@ if (prevMonthBtn) {
     }
     updateCalendarTitle();
     regenerateCalendar();
+    // Regenerate mobile calendar for month view
+    if (window.innerWidth <= 768) {
+      // Get tasks for new month
+      const year = currentYear;
+      const month = currentMonth;
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const start = `${year}-${String(month + 1).padStart(2, "0")}-01`;
+      const end = `${year}-${String(month + 1).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
+      fetch(`${baseUrl}/api/tasks/get_calendar_tasks.php?start=${start}&end=${end}`)
+        .then((res) => res.json())
+        .then((tasksByDate) => {
+          // Render mobile calendar
+          const mobileCalendar = document.querySelector(".mobile-calendar");
+          if (mobileCalendar) {
+            // ...existing code for rendering mobile calendar...
+            let html = '<table class="mobile-calendar-table" style="width:100%"><thead><tr>';
+            const daysOfWeek = ['MA', 'DI', 'WO', 'DO', 'VR', 'ZA', 'ZO'];
+            for (let i = 0; i < 7; i++) {
+              html += `<th>${daysOfWeek[i]}</th>`;
+            }
+            html += '</tr></thead><tbody>';
+            let firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            firstDay = firstDay === 0 ? 6 : firstDay - 1;
+            let day = 1;
+            for (let week = 0; week < 6; week++) {
+              html += '<tr>';
+              for (let i = 0; i < 7; i++) {
+                if ((week === 0 && i < firstDay) || day > daysInMonth) {
+                  html += '<td></td>';
+                } else {
+                  const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+                  const tasks = typeof tasksByDate !== "undefined" && tasksByDate[dateKey] ? tasksByDate[dateKey] : [];
+                  let cellContent = `<div class="mobile-day-number">${day}</div>`;
+                  let cellClass = "";
+                  if (tasks.length > 0) {
+                    if (tasks[0].color === "#cccccc") cellClass = "has-task-green";
+                    else if (tasks[0].color === "#ffb8d1") cellClass = "has-task-pink";
+                    else cellClass = "has-task-green";
+                    cellContent += tasks.map(ev => {
+                      let colorClass = "";
+                      if (ev.color === "#cccccc") colorClass = "green-cell";
+                      else if (ev.color === "#ffb8d1") colorClass = "pink-cell";
+                      return `<div class=\"mobile-task-badge ${colorClass}\" style=\"margin:2px 0;padding:2px 6px;border-radius:4px;font-size:13px;display:inline-block;\">${ev.title}</div>`;
+                    }).join("");
+                  }
+                  html += `<td class=\"${cellClass}\" style=\"height:44px;text-align:center;vertical-align:top;\">${cellContent}</td>`;
+                  day++;
+                }
+              }
+              html += '</tr>';
+              if (day > daysInMonth) break;
+            }
+            html += '</tbody></table>';
+            mobileCalendar.innerHTML = html;
+          }
+        });
+    }
   });
 }
 
@@ -772,6 +829,63 @@ if (nextMonthBtn) {
     }
     updateCalendarTitle();
     regenerateCalendar();
+    // Regenerate mobile calendar for month view
+    if (window.innerWidth <= 768) {
+      // Get tasks for new month
+      const year = currentYear;
+      const month = currentMonth;
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const start = `${year}-${String(month + 1).padStart(2, "0")}-01`;
+      const end = `${year}-${String(month + 1).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
+      fetch(`${baseUrl}/api/tasks/get_calendar_tasks.php?start=${start}&end=${end}`)
+        .then((res) => res.json())
+        .then((tasksByDate) => {
+          // Render mobile calendar
+          const mobileCalendar = document.querySelector(".mobile-calendar");
+          if (mobileCalendar) {
+            // ...existing code for rendering mobile calendar...
+            let html = '<table class="mobile-calendar-table" style="width:100%"><thead><tr>';
+            const daysOfWeek = ['MA', 'DI', 'WO', 'DO', 'VR', 'ZA', 'ZO'];
+            for (let i = 0; i < 7; i++) {
+              html += `<th>${daysOfWeek[i]}</th>`;
+            }
+            html += '</tr></thead><tbody>';
+            let firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            firstDay = firstDay === 0 ? 6 : firstDay - 1;
+            let day = 1;
+            for (let week = 0; week < 6; week++) {
+              html += '<tr>';
+              for (let i = 0; i < 7; i++) {
+                if ((week === 0 && i < firstDay) || day > daysInMonth) {
+                  html += '<td></td>';
+                } else {
+                  const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+                  const tasks = typeof tasksByDate !== "undefined" && tasksByDate[dateKey] ? tasksByDate[dateKey] : [];
+                  let cellContent = `<div class="mobile-day-number">${day}</div>`;
+                  let cellClass = "";
+                  if (tasks.length > 0) {
+                    if (tasks[0].color === "#cccccc") cellClass = "has-task-green";
+                    else if (tasks[0].color === "#ffb8d1") cellClass = "has-task-pink";
+                    else cellClass = "has-task-green";
+                    cellContent += tasks.map(ev => {
+                      let colorClass = "";
+                      if (ev.color === "#cccccc") colorClass = "green-cell";
+                      else if (ev.color === "#ffb8d1") colorClass = "pink-cell";
+                      return `<div class=\"mobile-task-badge ${colorClass}\" style=\"margin:2px 0;padding:2px 6px;border-radius:4px;font-size:13px;display:inline-block;\">${ev.title}</div>`;
+                    }).join("");
+                  }
+                  html += `<td class=\"${cellClass}\" style=\"height:44px;text-align:center;vertical-align:top;\">${cellContent}</td>`;
+                  day++;
+                }
+              }
+              html += '</tr>';
+              if (day > daysInMonth) break;
+            }
+            html += '</tbody></table>';
+            mobileCalendar.innerHTML = html;
+          }
+        });
+    }
   });
 }
 
