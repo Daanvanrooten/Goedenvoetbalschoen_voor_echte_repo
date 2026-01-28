@@ -284,16 +284,6 @@ function editTask(slotId, taskId, frequency, task) {
           <button type='button' id='cancelEdit' style='flex:1;padding:10px;background:#ccc;border:none;border-radius:6px;cursor:pointer;font-size:14px;'>Annuleren</button>
           <button type='submit' style='flex:1;padding:10px;background:#6b5b95;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px;'>Opslaan</button>
         </div>
-          </div>
-          <div style='flex:1;'>
-            <label style='display:block;margin-bottom:6px;font-weight:600;'>Eind tijd</label>
-            <input type='time' id='editEndTime' value='${task.end}' style='width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;' required>
-          </div>
-        </div>
-        <div style='display:flex;gap:12px;margin-top:20px;'>
-          <button type='button' id='cancelEdit' style='flex:1;padding:10px;background:#ccc;border:none;border-radius:6px;cursor:pointer;font-size:14px;'>Annuleren</button>
-          <button type='submit' style='flex:1;padding:10px;background:#6b5b95;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px;'>Opslaan</button>
-        </div>
       </form>
     </div>
   `;
