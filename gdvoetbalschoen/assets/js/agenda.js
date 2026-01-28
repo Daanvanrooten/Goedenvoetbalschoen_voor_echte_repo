@@ -835,9 +835,14 @@ function regenerateCalendar() {
   const month = currentMonth;
   const start = `${year}-${String(month + 1).padStart(2, "0")}-01`;
   const end = `${year}-${String(month + 1).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
+
+  // Maak tasksByDate globaal zodat andere functies het kunnen gebruiken
+  window.tasksByDate = {};
   fetch(`${baseUrl}/api/tasks/get_calendar_tasks.php?start=${start}&end=${end}`)
     .then((res) => res.json())
-    .then((tasksByDate) => {
+    .then((data) => {
+      window.tasksByDate = data;
+      const tasksByDate = window.tasksByDate;
       for (let day = 1; day <= daysInMonth; day++) {
         const dayCell = document.createElement("div");
         dayCell.className = "day-cell current-month";
@@ -852,7 +857,7 @@ function regenerateCalendar() {
           dayCell.classList.add("today");
         }
 
-        // Check if it's weekend (Saturday or Sunday)
+        // Check if it's weekend (Saturday of Sunday)
         const dayOfWeek = new Date(currentYear, currentMonth, day).getDay();
         if (dayOfWeek === 0 || dayOfWeek === 6) {
           dayCell.classList.add("weekend");
@@ -916,9 +921,13 @@ function regenerateCalendar() {
 
     // Group days by weekday (0-6)
     const daysByWeekday = [[], [], [], [], [], [], []];
+    // Definieer 'today' zodat deze beschikbaar is
+    const today = new Date();
+    // Gebruik window.tasksByDate als fallback als tasksByDate niet bestaat
+    const safeTasksByDate = typeof tasksByDate !== 'undefined' ? tasksByDate : (window.tasksByDate || {});
     calendarDays.forEach(({ day, weekday, date }) => {
       const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-      const hasTasks = tasksByDate[dateKey] && tasksByDate[dateKey].length > 0;
+      const hasTasks = safeTasksByDate[dateKey] && safeTasksByDate[dateKey].length > 0;
       const isToday =
         day === today.getDate() &&
         currentMonth === today.getMonth() &&

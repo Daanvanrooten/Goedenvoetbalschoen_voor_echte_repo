@@ -891,84 +891,89 @@ function regenerateCalendar() {
       }
     });
   });
-
-  // Generate mobile calendar - horizontal layout with weekdays as rows
+function renderMobileMonthCalendar(year, month, tasksByDate) {
+    const mobileCal = document.querySelector('.mobile-calendar');
+    if (!mobileCal) return;
+    const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THUR', 'FRI', 'SAT']; // 7 kolommen
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    // Bepaal op welke dag van de week de 1e van de maand valt (0=Zon, 1=Ma, ...)
+    let firstDay = new Date(year, month, 1).getDay();
+    // Zet op 0=Zon, 1=Ma, ... 4=Do, 5=Vr, 6=Za, maar we tonen alleen 5 kolommen (zo nodig schuiven)
+    // Start altijd op zondag, maar max 5 kolommen
+    let startOffset = firstDay;
+    // Bouw weken
+    let weeks = [];
+    let day = 1;
+    while (day <= daysInMonth) {
+        let week = [];
+        for (let i = 0; i < 7; i++) {
+            if (weeks.length === 0 && i < startOffset && day === 1) {
+                week.push('');
+            } else if (day <= daysInMonth) {
+                week.push(day++);
+            } else {
+                week.push('');
+            }
+        }
+        weeks.push(week);
+    }
+    // Bouw de tabel
+    let html = '<table class="mobile-calendar-table" style="table-layout:fixed;width:100%"><tbody>';
+    // Header
+    html += '<tr>';
+    for (let i = 0; i < 7; i++) {
+        html += `<td class="day-label" style="width:14.28%">${daysOfWeek[i]}</td>`;
+    }
+    html += '</tr>';
+    // Dagen
+    for (let w = 0; w < weeks.length; w++) {
+        html += '<tr>';
+        for (let i = 0; i < 7; i++) {
+            const d = weeks[w][i];
+            if (d) {
+                const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                let eventClass = '';
+                if (tasksByDate && tasksByDate[dateKey] && tasksByDate[dateKey].length > 0) {
+                    eventClass = 'green-cell';
+                }
+                html += `<td class="${eventClass}" style="width:14.28%;height:48px;text-align:center;vertical-align:middle;">${d}</td>`;
+            } else {
+                html += '<td style="width:14.28%;height:48px;"></td>';
+            }
+        }
+        html += '</tr>';
+    }
+    html += '</tbody></table>';
+    mobileCal.innerHTML = html;
+}
+  // Generate mobile calendar - always render month table
   const mobileCalendar = document.querySelector(".mobile-calendar");
   if (mobileCalendar) {
-    mobileCalendar.innerHTML = "";
-
-    // Create mobile calendar table with horizontal layout
-    const table = document.createElement("table");
-    table.className = "mobile-calendar-table";
-
-    const tbody = document.createElement("tbody");
-
-    // Days of week labels
-    const daysOfWeek = ["SUN", "MON", "TUE", "WED", "THUR", "FRI", "Sat"];
-
-    // Build array of all days with their weekday
-    const calendarDays = [];
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(currentYear, currentMonth, day);
-      const weekday = date.getDay(); // 0 = Sunday, 6 = Saturday
-      calendarDays.push({ day, weekday, date });
+    // Fallback: altijd een maandtabel tonen
+    let html = '<table class="mobile-calendar-table" style="width:100%"><thead><tr>';
+    const daysOfWeek = ['MA', 'DI', 'WO', 'DO', 'VR', 'ZA', 'ZO'];
+    for (let i = 0; i < 7; i++) {
+      html += `<th>${daysOfWeek[i]}</th>`;
     }
-
-    // Group days by weekday (0-6)
-    const daysByWeekday = [[], [], [], [], [], [], []];
-    calendarDays.forEach(({ day, weekday, date }) => {
-      const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-      const hasTasks = tasksByDate[dateKey] && tasksByDate[dateKey].length > 0;
-      const isToday =
-        day === today.getDate() &&
-        currentMonth === today.getMonth() &&
-        currentYear === today.getFullYear();
-
-      daysByWeekday[weekday].push({ day, date, dateKey, hasTasks, isToday });
-    });
-
-    // Create one row per weekday
-    for (let weekday = 0; weekday < 7; weekday++) {
-      const weekdayRow = document.createElement("tr");
-
-      // First cell: weekday label
-      const labelCell = document.createElement("td");
-      labelCell.className = "day-label";
-      labelCell.textContent = daysOfWeek[weekday];
-      weekdayRow.appendChild(labelCell);
-
-      // Add cells for each occurrence of this weekday in the month
-      const daysForThisWeekday = daysByWeekday[weekday];
-      daysForThisWeekday.forEach(({ day, dateKey, hasTasks, isToday }) => {
-        const dayCell = document.createElement("td");
-        dayCell.textContent = day;
-
-        // Add green background if there are tasks
-        if (hasTasks) {
-          dayCell.classList.add("green-cell");
+    html += '</tr></thead><tbody>';
+    let firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    firstDay = firstDay === 0 ? 6 : firstDay - 1;
+    let day = 1;
+    for (let week = 0; week < 6; week++) {
+      html += '<tr>';
+      for (let i = 0; i < 7; i++) {
+        if ((week === 0 && i < firstDay) || day > daysInMonth) {
+          html += '<td></td>';
+        } else {
+          html += `<td style="height:44px;text-align:center;">${day}</td>`;
+          day++;
         }
-
-        // Add today class if it's today
-        if (isToday) {
-          dayCell.classList.add("today");
-        }
-
-        // Make clickable to show tasks
-        if (hasTasks) {
-          dayCell.style.cursor = "pointer";
-          dayCell.addEventListener("click", () => {
-            showTasksModal(tasksByDate[dateKey], dateKey);
-          });
-        }
-
-        weekdayRow.appendChild(dayCell);
-      });
-
-      tbody.appendChild(weekdayRow);
+      }
+      html += '</tr>';
+      if (day > daysInMonth) break;
     }
-
-    table.appendChild(tbody);
-    mobileCalendar.appendChild(table);
+    html += '</tbody></table>';
+    mobileCalendar.innerHTML = html;
   }
 }
 
