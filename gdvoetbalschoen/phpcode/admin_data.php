@@ -4,10 +4,17 @@ require_once 'db_connection.php';
 
 header('Content-Type: application/json');
 
+// Check of sessie bestaat
+if (!isset($_SESSION['user'])) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Niet ingelogd']);
+    exit;
+}
+
 // Alleen admins mogen deze data ophalen
-if (!isset($_SESSION['user']) || !isset($_SESSION['user']['role_id']) || $_SESSION['user']['role_id'] != 2) {
+if (!isset($_SESSION['user']['role_id']) || $_SESSION['user']['role_id'] != 2) {
     http_response_code(403);
-    echo json_encode(['success' => false, 'message' => 'Geen toegang']);
+    echo json_encode(['success' => false, 'message' => 'Geen admin toegang']);
     exit;
 }
 

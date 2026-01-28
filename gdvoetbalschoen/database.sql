@@ -27,6 +27,7 @@ SET time_zone = "+00:00";
 -- Tabelstructuur voor tabel `email_verifications`
 --
 
+DROP TABLE IF EXISTS `email_verifications`;
 CREATE TABLE `email_verifications` (
   `token_id` int(20) UNSIGNED NOT NULL,
   `user_id` int(20) UNSIGNED NOT NULL,
@@ -41,6 +42,7 @@ CREATE TABLE `email_verifications` (
 -- Tabelstructuur voor tabel `roles`
 --
 
+DROP TABLE IF EXISTS `roles`;
 CREATE TABLE `roles` (
   `role_id` tinyint(3) UNSIGNED NOT NULL,
   `name` varchar(50) NOT NULL
@@ -49,6 +51,7 @@ CREATE TABLE `roles` (
 --
 -- Gegevens worden geëxporteerd voor tabel `roles`
 --
+
 
 INSERT INTO `roles` (`role_id`, `name`) VALUES
 (2, 'Admin'),
@@ -60,6 +63,8 @@ INSERT INTO `roles` (`role_id`, `name`) VALUES
 -- Stand-in structuur voor view `slot_capacity_overview`
 -- (Zie onder voor de actuele view)
 --
+
+DROP TABLE IF EXISTS `slot_capacity_overview`;
 CREATE TABLE `slot_capacity_overview` (
 `slot_id` int(20) unsigned
 ,`task_id` int(20) unsigned
@@ -77,6 +82,7 @@ CREATE TABLE `slot_capacity_overview` (
 -- Tabelstructuur voor tabel `tasks`
 --
 
+DROP TABLE IF EXISTS `tasks`;
 CREATE TABLE `tasks` (
   `task_id` int(20) UNSIGNED NOT NULL,
   `title` varchar(255) NOT NULL,
@@ -110,6 +116,7 @@ INSERT INTO `tasks` (`task_id`, `title`, `description`, `category_id`, `is_activ
 -- Tabelstructuur voor tabel `task_categories`
 --
 
+DROP TABLE IF EXISTS `task_categories`;
 CREATE TABLE `task_categories` (
   `category_id` tinyint(3) UNSIGNED NOT NULL,
   `name` varchar(100) NOT NULL,
@@ -129,6 +136,7 @@ INSERT INTO `task_categories` (`category_id`, `name`, `color_hex`) VALUES
 -- Tabelstructuur voor tabel `task_registrations`
 --
 
+DROP TABLE IF EXISTS `task_registrations`;
 CREATE TABLE `task_registrations` (
   `registration_id` int(20) UNSIGNED NOT NULL,
   `slot_id` int(20) UNSIGNED NOT NULL,
@@ -142,6 +150,7 @@ CREATE TABLE `task_registrations` (
 -- Tabelstructuur voor tabel `task_slots`
 --
 
+DROP TABLE IF EXISTS `task_slots`;
 CREATE TABLE `task_slots` (
   `slot_id` int(20) UNSIGNED NOT NULL,
   `task_id` int(20) UNSIGNED NOT NULL,
@@ -169,6 +178,7 @@ INSERT INTO `task_slots` (`slot_id`, `task_id`, `slot_date`, `start_time`, `end_
 -- Tabelstructuur voor tabel `users`
 --
 
+DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `user_id` int(20) UNSIGNED NOT NULL,
   `role_id` tinyint(3) UNSIGNED NOT NULL,

@@ -8,14 +8,14 @@ session_start();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log in - Gouden Schoen</title>
-    <link rel="stylesheet" href="../css/login_register.css">
+    <link rel="stylesheet" href="../assets/css/login_register.css">
 </head>
 
 <body>
     <header>
         <div class="container">
             <div class="logo">
-                <img src="../images/fc_team_zonder_plan.png" alt="FC Team zonder plan logo">
+                <img src="../assets/images/fc_team_zonder_plan.png" alt="FC Team zonder plan logo">
                 <span class="logo-text">FC Team zonder plan</span>
             </div>
             <nav>
@@ -62,27 +62,36 @@ session_start();
     </main>
 
     <script>
+        // Detecteer base URL automatisch
+        const isLocal = window.location.hostname.includes('localhost') ||
+            window.location.hostname.includes('127.0.0.1') ||
+            window.location.hostname.includes('webroot.local');
+        // Automatische path detectie - werkt op elke PC
+        const currentPath = window.location.pathname;
+        const viewsIndex = currentPath.lastIndexOf('/views/');
+        const baseUrl = viewsIndex !== -1 ? currentPath.substring(0, viewsIndex) : '';
+
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const errorDiv = document.getElementById('errorMessage');
             const submitBtn = this.querySelector('.auth-btn');
-            
+
             // Disable button
             submitBtn.disabled = true;
             submitBtn.textContent = 'Bezig...';
             errorDiv.style.display = 'none';
-            
+
             const formData = new FormData(this);
-            
+
             try {
-                const response = await fetch('/Goedenvoetbalschoen_voor_echte_repo/gdvoetbalschoen/phpcode/logincode.php', {
+                const response = await fetch(baseUrl + '/auth/logincode.php', {
                     method: 'POST',
                     body: formData
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
                     window.location.href = data.redirect;
                 } else {
@@ -93,6 +102,13 @@ session_start();
                     errorDiv.style.marginBottom = '15px';
                     errorDiv.style.backgroundColor = '#ffe6e6';
                     errorDiv.style.borderRadius = '5px';
+
+                    // Als er een redirect naar verificatie pagina is
+                    if (data.redirect) {
+                        setTimeout(() => {
+                            window.location.href = data.redirect;
+                        }, 2000);
+                    }
                 }
             } catch (error) {
                 errorDiv.textContent = 'Er is een fout opgetreden. Probeer het opnieuw.';

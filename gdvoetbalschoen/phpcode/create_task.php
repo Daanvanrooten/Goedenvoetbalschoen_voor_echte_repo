@@ -15,6 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+
 $user_id = $_SESSION['user']['id'];
 $title = trim($_POST['taaknaam'] ?? '');
 $category = $_POST['categorie'] ?? null;
@@ -24,12 +25,20 @@ $end_time = $_POST['end_time'] ?? null;
 $herhaling = $_POST['herhaling'] ?? 'eenmalig';
 $maxleden = $_POST['maxleden'] ?? null;
 $beschrijving = trim($_POST['beschrijving'] ?? '');
+// Personeel (array van user_id's)
+$personeel = isset($_POST['personeel']) ? (array)$_POST['personeel'] : [];
 
-// Nieuwe velden voor dag/week/maand/jaar
+// Nieuwe velden voor dag/week/maand/jaar en frequentie
 $day = isset($_POST['day']) ? intval($_POST['day']) : null;
 $week = isset($_POST['week']) ? intval($_POST['week']) : null;
 $month = isset($_POST['month']) ? intval($_POST['month']) : null;
 $year = isset($_POST['year']) ? intval($_POST['year']) : null;
+$herhaling = $_POST['herhaling'] ?? 'eenmalig';
+$frequency = null;
+if ($herhaling === 'dagelijks') $frequency = 'DAILY';
+elseif ($herhaling === 'wekelijks') $frequency = 'WEEKLY';
+elseif ($herhaling === 'maandelijks') $frequency = 'MONTHLY';
+else $frequency = null;
 
 // Validatie
 $errors = [];
@@ -46,14 +55,25 @@ if (!empty($errors)) {
 
 try {
     $conn = getDbConnection();
-    // Insert task met nieuwe dag/week/maand/jaar velden
-    $stmt = $conn->prepare("INSERT INTO tasks (title, description, category_id, is_active, created_at, start_time, end_time, day, week, month, year) VALUES (?, ?, ?, 1, NOW(), ?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$title, $beschrijving, $category, $start_time, $end_time, $day, $week, $month, $year]);
+    // Insert task met frequentie en dag/week/maand/jaar velden
+    $stmt = $conn->prepare("INSERT INTO tasks (title, description, category_id, is_active, created_at, frequency, start_time, end_time, day, week, month, year) VALUES (?, ?, ?, 1, NOW(), ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$title, $beschrijving, $category, $frequency, $start_time, $end_time, $day, $week, $month, $year]);
     $task_id = $conn->lastInsertId();
 
     // Voeg slot toe met start en eind uur
     $stmtSlot = $conn->prepare("INSERT INTO task_slots (task_id, slot_date, start_time, end_time, capacity, created_at) VALUES (?, ?, ?, ?, ?, NOW())");
     $stmtSlot->execute([$task_id, $date, $start_time, $end_time, $maxleden ?? 1]);
+    $slot_id = $conn->lastInsertId();
+
+    // Personeel koppelen aan taak (task_registrations)
+    if (!empty($personeel)) {
+        $stmtReg = $conn->prepare("INSERT INTO task_registrations (slot_id, user_id) VALUES (?, ?)");
+        foreach ($personeel as $userId) {
+            if (!empty($userId)) {
+                $stmtReg->execute([$slot_id, $userId]);
+            }
+        }
+    }
 
     echo json_encode(['success' => true, 'message' => 'Taak succesvol opgeslagen!', 'task_id' => $task_id, 'category_id' => $category]);
 } catch (PDOException $e) {

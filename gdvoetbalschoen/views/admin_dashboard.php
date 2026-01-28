@@ -35,14 +35,14 @@ $aantalTakenOpen = 0;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="../css/admin_dashboard.css">
+    <link rel="stylesheet" href="../assets/css/admin_dashboard.css">
 </head>
 
 <body>
     <header>
         <div class="header-container">
             <div class="logo">
-                <img src="../images/fc_team_zonder_plan.png" alt="FC Team zonder plan logo">
+                <img src="../assets/images/fc_team_zonder_plan.png" alt="FC Team zonder plan logo">
             </div>
             <nav>
                 <a href="../index.php" class="nav-icon home-icon" title="Home">
@@ -84,7 +84,7 @@ $aantalTakenOpen = 0;
             </section>
 
             <!-- Ledenlijst -->
-            
+
 
             <!-- Action Buttons -->
             <section class="actions-section">
@@ -111,148 +111,152 @@ $aantalTakenOpen = 0;
         </main>
 
 
-    <!-- Uitloggen Modal -->
-    <div id="logoutModal" class="taak-modal">
-        <div class="taak-modal-content logout-modal-content">
-            <h2 class="taak-modal-title">Uitloggen</h2>
-            <p class="modal-text">Weet je zeker dat je wilt uitloggen?</p>
-            <div class="form-actions logout-actions">
-                <button type="button" class="cancel-logout-btn">Annuleer</button>
-                <button type="button" class="confirm-logout-btn">Ja</button>
+        <!-- Uitloggen Modal -->
+        <div id="logoutModal" class="taak-modal">
+            <div class="taak-modal-content logout-modal-content">
+                <h2 class="taak-modal-title">Uitloggen</h2>
+                <p class="modal-text">Weet je zeker dat je wilt uitloggen?</p>
+                <div class="form-actions logout-actions">
+                    <button type="button" class="cancel-logout-btn">Annuleer</button>
+                    <button type="button" class="confirm-logout-btn">Ja</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Ledenlijst -->
-    <section class="leden-section">
-        <h2>Alle leden</h2>
-        <table class="leden-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Naam</th>
-                    <th>Email</th>
-                    <th>Gebruikersnaam</th>
-                    <th>Rol</th>
-                </tr>
-            </thead>
-            <tbody id="ledenTableBody">
-                <tr><td colspan="5">Laden...</td></tr>
-            </tbody>
-        </table>
-    </section>
+        <!-- Ledenlijst -->
+        <section class="leden-section">
+            <h2>Alle leden</h2>
+            <table class="leden-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Naam</th>
+                        <th>Email</th>
+                        <th>Gebruikersnaam</th>
+                        <th>Rol</th>
+                    </tr>
+                </thead>
+                <tbody id="ledenTableBody">
+                    <tr>
+                        <td colspan="5">Laden...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
 
-    <!-- Open taken -->
-    <section class="taken-section">
-        <h2>Open taken</h2>
-        <table class="taken-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Titel</th>
-                    <th>Beschrijving</th>
-                    <th>Startdatum</th>
-                    <th>Einddatum</th>
-                </tr>
-            </thead>
-            <tbody id="takenTableBody">
-                <tr><td colspan="5">Laden...</td></tr>
-            </tbody>
-        </table>
-    </section>
+        <!-- Open taken -->
+        <section class="taken-section">
+            <h2>Open taken</h2>
+            <table class="taken-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Titel</th>
+                        <th>Beschrijving</th>
+                        <th>Startdatum</th>
+                        <th>Einddatum</th>
+                    </tr>
+                </thead>
+                <tbody id="takenTableBody">
+                    <tr>
+                        <td colspan="5">Laden...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
 
-    <script>
-    // Haal leden en open taken op via AJAX
-    document.addEventListener('DOMContentLoaded', function() {
-        fetch('../phpcode/admin_data.php')
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    // Leden
-                    document.getElementById('ledenCount').textContent = data.aantalLeden;
-                    const ledenBody = document.getElementById('ledenTableBody');
-                    ledenBody.innerHTML = '';
-                    data.leden.forEach(lid => {
-                        ledenBody.innerHTML += `<tr><td>${lid.user_id}</td><td>${lid.first_name} ${lid.last_name}</td><td>${lid.email}</td><td>${lid.username}</td><td>${lid.role_id}</td></tr>`;
+        <script>
+            // Haal leden en open taken op via AJAX
+            document.addEventListener('DOMContentLoaded', function() {
+                fetch('../api/users/admin_data.php')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Leden
+                            document.getElementById('ledenCount').textContent = data.aantalLeden;
+                            const ledenBody = document.getElementById('ledenTableBody');
+                            ledenBody.innerHTML = '';
+                            data.leden.forEach(lid => {
+                                ledenBody.innerHTML += `<tr><td>${lid.user_id}</td><td>${lid.first_name} ${lid.last_name}</td><td>${lid.email}</td><td>${lid.username}</td><td>${lid.role_id}</td></tr>`;
+                            });
+                            if (data.leden.length === 0) ledenBody.innerHTML = '<tr><td colspan="5">Geen leden gevonden</td></tr>';
+
+                            // Taken
+                            document.getElementById('takenCount').textContent = data.open_taken.length;
+                            const takenBody = document.getElementById('takenTableBody');
+                            takenBody.innerHTML = '';
+                            data.open_taken.forEach(taak => {
+                                takenBody.innerHTML += `<tr><td>${taak.task_id}</td><td>${taak.title}</td><td>${taak.description || ''}</td><td>${taak.start_date || ''}</td><td>${taak.end_date || ''}</td></tr>`;
+                            });
+                            if (data.open_taken.length === 0) takenBody.innerHTML = '<tr><td colspan="5">Geen open taken</td></tr>';
+                        } else {
+                            document.getElementById('ledenTableBody').innerHTML = '<tr><td colspan="5">Fout: ' + data.message + '</td></tr>';
+                            document.getElementById('takenTableBody').innerHTML = '<tr><td colspan="5">Fout: ' + data.message + '</td></tr>';
+                        }
+                    })
+                    .catch(err => {
+                        document.getElementById('ledenTableBody').innerHTML = '<tr><td colspan="5">Fout bij ophalen</td></tr>';
+                        document.getElementById('takenTableBody').innerHTML = '<tr><td colspan="5">Fout bij ophalen</td></tr>';
                     });
-                    if (data.leden.length === 0) ledenBody.innerHTML = '<tr><td colspan="5">Geen leden gevonden</td></tr>';
-
-                    // Taken
-                    document.getElementById('takenCount').textContent = data.open_taken.length;
-                    const takenBody = document.getElementById('takenTableBody');
-                    takenBody.innerHTML = '';
-                    data.open_taken.forEach(taak => {
-                        takenBody.innerHTML += `<tr><td>${taak.task_id}</td><td>${taak.title}</td><td>${taak.description || ''}</td><td>${taak.start_date || ''}</td><td>${taak.end_date || ''}</td></tr>`;
-                    });
-                    if (data.open_taken.length === 0) takenBody.innerHTML = '<tr><td colspan="5">Geen open taken</td></tr>';
-                } else {
-                    document.getElementById('ledenTableBody').innerHTML = '<tr><td colspan="5">Fout: ' + data.message + '</td></tr>';
-                    document.getElementById('takenTableBody').innerHTML = '<tr><td colspan="5">Fout: ' + data.message + '</td></tr>';
-                }
-            })
-            .catch(err => {
-                document.getElementById('ledenTableBody').innerHTML = '<tr><td colspan="5">Fout bij ophalen</td></tr>';
-                document.getElementById('takenTableBody').innerHTML = '<tr><td colspan="5">Fout bij ophalen</td></tr>';
             });
-    });
-        // Mobile menu toggle
-        const menuToggle = document.querySelector('.mobile-menu-toggle');
-        const mobileMenu = document.querySelector('.mobile-menu');
+            // Mobile menu toggle
+            const menuToggle = document.querySelector('.mobile-menu-toggle');
+            const mobileMenu = document.querySelector('.mobile-menu');
 
-        if (menuToggle && mobileMenu) {
-            menuToggle.addEventListener('click', () => {
-                menuToggle.classList.toggle('active');
-                mobileMenu.classList.toggle('active');
+            if (menuToggle && mobileMenu) {
+                menuToggle.addEventListener('click', () => {
+                    menuToggle.classList.toggle('active');
+                    mobileMenu.classList.toggle('active');
+                });
+            }
+
+            // Profile circle click for logout modal
+            const profileCircle = document.querySelector('.profile-circle');
+            const logoutModal = document.getElementById('logoutModal');
+            const cancelLogoutBtn = document.querySelector('.cancel-logout-btn');
+            const confirmLogoutBtn = document.querySelector('.confirm-logout-btn');
+
+            if (profileCircle) {
+                profileCircle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // Haal leden en open taken op via AJAX
+                    logoutModal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                });
+            }
+
+            // Close logout modal
+            function closeLogoutModal() {
+                logoutModal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            if (cancelLogoutBtn) {
+                cancelLogoutBtn.addEventListener('click', closeLogoutModal);
+            }
+
+            if (logoutModal) {
+                logoutModal.addEventListener('click', function(e) {
+                    if (e.target === logoutModal) {
+                        closeLogoutModal();
+                    }
+                });
+            }
+
+            if (confirmLogoutBtn) {
+                confirmLogoutBtn.addEventListener('click', function() {
+                    window.location.href = 'login.php';
+                });
+            }
+
+            // Logout buttons (mobile)
+            document.querySelectorAll('.logout-btn-mobile').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    logoutModal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                });
             });
-        }
-
-        // Profile circle click for logout modal
-        const profileCircle = document.querySelector('.profile-circle');
-        const logoutModal = document.getElementById('logoutModal');
-        const cancelLogoutBtn = document.querySelector('.cancel-logout-btn');
-        const confirmLogoutBtn = document.querySelector('.confirm-logout-btn');
-
-        if (profileCircle) {
-            profileCircle.addEventListener('click', function(e) {
-                e.preventDefault();
-                // Haal leden en open taken op via AJAX
-                logoutModal.classList.add('active');
-                document.body.style.overflow = 'hidden';
-            });
-        }
-
-        // Close logout modal
-        function closeLogoutModal() {
-            logoutModal.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-
-        if (cancelLogoutBtn) {
-            cancelLogoutBtn.addEventListener('click', closeLogoutModal);
-        }
-
-        if (logoutModal) {
-            logoutModal.addEventListener('click', function(e) {
-                if (e.target === logoutModal) {
-                    closeLogoutModal();
-                }
-            });
-        }
-
-        if (confirmLogoutBtn) {
-            confirmLogoutBtn.addEventListener('click', function() {
-                window.location.href = 'login.php';
-            });
-        }
-
-        // Logout buttons (mobile)
-        document.querySelectorAll('.logout-btn-mobile').forEach(btn => {
-            btn.addEventListener('click', () => {
-                logoutModal.classList.add('active');
-                document.body.style.overflow = 'hidden';
-            });
-        });
-    </script>
+        </script>
 </body>
 
 </html>

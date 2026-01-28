@@ -1,9 +1,9 @@
 Array
 (
-    [id] => 2
-    [first_name] => Daan
-    [last_name] => van Rooten
-    [email] => daanvanrooten@gmail.com
-    [username] => Daan
-    [role_id] => 2
+    [id] => 6
+    [first_name] => Naam
+    [last_name] => Achternaam
+    [email] => 593781@edu.rocmn.nl
+    [username] => bob
+    [role_id] => 1
 )

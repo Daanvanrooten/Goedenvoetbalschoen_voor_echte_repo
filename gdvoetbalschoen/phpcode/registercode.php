@@ -58,7 +58,7 @@ if (!empty($errors)) {
 
 try {
     $conn = getDbConnection();
-    
+
     // Check of email al bestaat
     $stmt = $conn->prepare("SELECT user_id FROM users WHERE email = ?");
     $stmt->execute([$email]);
@@ -67,7 +67,7 @@ try {
         echo json_encode(['success' => false, 'message' => 'Email adres is al in gebruik']);
         exit;
     }
-    
+
     // Check of username al bestaat
     $stmt = $conn->prepare("SELECT user_id FROM users WHERE username = ?");
     $stmt->execute([$username]);
@@ -76,20 +76,20 @@ try {
         echo json_encode(['success' => false, 'message' => 'Gebruikersnaam is al in gebruik']);
         exit;
     }
-    
+
     // Hash wachtwoord
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-    
+
     // Standaard role_id voor nieuwe gebruikers (1 = regular user)
     $roleId = 1;
-    
+
     // Insert nieuwe gebruiker
     $stmt = $conn->prepare("
         INSERT INTO users 
         (role_id, first_name, last_name, email, telefoonnummer, username, password_hash, is_active, is_email_verified, created_at) 
         VALUES (?, ?, ?, ?, ?, ?, ?, 1, 0, NOW())
     ");
-    
+
     $stmt->execute([
         $roleId,
         $voornaam,
@@ -99,41 +99,53 @@ try {
         $username,
         $passwordHash
     ]);
-    
+
     $userId = $conn->lastInsertId();
-    
-    // Haal gebruiker op voor sessie
+
+    // Genereer 6-cijferige verificatiecode
+    $verificationCode = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+    $expiresAt = date('Y-m-d H:i:s', strtotime('+15 minutes'));
+
+    // Sla verificatiecode op
     $stmt = $conn->prepare("
-        SELECT user_id, first_name, last_name, email, telefoonnummer, username, role_id 
-        FROM users 
-        WHERE user_id = ?
+        INSERT INTO email_verifications (user_id, token, created_at, expires_at) 
+        VALUES (?, ?, NOW(), ?)
     ");
-    $stmt->execute([$userId]);
-    $user = $stmt->fetch();
-    
-    // Sla gebruiker op in sessie
-    $_SESSION['user'] = [
-        'id' => $user['user_id'],
-        'voornaam' => $user['first_name'],
-        'achternaam' => $user['last_name'],
-        'email' => $user['email'],
-        'telefoonnummer' => $user['telefoonnummer'],
-        'username' => $user['username'],
-        'role_id' => $user['role_id']
+    $stmt->execute([$userId, $verificationCode, $expiresAt]);
+
+    // Verstuur email
+    require_once __DIR__ . '/email_sender.php';
+    $emailSent = sendVerificationEmail($email, $voornaam, $verificationCode);
+
+    // Log ALTIJD de code (backup)
+    $debugMessage = "=== VERIFICATIECODE ===\n";
+    $debugMessage .= "Tijd: " . date('Y-m-d H:i:s') . "\n";
+    $debugMessage .= "Email: $email\n";
+    $debugMessage .= "Naam: $voornaam $achternaam\n";
+    $debugMessage .= "CODE: $verificationCode\n";
+    $debugMessage .= "Geldig tot: $expiresAt\n";
+    $debugMessage .= "Email verstuurd: " . ($emailSent ? 'JA' : 'NEE (check dit bestand voor de code!)') . "\n";
+    $debugMessage .= "======================\n\n";
+    file_put_contents(__DIR__ . '/verification_codes.txt', $debugMessage, FILE_APPEND);
+
+    // Sla tijdelijk gebruiker info op in sessie voor verificatie pagina
+    $_SESSION['pending_verification'] = [
+        'user_id' => $userId,
+        'email' => $email,
+        'first_name' => $voornaam,
+        'last_name' => $achternaam
     ];
-    
+
     echo json_encode([
-        'success' => true, 
-        'message' => 'Account succesvol aangemaakt!',
-        'redirect' => 'agenda.php'
+        'success' => true,
+        'message' => 'Account aangemaakt! Controleer je email voor de verificatiecode.',
+        'redirect' => 'verify_email.php'
     ]);
-    
 } catch (PDOException $e) {
     error_log("Registratie fout: " . $e->getMessage());
     http_response_code(500);
     echo json_encode([
-        'success' => false, 
+        'success' => false,
         'message' => 'Database fout: ' . $e->getMessage()
     ]);
 }
-?>
