@@ -82,6 +82,7 @@
         </div>
     </header>
     <div class="MainArea">
+        <a class="LogoutButton" href="logout.php">Log out ></a>
         <!-- TaskArea is voor Task display -->
         <div class="TaskArea">
         <?php
@@ -116,7 +117,7 @@
 
             
         </div>
-        <a href="logout.php">Log out</a>
+        
     </div>
     
     
