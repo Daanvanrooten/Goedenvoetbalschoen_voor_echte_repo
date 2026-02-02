@@ -15,9 +15,33 @@ function getEventClass(colorHex) {
 
 // Render week events in een kolom
 function renderWeekEvents(dayColumn, events) {
+  const isAdmin = typeof userIsAdmin !== "undefined" && userIsAdmin === true;
+  
   events.forEach((ev) => {
     const el = document.createElement("div");
-    el.classList.add("week-event", getEventClass(ev.color));
+    
+    // Bepaal de kleur op basis van inschrijfstatus (voor niet-admins)
+    let colorClass = getEventClass(ev.color); // Standaard kleur
+    
+    if (!isAdmin) {
+      const capacity = ev.capacity || 1;
+      const registered = ev.registered_count || 0;
+      const isFull = registered >= capacity;
+      const userRegistered = ev.user_is_registered || false;
+      
+      // Groen: ingeschreven
+      // Oranje: niet ingeschreven, nog plek
+      // Rood: vol
+      if (userRegistered) {
+        colorClass = 'green-bg';
+      } else if (isFull) {
+        colorClass = 'red-bg';
+      } else {
+        colorClass = 'orange-bg';
+      }
+    }
+    
+    el.classList.add("week-event", colorClass);
     el.innerHTML = `
             <div class="event-time">${ev.start} - ${ev.end}</div>
             <div class="event-title">${ev.title}</div>
@@ -97,14 +121,38 @@ function showTasksModal(date, events) {
         <div style='padding:0 20px 20px 20px;max-height:400px;overflow-y:auto;'>
             ${events
               .map(
-                (ev, idx) => `
-                <div class='task-item-modal' style='margin-bottom:18px;padding:16px;background:#f9f9f9;border-radius:8px;position:relative;' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-slot-date='${ev.slot_date || ""}'>
+                (ev, idx) => {
+                const capacity = ev.capacity || 1;
+                const registered = ev.registered_count || 0;
+                const spotsLeft = capacity - registered;
+                const isFull = spotsLeft <= 0;
+                const userRegistered = ev.user_is_registered || false;
+
+                return `
+                <div class='task-item-modal' style='margin-bottom:18px;padding:16px;background:#f9f9f9;border-radius:8px;position:relative;' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}'>
                     <div style='font-weight:600;font-size:17px;margin-bottom:6px;'>${ev.title}</div>
                     <div style='color:#888;font-size:14px;margin-bottom:8px;'>
                         <span style='display:inline-block;margin-right:12px;'>🕐 ${ev.start} - ${ev.end}</span>
                         ${ev.frequency ? `<span style='background:#e5dbfa;color:#6b5b95;padding:2px 8px;border-radius:4px;font-size:12px;'>${ev.frequency}</span>` : ""}
                     </div>
-                    <div style='margin:8px 0 0 0;font-size:15px;color:#666;'>Toegewezen aan leden</div>
+                    
+                    ${
+                      !isAdmin
+                        ? `
+                    <div style='background:#fff;padding:10px;border-radius:6px;margin:10px 0;border-left:3px solid ${isFull ? "#dc3545" : "#28a745"};'>
+                        <div style='font-size:13px;color:#666;margin-bottom:4px;'>Beschikbare plekken</div>
+                        <div style='font-size:18px;font-weight:600;color:${isFull ? "#dc3545" : "#28a745"};'>
+                            ${registered} / ${capacity} ${isFull ? "(VOL)" : ""}
+                        </div>
+                    </div>
+                    `
+                        : ""
+                    }
+                    
+                    <div class='task-members-${ev.slot_id}' style='margin:8px 0;font-size:14px;color:#666;'>
+                        <div style='font-weight:500;margin-bottom:4px;'>Ingeschreven leden:</div>
+                        <div style='font-style:italic;color:#999;'>Laden...</div>
+                    </div>
                     ${
                       isAdmin && (ev.slot_id || ev.task_id)
                         ? `
@@ -117,11 +165,29 @@ function showTasksModal(date, events) {
                         </button>
                     </div>
                     `
+                        : !isAdmin && ev.slot_id
+                        ? `
+                    <div class='signup-container-${ev.slot_id}' style='margin-top:12px;'>
+                        ${
+                          userRegistered
+                            ? `<button class='signout-task-btn' data-slot-id='${ev.slot_id}' style='width:100%;background:#dc3545;color:#fff;border:none;padding:12px 16px;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;transition:all 0.2s;box-shadow:0 2px 4px rgba(220,53,69,0.3);'>
+                              ✗ Uitschrijven
+                             </button>`
+                            : isFull
+                              ? `<button disabled style='width:100%;background:#6c757d;color:#fff;border:none;padding:12px 16px;border-radius:8px;cursor:not-allowed;font-size:15px;font-weight:600;opacity:0.6;'>
+                                🚫 Taak is vol
+                               </button>`
+                              : `<button class='signup-task-btn' data-slot-id='${ev.slot_id}' style='width:100%;background:#28a745;color:#fff;border:none;padding:12px 16px;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;transition:all 0.2s;box-shadow:0 2px 4px rgba(40,167,69,0.3);'>
+                                ✓ Inschrijven voor taak
+                               </button>`
+                        }
+                    </div>
+                    `
                         : ""
                     }
                 </div>
-            `,
-              )
+            `;
+              })
               .join("")}
         </div>
     </div>`;
@@ -132,7 +198,14 @@ function showTasksModal(date, events) {
     modal.style.display = "none";
   };
 
-  // Event listeners voor edit en delete knoppen
+  // Laad ingeschreven leden voor elke taak
+  events.forEach((ev) => {
+    if (ev.slot_id) {
+      loadTaskMembers(ev.slot_id);
+    }
+  });
+
+  // Event listeners voor edit en delete knoppen (admin)
   if (isAdmin) {
     modal.querySelectorAll(".edit-task-btn").forEach((btn) => {
       btn.onclick = function () {
@@ -153,6 +226,39 @@ function showTasksModal(date, events) {
         const taskId = this.dataset.taskId || null;
         const frequency = this.dataset.frequency || null;
         deleteTask(slotId, taskId, frequency);
+      };
+    });
+  } else {
+    // Event listeners voor signup/signout knoppen (users)
+    modal.querySelectorAll(".signup-task-btn").forEach((btn) => {
+      btn.onclick = function () {
+        const slotId = this.dataset.slotId;
+        handleSignupToggle(slotId, false);
+      };
+      // Hover effect
+      btn.onmouseenter = function () {
+        this.style.transform = "translateY(-2px)";
+        this.style.boxShadow = "0 4px 8px rgba(40,167,69,0.4)";
+      };
+      btn.onmouseleave = function () {
+        this.style.transform = "translateY(0)";
+        this.style.boxShadow = "0 2px 4px rgba(40,167,69,0.3)";
+      };
+    });
+
+    modal.querySelectorAll(".signout-task-btn").forEach((btn) => {
+      btn.onclick = function () {
+        const slotId = this.dataset.slotId;
+        handleSignupToggle(slotId, true);
+      };
+      // Hover effect
+      btn.onmouseenter = function () {
+        this.style.transform = "translateY(-2px)";
+        this.style.boxShadow = "0 4px 8px rgba(220,53,69,0.4)";
+      };
+      btn.onmouseleave = function () {
+        this.style.transform = "translateY(0)";
+        this.style.boxShadow = "0 2px 4px rgba(220,53,69,0.3)";
       };
     });
   }
@@ -471,7 +577,31 @@ function renderEventsForDay(dayCell, events) {
   // Toon alleen een blokje, klikbaar voor alle taken
   if (events.length > 0) {
     const el = document.createElement("div");
-    el.classList.add("event", getEventClass(events[0].color));
+    
+    // Bepaal de kleur op basis van inschrijfstatus (voor niet-admins)
+    const isAdmin = typeof userIsAdmin !== "undefined" && userIsAdmin === true;
+    let colorClass = getEventClass(events[0].color); // Standaard kleur
+    
+    if (!isAdmin && events.length === 1) {
+      const event = events[0];
+      const capacity = event.capacity || 1;
+      const registered = event.registered_count || 0;
+      const isFull = registered >= capacity;
+      const userRegistered = event.user_is_registered || false;
+      
+      // Groen: ingeschreven
+      // Oranje: niet ingeschreven, nog plek
+      // Rood: vol
+      if (userRegistered) {
+        colorClass = 'green';
+      } else if (isFull) {
+        colorClass = 'red';
+      } else {
+        colorClass = 'orange';
+      }
+    }
+    
+    el.classList.add("event", colorClass);
     el.style.cursor = "pointer";
     let freqLabel = "";
     if (events.length === 1 && events[0].frequency) {
@@ -866,7 +996,6 @@ function regenerateCalendar() {
         const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
         if (tasksByDate[dateKey]) {
           renderEventsForDay(dayCell, tasksByDate[dateKey]);
-          dayCell.classList.add("green"); // optioneel: hele dag kleuren
         }
 
         daysGrid.appendChild(dayCell);
@@ -1284,6 +1413,102 @@ function removeSelectedUser(userId) {
 function updatePersoneelHidden() {
   if (personeelHidden) {
     personeelHidden.value = selectedUsers.map((u) => u.user_id).join(",");
+  }
+}
+
+// Load task members functie
+function loadTaskMembers(slotId) {
+  const container = document.querySelector(`.task-members-${slotId}`);
+  if (!container) return;
+
+  fetch(`${baseUrl}/api/users/get_assigned_users.php?slot_id=${slotId}`)
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success && data.assigned && data.assigned.length > 0) {
+        const membersList = data.assigned
+          .map(
+            (user) =>
+              `<span style='display:inline-block;background:#e5dbfa;color:#6b5b95;padding:4px 8px;border-radius:4px;font-size:13px;margin:2px;'>${user.first_name} ${user.last_name}</span>`,
+          )
+          .join("");
+        container.innerHTML = `
+          <div style='font-weight:500;margin-bottom:4px;'>Ingeschreven leden (${data.assigned.length}):</div>
+          <div>${membersList}</div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div style='font-weight:500;margin-bottom:4px;'>Ingeschreven leden:</div>
+          <div style='color:#999;font-style:italic;'>Nog niemand ingeschreven</div>
+        `;
+      }
+    })
+    .catch((err) => {
+      console.error("Error loading task members:", err);
+      container.innerHTML = `
+        <div style='font-weight:500;margin-bottom:4px;'>Ingeschreven leden:</div>
+        <div style='color:#dc3545;'>Fout bij laden</div>
+      `;
+    });
+}
+
+// Handle signup/signout toggle functie
+function handleSignupToggle(slotId, isSignedUp) {
+  if (isSignedUp) {
+    // Uitschrijven
+    if (!confirm("Weet je zeker dat je je wilt uitschrijven van deze taak?")) {
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("slot_id", slotId);
+
+    fetch(`${baseUrl}/api/tasks/signout_task.php`, {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          // Sluit modal en herlaad
+          const modal = document.getElementById("tasksModal");
+          if (modal) modal.style.display = "none";
+          alert(data.message);
+          regenerateCalendar();
+          regenerateWeekView();
+        } else {
+          alert("Fout: " + data.message);
+        }
+      })
+      .catch((err) => {
+        console.error("Signout error:", err);
+        alert("Er ging iets fout bij het uitschrijven");
+      });
+  } else {
+    // Inschrijven
+    const formData = new FormData();
+    formData.append("slot_id", slotId);
+
+    fetch(`${baseUrl}/api/tasks/signup_task.php`, {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          // Sluit modal en herlaad
+          const modal = document.getElementById("tasksModal");
+          if (modal) modal.style.display = "none";
+          alert(data.message);
+          regenerateCalendar();
+          regenerateWeekView();
+        } else {
+          alert("Fout: " + data.message);
+        }
+      })
+      .catch((err) => {
+        console.error("Signup error:", err);
+        alert("Er ging iets fong bij het inschrijven");
+      });
   }
 }
 

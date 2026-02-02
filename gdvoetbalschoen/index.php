@@ -137,7 +137,7 @@ if (isset($_SESSION['user'])) {
         const cancelLogoutBtn = document.querySelector('.cancel-logout-btn');
         const confirmLogoutBtn = document.querySelector('.confirm-logout-btn');
 
-        if (profileIcon) {
+        if (profileIcon && profileIcon.classList.contains('profile-circle')) {
             profileIcon.addEventListener('click', function(e) {
                 e.preventDefault();
                 logoutModal.classList.add('active');

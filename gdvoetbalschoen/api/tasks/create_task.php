@@ -94,8 +94,9 @@ try {
         $slotIds[] = $conn->lastInsertId();
     }
 
-    // Personeel koppelen aan ALLE slots (voor herhalende taken)
-    if (!empty($personeel) && !empty($slotIds)) {
+    // Personeel koppelen aan taak (task_registrations) - OPTIONEEL
+    // Admin kan nu taken aanmaken zonder personeel toe te wijzen
+    if (!empty($personeel)) {
         $stmtReg = $conn->prepare("INSERT INTO task_registrations (slot_id, user_id) VALUES (?, ?)");
         foreach ($slotIds as $slot_id) {
             foreach ($personeel as $userId) {
@@ -106,7 +107,7 @@ try {
         }
     }
 
-    echo json_encode(['success' => true, 'message' => 'Taak succesvol opgeslagen!', 'task_id' => $task_id, 'category_id' => $category, 'slots_created' => count($slotDates)]);
+    echo json_encode(['success' => true, 'message' => 'Taak succesvol opgeslagen!', 'task_id' => $task_id, 'category_id' => $category]);
 } catch (PDOException $e) {
     error_log('Taak opslaan fout: ' . $e->getMessage());
     http_response_code(500);

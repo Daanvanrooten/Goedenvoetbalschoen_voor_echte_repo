@@ -531,7 +531,7 @@ while (count($weekNumbers) < 2) {
                         <label>Beschrijving</label>
                         <textarea name="beschrijving" placeholder="Placeholder" rows="4"></textarea>
                     </div>
-                    
+
                     <div class="form-actions">
                         <button type="submit" class="submit-btn">Taak aanmaken</button>
                     </div>
@@ -556,6 +556,12 @@ while (count($weekNumbers) < 2) {
     <script>
         // User role voor admin checks
         const userIsAdmin = <?php echo (isset($user['role_id']) && $user['role_id'] == 2) ? 'true' : 'false'; ?>;
+
+        // Current user data voor signup functionaliteit
+        const currentUser = {
+            id: <?php echo $user['id']; ?>,
+            name: '<?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?>'
+        };
 
         // Gebruik de baseUrl uit agenda.js (al geladen hierboven)
         // Dynamisch categorieën laden
