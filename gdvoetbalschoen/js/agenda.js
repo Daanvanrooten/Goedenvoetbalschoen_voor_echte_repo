@@ -140,23 +140,25 @@ function showTasksModal(date, events) {
                         </button>
                     </div>
                     `
-                        : `
+                        : !isAdmin && ev.slot_id
+                        ? `
                     <div class='signup-container-${ev.slot_id}' style='margin-top:12px;'>
                         ${
                           userRegistered
-                            ? `<button class='signout-task-btn' data-slot-id='${ev.slot_id || ""}' style='width:100%;background:#dc3545;color:#fff;border:none;padding:12px 16px;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;transition:all 0.2s;box-shadow:0 2px 4px rgba(220,53,69,0.3);'>
+                            ? `<button class='signout-task-btn' data-slot-id='${ev.slot_id}' style='width:100%;background:#dc3545;color:#fff;border:none;padding:12px 16px;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;transition:all 0.2s;box-shadow:0 2px 4px rgba(220,53,69,0.3);'>
                               ✗ Uitschrijven
                              </button>`
                             : isFull
                               ? `<button disabled style='width:100%;background:#6c757d;color:#fff;border:none;padding:12px 16px;border-radius:8px;cursor:not-allowed;font-size:15px;font-weight:600;opacity:0.6;'>
                                 🚫 Taak is vol
                                </button>`
-                              : `<button class='signup-task-btn' data-slot-id='${ev.slot_id || ""}' style='width:100%;background:#28a745;color:#fff;border:none;padding:12px 16px;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;transition:all 0.2s;box-shadow:0 2px 4px rgba(40,167,69,0.3);'>
+                              : `<button class='signup-task-btn' data-slot-id='${ev.slot_id}' style='width:100%;background:#28a745;color:#fff;border:none;padding:12px 16px;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;transition:all 0.2s;box-shadow:0 2px 4px rgba(40,167,69,0.3);'>
                                 ✓ Inschrijven voor taak
                                </button>`
                         }
                     </div>
                     `
+                        : ""
                     }
                 </div>
             `;
