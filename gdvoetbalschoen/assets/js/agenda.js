@@ -1532,6 +1532,5 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("Agenda automatisch ververst");
   }, 30000); // 30 seconden
 });
-});
 
 console.log("Agenda pagina geladen!");
