@@ -28,7 +28,7 @@ if (empty($slot_id)) {
 
 try {
     $conn = getDbConnection();
-    
+
     // Controleer of de slot bestaat en haal capaciteit op
     $stmt = $conn->prepare("
         SELECT ts.capacity, 
@@ -38,40 +38,39 @@ try {
     ");
     $stmt->execute([$slot_id]);
     $slot = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+
     if (!$slot) {
         http_response_code(404);
         echo json_encode(['success' => false, 'message' => 'Taak niet gevonden']);
         exit;
     }
-    
+
     // Controleer of er nog plek is
     if ($slot['current_registrations'] >= $slot['capacity']) {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Taak is al vol']);
         exit;
     }
-    
+
     // Controleer of gebruiker al is ingeschreven
     $checkStmt = $conn->prepare("SELECT registration_id FROM task_registrations WHERE slot_id = ? AND user_id = ?");
     $checkStmt->execute([$slot_id, $user_id]);
-    
+
     if ($checkStmt->fetch()) {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Je bent al ingeschreven voor deze taak']);
         exit;
     }
-    
+
     // Schrijf gebruiker in
     $insertStmt = $conn->prepare("INSERT INTO task_registrations (slot_id, user_id, registered_at) VALUES (?, ?, NOW())");
     $insertStmt->execute([$slot_id, $user_id]);
-    
+
     echo json_encode([
-        'success' => true, 
+        'success' => true,
         'message' => 'Je bent succesvol ingeschreven voor deze taak!',
         'registration_id' => $conn->lastInsertId()
     ]);
-    
 } catch (PDOException $e) {
     error_log('Inschrijven fout: ' . $e->getMessage());
     http_response_code(500);

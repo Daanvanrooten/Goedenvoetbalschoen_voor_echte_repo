@@ -791,51 +791,62 @@ if (prevMonthBtn) {
       const daysInMonth = new Date(year, month + 1, 0).getDate();
       const start = `${year}-${String(month + 1).padStart(2, "0")}-01`;
       const end = `${year}-${String(month + 1).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
-      fetch(`${baseUrl}/api/tasks/get_calendar_tasks.php?start=${start}&end=${end}`)
+      fetch(
+        `${baseUrl}/api/tasks/get_calendar_tasks.php?start=${start}&end=${end}`,
+      )
         .then((res) => res.json())
         .then((tasksByDate) => {
           // Render mobile calendar
           const mobileCalendar = document.querySelector(".mobile-calendar");
           if (mobileCalendar) {
             // ...existing code for rendering mobile calendar...
-            let html = '<table class="mobile-calendar-table" style="width:100%"><thead><tr>';
-            const daysOfWeek = ['MA', 'DI', 'WO', 'DO', 'VR', 'ZA', 'ZO'];
+            let html =
+              '<table class="mobile-calendar-table" style="width:100%"><thead><tr>';
+            const daysOfWeek = ["MA", "DI", "WO", "DO", "VR", "ZA", "ZO"];
             for (let i = 0; i < 7; i++) {
               html += `<th>${daysOfWeek[i]}</th>`;
             }
-            html += '</tr></thead><tbody>';
+            html += "</tr></thead><tbody>";
             let firstDay = new Date(currentYear, currentMonth, 1).getDay();
             firstDay = firstDay === 0 ? 6 : firstDay - 1;
             let day = 1;
             for (let week = 0; week < 6; week++) {
-              html += '<tr>';
+              html += "<tr>";
               for (let i = 0; i < 7; i++) {
                 if ((week === 0 && i < firstDay) || day > daysInMonth) {
-                  html += '<td></td>';
+                  html += "<td></td>";
                 } else {
                   const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-                  const tasks = typeof tasksByDate !== "undefined" && tasksByDate[dateKey] ? tasksByDate[dateKey] : [];
+                  const tasks =
+                    typeof tasksByDate !== "undefined" && tasksByDate[dateKey]
+                      ? tasksByDate[dateKey]
+                      : [];
                   let cellContent = `<div class="mobile-day-number">${day}</div>`;
                   let cellClass = "";
                   if (tasks.length > 0) {
-                    if (tasks[0].color === "#cccccc") cellClass = "has-task-green";
-                    else if (tasks[0].color === "#ffb8d1") cellClass = "has-task-pink";
+                    if (tasks[0].color === "#cccccc")
+                      cellClass = "has-task-green";
+                    else if (tasks[0].color === "#ffb8d1")
+                      cellClass = "has-task-pink";
                     else cellClass = "has-task-green";
-                    cellContent += tasks.map(ev => {
-                      let colorClass = "";
-                      if (ev.color === "#cccccc") colorClass = "green-cell";
-                      else if (ev.color === "#ffb8d1") colorClass = "pink-cell";
-                      return `<div class=\"mobile-task-badge ${colorClass}\" style=\"margin:2px 0;padding:2px 6px;border-radius:4px;font-size:13px;display:inline-block;\">${ev.title}</div>`;
-                    }).join("");
+                    cellContent += tasks
+                      .map((ev) => {
+                        let colorClass = "";
+                        if (ev.color === "#cccccc") colorClass = "green-cell";
+                        else if (ev.color === "#ffb8d1")
+                          colorClass = "pink-cell";
+                        return `<div class=\"mobile-task-badge ${colorClass}\" style=\"margin:2px 0;padding:2px 6px;border-radius:4px;font-size:13px;display:inline-block;\">${ev.title}</div>`;
+                      })
+                      .join("");
                   }
                   html += `<td class=\"${cellClass}\" style=\"height:44px;text-align:center;vertical-align:top;\">${cellContent}</td>`;
                   day++;
                 }
               }
-              html += '</tr>';
+              html += "</tr>";
               if (day > daysInMonth) break;
             }
-            html += '</tbody></table>';
+            html += "</tbody></table>";
             mobileCalendar.innerHTML = html;
           }
         });
@@ -861,51 +872,62 @@ if (nextMonthBtn) {
       const daysInMonth = new Date(year, month + 1, 0).getDate();
       const start = `${year}-${String(month + 1).padStart(2, "0")}-01`;
       const end = `${year}-${String(month + 1).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
-      fetch(`${baseUrl}/api/tasks/get_calendar_tasks.php?start=${start}&end=${end}`)
+      fetch(
+        `${baseUrl}/api/tasks/get_calendar_tasks.php?start=${start}&end=${end}`,
+      )
         .then((res) => res.json())
         .then((tasksByDate) => {
           // Render mobile calendar
           const mobileCalendar = document.querySelector(".mobile-calendar");
           if (mobileCalendar) {
             // ...existing code for rendering mobile calendar...
-            let html = '<table class="mobile-calendar-table" style="width:100%"><thead><tr>';
-            const daysOfWeek = ['MA', 'DI', 'WO', 'DO', 'VR', 'ZA', 'ZO'];
+            let html =
+              '<table class="mobile-calendar-table" style="width:100%"><thead><tr>';
+            const daysOfWeek = ["MA", "DI", "WO", "DO", "VR", "ZA", "ZO"];
             for (let i = 0; i < 7; i++) {
               html += `<th>${daysOfWeek[i]}</th>`;
             }
-            html += '</tr></thead><tbody>';
+            html += "</tr></thead><tbody>";
             let firstDay = new Date(currentYear, currentMonth, 1).getDay();
             firstDay = firstDay === 0 ? 6 : firstDay - 1;
             let day = 1;
             for (let week = 0; week < 6; week++) {
-              html += '<tr>';
+              html += "<tr>";
               for (let i = 0; i < 7; i++) {
                 if ((week === 0 && i < firstDay) || day > daysInMonth) {
-                  html += '<td></td>';
+                  html += "<td></td>";
                 } else {
                   const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-                  const tasks = typeof tasksByDate !== "undefined" && tasksByDate[dateKey] ? tasksByDate[dateKey] : [];
+                  const tasks =
+                    typeof tasksByDate !== "undefined" && tasksByDate[dateKey]
+                      ? tasksByDate[dateKey]
+                      : [];
                   let cellContent = `<div class="mobile-day-number">${day}</div>`;
                   let cellClass = "";
                   if (tasks.length > 0) {
-                    if (tasks[0].color === "#cccccc") cellClass = "has-task-green";
-                    else if (tasks[0].color === "#ffb8d1") cellClass = "has-task-pink";
+                    if (tasks[0].color === "#cccccc")
+                      cellClass = "has-task-green";
+                    else if (tasks[0].color === "#ffb8d1")
+                      cellClass = "has-task-pink";
                     else cellClass = "has-task-green";
-                    cellContent += tasks.map(ev => {
-                      let colorClass = "";
-                      if (ev.color === "#cccccc") colorClass = "green-cell";
-                      else if (ev.color === "#ffb8d1") colorClass = "pink-cell";
-                      return `<div class=\"mobile-task-badge ${colorClass}\" style=\"margin:2px 0;padding:2px 6px;border-radius:4px;font-size:13px;display:inline-block;\">${ev.title}</div>`;
-                    }).join("");
+                    cellContent += tasks
+                      .map((ev) => {
+                        let colorClass = "";
+                        if (ev.color === "#cccccc") colorClass = "green-cell";
+                        else if (ev.color === "#ffb8d1")
+                          colorClass = "pink-cell";
+                        return `<div class=\"mobile-task-badge ${colorClass}\" style=\"margin:2px 0;padding:2px 6px;border-radius:4px;font-size:13px;display:inline-block;\">${ev.title}</div>`;
+                      })
+                      .join("");
                   }
                   html += `<td class=\"${cellClass}\" style=\"height:44px;text-align:center;vertical-align:top;\">${cellContent}</td>`;
                   day++;
                 }
               }
-              html += '</tr>';
+              html += "</tr>";
               if (day > daysInMonth) break;
             }
-            html += '</tbody></table>';
+            html += "</tbody></table>";
             mobileCalendar.innerHTML = html;
           }
         });
@@ -1029,10 +1051,10 @@ function regenerateCalendar() {
       }
     });
   });
-function renderMobileMonthCalendar(year, month, tasksByDate) {
-    const mobileCal = document.querySelector('.mobile-calendar');
+  function renderMobileMonthCalendar(year, month, tasksByDate) {
+    const mobileCal = document.querySelector(".mobile-calendar");
     if (!mobileCal) return;
-    const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THUR', 'FRI', 'SAT']; // 7 kolommen
+    const daysOfWeek = ["SUN", "MON", "TUE", "WED", "THUR", "FRI", "SAT"]; // 7 kolommen
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     // Bepaal op welke dag van de week de 1e van de maand valt (0=Zon, 1=Ma, ...)
     let firstDay = new Date(year, month, 1).getDay();
@@ -1043,74 +1065,80 @@ function renderMobileMonthCalendar(year, month, tasksByDate) {
     let weeks = [];
     let day = 1;
     while (day <= daysInMonth) {
-        let week = [];
-        for (let i = 0; i < 7; i++) {
-            if (weeks.length === 0 && i < startOffset && day === 1) {
-                week.push('');
-            } else if (day <= daysInMonth) {
-                week.push(day++);
-            } else {
-                week.push('');
-            }
+      let week = [];
+      for (let i = 0; i < 7; i++) {
+        if (weeks.length === 0 && i < startOffset && day === 1) {
+          week.push("");
+        } else if (day <= daysInMonth) {
+          week.push(day++);
+        } else {
+          week.push("");
         }
-        weeks.push(week);
+      }
+      weeks.push(week);
     }
     // Bouw de tabel
-    let html = '<table class="mobile-calendar-table" style="table-layout:fixed;width:100%"><tbody>';
+    let html =
+      '<table class="mobile-calendar-table" style="table-layout:fixed;width:100%"><tbody>';
     // Header
-    html += '<tr>';
+    html += "<tr>";
     for (let i = 0; i < 7; i++) {
-        html += `<td class="day-label" style="width:14.28%">${daysOfWeek[i]}</td>`;
+      html += `<td class="day-label" style="width:14.28%">${daysOfWeek[i]}</td>`;
     }
-    html += '</tr>';
+    html += "</tr>";
     // Dagen
     for (let w = 0; w < weeks.length; w++) {
-        html += '<tr>';
-        for (let i = 0; i < 7; i++) {
-            const d = weeks[w][i];
-            if (d) {
-                const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                let eventClass = '';
-                if (tasksByDate && tasksByDate[dateKey] && tasksByDate[dateKey].length > 0) {
-                    eventClass = 'green-cell';
-                }
-                html += `<td class="${eventClass}" style="width:14.28%;height:48px;text-align:center;vertical-align:middle;">${d}</td>`;
-            } else {
-                html += '<td style="width:14.28%;height:48px;"></td>';
-            }
+      html += "<tr>";
+      for (let i = 0; i < 7; i++) {
+        const d = weeks[w][i];
+        if (d) {
+          const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+          let eventClass = "";
+          if (
+            tasksByDate &&
+            tasksByDate[dateKey] &&
+            tasksByDate[dateKey].length > 0
+          ) {
+            eventClass = "green-cell";
+          }
+          html += `<td class="${eventClass}" style="width:14.28%;height:48px;text-align:center;vertical-align:middle;">${d}</td>`;
+        } else {
+          html += '<td style="width:14.28%;height:48px;"></td>';
         }
-        html += '</tr>';
+      }
+      html += "</tr>";
     }
-    html += '</tbody></table>';
+    html += "</tbody></table>";
     mobileCal.innerHTML = html;
-}
+  }
   // Generate mobile calendar - always render month table
   const mobileCalendar = document.querySelector(".mobile-calendar");
   if (mobileCalendar) {
     // Fallback: altijd een maandtabel tonen
-    let html = '<table class="mobile-calendar-table" style="width:100%"><thead><tr>';
-    const daysOfWeek = ['MA', 'DI', 'WO', 'DO', 'VR', 'ZA', 'ZO'];
+    let html =
+      '<table class="mobile-calendar-table" style="width:100%"><thead><tr>';
+    const daysOfWeek = ["MA", "DI", "WO", "DO", "VR", "ZA", "ZO"];
     for (let i = 0; i < 7; i++) {
       html += `<th>${daysOfWeek[i]}</th>`;
     }
-    html += '</tr></thead><tbody>';
+    html += "</tr></thead><tbody>";
     let firstDay = new Date(currentYear, currentMonth, 1).getDay();
     firstDay = firstDay === 0 ? 6 : firstDay - 1;
     let day = 1;
     for (let week = 0; week < 6; week++) {
-      html += '<tr>';
+      html += "<tr>";
       for (let i = 0; i < 7; i++) {
         if ((week === 0 && i < firstDay) || day > daysInMonth) {
-          html += '<td></td>';
+          html += "<td></td>";
         } else {
           html += `<td style="height:44px;text-align:center;">${day}</td>`;
           day++;
         }
       }
-      html += '</tr>';
+      html += "</tr>";
       if (day > daysInMonth) break;
     }
-    html += '</tbody></table>';
+    html += "</tbody></table>";
     mobileCalendar.innerHTML = html;
   }
 }
@@ -1439,11 +1467,14 @@ function loadTaskMembers(slotId) {
           <div style='font-weight:500;margin-bottom:4px;'>Ingeschreven leden (${data.assigned.length}):</div>
           <div>${membersList}</div>
         `;
-        
+
         // Check of huidige user is ingeschreven
-        const currentUserId = typeof currentUser !== "undefined" ? currentUser.id : null;
-        const isSignedUp = data.assigned.some((u) => u.user_id == currentUserId);
-        
+        const currentUserId =
+          typeof currentUser !== "undefined" ? currentUser.id : null;
+        const isSignedUp = data.assigned.some(
+          (u) => u.user_id == currentUserId,
+        );
+
         // Update signup knop als user niet admin is
         if (!userIsAdmin) {
           updateSignupButton(slotId, isSignedUp);
@@ -1453,7 +1484,7 @@ function loadTaskMembers(slotId) {
           <div style='font-weight:500;margin-bottom:4px;'>Ingeschreven leden:</div>
           <div style='color:#999;font-style:italic;'>Nog niemand ingeschreven</div>
         `;
-        
+
         // Update signup knop
         if (!userIsAdmin) {
           updateSignupButton(slotId, false);

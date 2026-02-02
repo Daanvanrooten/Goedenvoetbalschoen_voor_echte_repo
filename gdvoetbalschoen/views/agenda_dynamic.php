@@ -257,7 +257,7 @@ $events = [
     <script>
         // User role voor admin checks
         const userIsAdmin = <?php echo (isset($user['role_id']) && $user['role_id'] == 2) ? 'true' : 'false'; ?>;
-        
+
         // Current user data voor signup functionaliteit
         const currentUser = {
             id: <?php echo $user['id']; ?>,

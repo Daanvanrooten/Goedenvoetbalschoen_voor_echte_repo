@@ -77,9 +77,9 @@ try {
     }
 
     echo json_encode([
-        'success' => true, 
-        'message' => 'Taak succesvol opgeslagen!', 
-        'task_id' => $task_id, 
+        'success' => true,
+        'message' => 'Taak succesvol opgeslagen!',
+        'task_id' => $task_id,
         'slot_id' => $slot_id,
         'category_id' => $category,
         'assigned_count' => count($personeel)
