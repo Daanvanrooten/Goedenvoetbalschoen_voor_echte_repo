@@ -96,15 +96,14 @@ function showTasksModal(date, events) {
         </div>
         <div style='padding:0 20px 20px 20px;max-height:400px;overflow-y:auto;'>
             ${events
-              .map(
-                (ev, idx) => {
-                  const capacity = ev.capacity || 1;
-                  const registered = ev.registered_count || 0;
-                  const spotsLeft = capacity - registered;
-                  const isFull = spotsLeft <= 0;
-                  const userRegistered = ev.user_is_registered || false;
-                  
-                  return `
+              .map((ev, idx) => {
+                const capacity = ev.capacity || 1;
+                const registered = ev.registered_count || 0;
+                const spotsLeft = capacity - registered;
+                const isFull = spotsLeft <= 0;
+                const userRegistered = ev.user_is_registered || false;
+
+                return `
                 <div class='task-item-modal' style='margin-bottom:18px;padding:16px;background:#f9f9f9;border-radius:8px;position:relative;' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}'>
                     <div style='font-weight:600;font-size:17px;margin-bottom:6px;'>${ev.title}</div>
                     <div style='color:#888;font-size:14px;margin-bottom:8px;'>
@@ -112,14 +111,18 @@ function showTasksModal(date, events) {
                         ${ev.frequency ? `<span style='background:#e5dbfa;color:#6b5b95;padding:2px 8px;border-radius:4px;font-size:12px;'>${ev.frequency}</span>` : ""}
                     </div>
                     
-                    ${!isAdmin ? `
-                    <div style='background:#fff;padding:10px;border-radius:6px;margin:10px 0;border-left:3px solid ${isFull ? '#dc3545' : '#28a745'};'>
+                    ${
+                      !isAdmin
+                        ? `
+                    <div style='background:#fff;padding:10px;border-radius:6px;margin:10px 0;border-left:3px solid ${isFull ? "#dc3545" : "#28a745"};'>
                         <div style='font-size:13px;color:#666;margin-bottom:4px;'>Beschikbare plekken</div>
-                        <div style='font-size:18px;font-weight:600;color:${isFull ? '#dc3545' : '#28a745'};'>
-                            ${registered} / ${capacity} ${isFull ? '(VOL)' : ''}
+                        <div style='font-size:18px;font-weight:600;color:${isFull ? "#dc3545" : "#28a745"};'>
+                            ${registered} / ${capacity} ${isFull ? "(VOL)" : ""}
                         </div>
                     </div>
-                    ` : ''}
+                    `
+                        : ""
+                    }
                     
                     <div class='task-members-${ev.slot_id}' style='margin:8px 0;font-size:14px;color:#666;'>
                         <div style='font-weight:500;margin-bottom:4px;'>Ingeschreven leden:</div>
@@ -139,15 +142,16 @@ function showTasksModal(date, events) {
                     `
                         : `
                     <div class='signup-container-${ev.slot_id}' style='margin-top:12px;'>
-                        ${userRegistered 
-                          ? `<button class='signout-task-btn' data-slot-id='${ev.slot_id || ""}' style='width:100%;background:#dc3545;color:#fff;border:none;padding:12px 16px;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;transition:all 0.2s;box-shadow:0 2px 4px rgba(220,53,69,0.3);'>
+                        ${
+                          userRegistered
+                            ? `<button class='signout-task-btn' data-slot-id='${ev.slot_id || ""}' style='width:100%;background:#dc3545;color:#fff;border:none;padding:12px 16px;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;transition:all 0.2s;box-shadow:0 2px 4px rgba(220,53,69,0.3);'>
                               ✗ Uitschrijven
                              </button>`
-                          : isFull
-                            ? `<button disabled style='width:100%;background:#6c757d;color:#fff;border:none;padding:12px 16px;border-radius:8px;cursor:not-allowed;font-size:15px;font-weight:600;opacity:0.6;'>
+                            : isFull
+                              ? `<button disabled style='width:100%;background:#6c757d;color:#fff;border:none;padding:12px 16px;border-radius:8px;cursor:not-allowed;font-size:15px;font-weight:600;opacity:0.6;'>
                                 🚫 Taak is vol
                                </button>`
-                            : `<button class='signup-task-btn' data-slot-id='${ev.slot_id || ""}' style='width:100%;background:#28a745;color:#fff;border:none;padding:12px 16px;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;transition:all 0.2s;box-shadow:0 2px 4px rgba(40,167,69,0.3);'>
+                              : `<button class='signup-task-btn' data-slot-id='${ev.slot_id || ""}' style='width:100%;background:#28a745;color:#fff;border:none;padding:12px 16px;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;transition:all 0.2s;box-shadow:0 2px 4px rgba(40,167,69,0.3);'>
                                 ✓ Inschrijven voor taak
                                </button>`
                         }
@@ -156,8 +160,7 @@ function showTasksModal(date, events) {
                     }
                 </div>
             `;
-                }
-              )
+              })
               .join("")}
         </div>
     </div>`;
@@ -205,29 +208,29 @@ function showTasksModal(date, events) {
         handleSignupToggle(slotId, false);
       };
       // Hover effect
-      btn.onmouseenter = function() {
-        this.style.transform = 'translateY(-2px)';
-        this.style.boxShadow = '0 4px 8px rgba(40,167,69,0.4)';
+      btn.onmouseenter = function () {
+        this.style.transform = "translateY(-2px)";
+        this.style.boxShadow = "0 4px 8px rgba(40,167,69,0.4)";
       };
-      btn.onmouseleave = function() {
-        this.style.transform = 'translateY(0)';
-        this.style.boxShadow = '0 2px 4px rgba(40,167,69,0.3)';
+      btn.onmouseleave = function () {
+        this.style.transform = "translateY(0)";
+        this.style.boxShadow = "0 2px 4px rgba(40,167,69,0.3)";
       };
     });
-    
+
     modal.querySelectorAll(".signout-task-btn").forEach((btn) => {
       btn.onclick = function () {
         const slotId = this.dataset.slotId;
         handleSignupToggle(slotId, true);
       };
       // Hover effect
-      btn.onmouseenter = function() {
-        this.style.transform = 'translateY(-2px)';
-        this.style.boxShadow = '0 4px 8px rgba(220,53,69,0.4)';
+      btn.onmouseenter = function () {
+        this.style.transform = "translateY(-2px)";
+        this.style.boxShadow = "0 4px 8px rgba(220,53,69,0.4)";
       };
-      btn.onmouseleave = function() {
-        this.style.transform = 'translateY(0)';
-        this.style.boxShadow = '0 2px 4px rgba(220,53,69,0.3)';
+      btn.onmouseleave = function () {
+        this.style.transform = "translateY(0)";
+        this.style.boxShadow = "0 2px 4px rgba(220,53,69,0.3)";
       };
     });
   }
