@@ -46,9 +46,23 @@ if (isset($_SESSION['user'])) {
                     </a>
                 <?php endif; ?>
                 <?php if ($userInitial): ?>
-                    <div class="nav-icon profile-icon" title="Profiel" style="cursor:pointer;">
-                        <div class="profile-circle" id="profileBtn"><?php echo $userInitial; ?></div>
-                    </div>
+                    <a href="views/UserPage.php" style="
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 50%;
+                        background: linear-gradient(135deg, #6b7adb 0%, #8b9bef 100%);
+                        color: white;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 18px;
+                        font-weight: 600;
+                        box-shadow: 0 2px 8px rgba(107, 122, 219, 0.3);
+                        cursor: pointer;
+                        transition: all 0.3s;
+                    ">
+                    <?php echo $userInitial;?>
+                    </a>
                 <?php else: ?>
                     <a href="views/login.php" class="nav-icon profile-icon" title="Profiel" id="profileBtn">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">

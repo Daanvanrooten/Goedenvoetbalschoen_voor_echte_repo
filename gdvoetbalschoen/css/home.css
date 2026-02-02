@@ -1,5 +1,5 @@
 /* Profile Circle (gelijk aan agenda.css) */
-.profile-circle {
+.profile-image {
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -15,7 +15,7 @@
     transition: all 0.3s;
 }
 
-.profile-circle:hover {
+.profile-image:hover {
     transform: scale(1.1);
     box-shadow: 0 4px 12px rgba(107, 122, 219, 0.4);
 }

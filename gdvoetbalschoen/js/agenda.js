@@ -522,8 +522,8 @@ toggleBtns.forEach((btn) => {
       // Toon weeknavigatie altijd in weekview
       const weekNav = document.getElementById("weekNavigation");
       if (weekNav) weekNav.style.display = "flex";
-      // Hide mobile tasks section in week view
-      if (mobileTasksSection && window.innerWidth <= 768) {
+      // Hide mobile tasks section in week view (telefoon)
+      if (mobileTasksSection) {
         mobileTasksSection.style.display = "none";
       }
       // Initialize week view
@@ -674,14 +674,14 @@ const logoutModal = document.getElementById("logoutModal");
 const cancelLogoutBtn = document.querySelector(".cancel-logout-btn");
 const confirmLogoutBtn = document.querySelector(".confirm-logout-btn");
 
-if (profileCircle) {
-  profileCircle.addEventListener("click", function (e) {
-    e.preventDefault();
-    // Open logout modal
-    logoutModal.classList.add("active");
-    document.body.style.overflow = "hidden";
-  });
-}
+// if (profileCircle) {
+//   profileCircle.addEventListener("click", function (e) {
+//     e.preventDefault();
+//     // Open logout modal
+//     logoutModal.classList.add("active");
+//     document.body.style.overflow = "hidden";
+//   });
+// }
 
 // Close logout modal functions
 function closeLogoutModal() {
@@ -759,6 +759,63 @@ if (prevMonthBtn) {
     }
     updateCalendarTitle();
     regenerateCalendar();
+    // Regenerate mobile calendar for month view
+    if (window.innerWidth <= 768) {
+      // Get tasks for new month
+      const year = currentYear;
+      const month = currentMonth;
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const start = `${year}-${String(month + 1).padStart(2, "0")}-01`;
+      const end = `${year}-${String(month + 1).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
+      fetch(`${baseUrl}/api/tasks/get_calendar_tasks.php?start=${start}&end=${end}`)
+        .then((res) => res.json())
+        .then((tasksByDate) => {
+          // Render mobile calendar
+          const mobileCalendar = document.querySelector(".mobile-calendar");
+          if (mobileCalendar) {
+            // ...existing code for rendering mobile calendar...
+            let html = '<table class="mobile-calendar-table" style="width:100%"><thead><tr>';
+            const daysOfWeek = ['MA', 'DI', 'WO', 'DO', 'VR', 'ZA', 'ZO'];
+            for (let i = 0; i < 7; i++) {
+              html += `<th>${daysOfWeek[i]}</th>`;
+            }
+            html += '</tr></thead><tbody>';
+            let firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            firstDay = firstDay === 0 ? 6 : firstDay - 1;
+            let day = 1;
+            for (let week = 0; week < 6; week++) {
+              html += '<tr>';
+              for (let i = 0; i < 7; i++) {
+                if ((week === 0 && i < firstDay) || day > daysInMonth) {
+                  html += '<td></td>';
+                } else {
+                  const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+                  const tasks = typeof tasksByDate !== "undefined" && tasksByDate[dateKey] ? tasksByDate[dateKey] : [];
+                  let cellContent = `<div class="mobile-day-number">${day}</div>`;
+                  let cellClass = "";
+                  if (tasks.length > 0) {
+                    if (tasks[0].color === "#cccccc") cellClass = "has-task-green";
+                    else if (tasks[0].color === "#ffb8d1") cellClass = "has-task-pink";
+                    else cellClass = "has-task-green";
+                    cellContent += tasks.map(ev => {
+                      let colorClass = "";
+                      if (ev.color === "#cccccc") colorClass = "green-cell";
+                      else if (ev.color === "#ffb8d1") colorClass = "pink-cell";
+                      return `<div class=\"mobile-task-badge ${colorClass}\" style=\"margin:2px 0;padding:2px 6px;border-radius:4px;font-size:13px;display:inline-block;\">${ev.title}</div>`;
+                    }).join("");
+                  }
+                  html += `<td class=\"${cellClass}\" style=\"height:44px;text-align:center;vertical-align:top;\">${cellContent}</td>`;
+                  day++;
+                }
+              }
+              html += '</tr>';
+              if (day > daysInMonth) break;
+            }
+            html += '</tbody></table>';
+            mobileCalendar.innerHTML = html;
+          }
+        });
+    }
   });
 }
 
@@ -772,14 +829,68 @@ if (nextMonthBtn) {
     }
     updateCalendarTitle();
     regenerateCalendar();
+    // Regenerate mobile calendar for month view
+    if (window.innerWidth <= 768) {
+      // Get tasks for new month
+      const year = currentYear;
+      const month = currentMonth;
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const start = `${year}-${String(month + 1).padStart(2, "0")}-01`;
+      const end = `${year}-${String(month + 1).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
+      fetch(`${baseUrl}/api/tasks/get_calendar_tasks.php?start=${start}&end=${end}`)
+        .then((res) => res.json())
+        .then((tasksByDate) => {
+          // Render mobile calendar
+          const mobileCalendar = document.querySelector(".mobile-calendar");
+          if (mobileCalendar) {
+            // ...existing code for rendering mobile calendar...
+            let html = '<table class="mobile-calendar-table" style="width:100%"><thead><tr>';
+            const daysOfWeek = ['MA', 'DI', 'WO', 'DO', 'VR', 'ZA', 'ZO'];
+            for (let i = 0; i < 7; i++) {
+              html += `<th>${daysOfWeek[i]}</th>`;
+            }
+            html += '</tr></thead><tbody>';
+            let firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            firstDay = firstDay === 0 ? 6 : firstDay - 1;
+            let day = 1;
+            for (let week = 0; week < 6; week++) {
+              html += '<tr>';
+              for (let i = 0; i < 7; i++) {
+                if ((week === 0 && i < firstDay) || day > daysInMonth) {
+                  html += '<td></td>';
+                } else {
+                  const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+                  const tasks = typeof tasksByDate !== "undefined" && tasksByDate[dateKey] ? tasksByDate[dateKey] : [];
+                  let cellContent = `<div class="mobile-day-number">${day}</div>`;
+                  let cellClass = "";
+                  if (tasks.length > 0) {
+                    if (tasks[0].color === "#cccccc") cellClass = "has-task-green";
+                    else if (tasks[0].color === "#ffb8d1") cellClass = "has-task-pink";
+                    else cellClass = "has-task-green";
+                    cellContent += tasks.map(ev => {
+                      let colorClass = "";
+                      if (ev.color === "#cccccc") colorClass = "green-cell";
+                      else if (ev.color === "#ffb8d1") colorClass = "pink-cell";
+                      return `<div class=\"mobile-task-badge ${colorClass}\" style=\"margin:2px 0;padding:2px 6px;border-radius:4px;font-size:13px;display:inline-block;\">${ev.title}</div>`;
+                    }).join("");
+                  }
+                  html += `<td class=\"${cellClass}\" style=\"height:44px;text-align:center;vertical-align:top;\">${cellContent}</td>`;
+                  day++;
+                }
+              }
+              html += '</tr>';
+              if (day > daysInMonth) break;
+            }
+            html += '</tbody></table>';
+            mobileCalendar.innerHTML = html;
+          }
+        });
+    }
   });
 }
 
 // Regenerate calendar grid for new month
 function regenerateCalendar() {
-  console.log('=== regenerateCalendar CALLED ===');
-  console.log('Current month:', currentMonth, 'Current year:', currentYear);
-  
   const daysGrid = document.querySelector(".days-grid");
   const weekNumbers = document.querySelector(".week-numbers");
   if (!daysGrid) return;
@@ -838,13 +949,9 @@ function regenerateCalendar() {
   const month = currentMonth;
   const start = `${year}-${String(month + 1).padStart(2, "0")}-01`;
   const end = `${year}-${String(month + 1).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
-  
   fetch(`${baseUrl}/api/tasks/get_calendar_tasks.php?start=${start}&end=${end}`)
     .then((res) => res.json())
     .then((tasksByDate) => {
-      console.log('Desktop calendar tasks:', tasksByDate);
-
-      // Render desktop calendar days
       for (let day = 1; day <= daysInMonth; day++) {
         const dayCell = document.createElement("div");
         dayCell.className = "day-cell current-month";
@@ -871,95 +978,117 @@ function regenerateCalendar() {
         const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
         if (tasksByDate[dateKey]) {
           renderEventsForDay(dayCell, tasksByDate[dateKey]);
-          dayCell.classList.add("green");
+          dayCell.classList.add("green"); // optioneel: hele dag kleuren
         }
 
         daysGrid.appendChild(dayCell);
       }
-
-      // Add next month's days to fill the grid
-      const totalCells = adjustedFirstDay + daysInMonth;
-      const remainingCells = Math.ceil(totalCells / 7) * 7 - totalCells;
-
-      for (let day = 1; day <= remainingCells; day++) {
-        const dayCell = document.createElement("div");
-        dayCell.className = "day-cell prev-month";
-        dayCell.textContent = day;
-        daysGrid.appendChild(dayCell);
-      }
-
-      // Re-add click handlers to new day cells
-      const newDayCells = daysGrid.querySelectorAll(".day-cell");
-      newDayCells.forEach((cell) => {
-        cell.addEventListener("click", function () {
-          if (!this.querySelector(".event")) {
-            console.log("Empty day clicked - add new event");
-          }
-        });
-      });
-
-      // Generate mobile calendar - render with tasks
-      console.log('=== About to render mobile calendar ===');
-      const mobileCalendar = document.querySelector(".mobile-calendar");
-      console.log('Mobile calendar element found?', mobileCalendar !== null);
-      
-      if (mobileCalendar) {
-        console.log('Starting mobile calendar render...');
-        console.log('Mobile calendar tasks:', tasksByDate);
-        
-        const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-        let firstDay = new Date(year, month, 1).getDay();
-        
-        let html = '<table class="mobile-calendar-table" style="width:100%;border-collapse:collapse;"><thead><tr>';
-        for (let i = 0; i < 7; i++) {
-            html += `<th style="text-align:center;padding:8px;font-size:12px;color:#666;font-weight:600;">${daysOfWeek[i]}</th>`;
-        }
-        html += '</tr></thead><tbody>';
-        
-        let day = 1;
-        for (let week = 0; week < 6; week++) {
-            html += '<tr>';
-            for (let i = 0; i < 7; i++) {
-                if ((week === 0 && i < firstDay) || day > daysInMonth) {
-                    html += '<td style="height:48px;border:1px solid #eee;"></td>';
-                } else {
-                    const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                    const hasTasks = tasksByDate[dateKey] && tasksByDate[dateKey].length > 0;
-                    const cellStyle = hasTasks ? 'background:#d4edda;color:#155724;font-weight:600;' : '';
-                    
-                    html += `<td style="height:48px;text-align:center;vertical-align:middle;border:1px solid #eee;cursor:pointer;${cellStyle}" data-date="${dateKey}">${day}</td>`;
-                    day++;
-                }
-            }
-            html += '</tr>';
-            if (day > daysInMonth) break;
-        }
-        html += '</tbody></table>';
-        mobileCalendar.innerHTML = html;
-        
-        console.log('Mobile calendar HTML set, adding click handlers...');
-        
-        // Add click handlers to ALL cells
-        setTimeout(() => {
-            mobileCalendar.querySelectorAll('td[data-date]').forEach(cell => {
-                const date = cell.dataset.date;
-                const events = tasksByDate[date] || [];
-                
-                cell.onclick = function() {
-                    if (events.length > 0) {
-                        showTasksModal(date, events);
-                    } else {
-                        console.log('No tasks for', date);
-                    }
-                };
-            });
-            console.log('Click handlers added to mobile calendar');
-        }, 0);
-      }
-    })
-    .catch(err => {
-        console.error('Error fetching calendar tasks:', err);
     });
+
+  // Add next month's days to fill the grid
+  const totalCells = adjustedFirstDay + daysInMonth;
+  const remainingCells = Math.ceil(totalCells / 7) * 7 - totalCells;
+
+  for (let day = 1; day <= remainingCells; day++) {
+    const dayCell = document.createElement("div");
+    dayCell.className = "day-cell prev-month";
+    dayCell.textContent = day;
+    daysGrid.appendChild(dayCell);
+  }
+
+  // Re-add click handlers to new day cells
+  const newDayCells = daysGrid.querySelectorAll(".day-cell");
+  newDayCells.forEach((cell) => {
+    cell.addEventListener("click", function () {
+      if (!this.querySelector(".event")) {
+        console.log("Empty day clicked - add new event");
+      }
+    });
+  });
+function renderMobileMonthCalendar(year, month, tasksByDate) {
+    const mobileCal = document.querySelector('.mobile-calendar');
+    if (!mobileCal) return;
+    const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THUR', 'FRI', 'SAT']; // 7 kolommen
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    // Bepaal op welke dag van de week de 1e van de maand valt (0=Zon, 1=Ma, ...)
+    let firstDay = new Date(year, month, 1).getDay();
+    // Zet op 0=Zon, 1=Ma, ... 4=Do, 5=Vr, 6=Za, maar we tonen alleen 5 kolommen (zo nodig schuiven)
+    // Start altijd op zondag, maar max 5 kolommen
+    let startOffset = firstDay;
+    // Bouw weken
+    let weeks = [];
+    let day = 1;
+    while (day <= daysInMonth) {
+        let week = [];
+        for (let i = 0; i < 7; i++) {
+            if (weeks.length === 0 && i < startOffset && day === 1) {
+                week.push('');
+            } else if (day <= daysInMonth) {
+                week.push(day++);
+            } else {
+                week.push('');
+            }
+        }
+        weeks.push(week);
+    }
+    // Bouw de tabel
+    let html = '<table class="mobile-calendar-table" style="table-layout:fixed;width:100%"><tbody>';
+    // Header
+    html += '<tr>';
+    for (let i = 0; i < 7; i++) {
+        html += `<td class="day-label" style="width:14.28%">${daysOfWeek[i]}</td>`;
+    }
+    html += '</tr>';
+    // Dagen
+    for (let w = 0; w < weeks.length; w++) {
+        html += '<tr>';
+        for (let i = 0; i < 7; i++) {
+            const d = weeks[w][i];
+            if (d) {
+                const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                let eventClass = '';
+                if (tasksByDate && tasksByDate[dateKey] && tasksByDate[dateKey].length > 0) {
+                    eventClass = 'green-cell';
+                }
+                html += `<td class="${eventClass}" style="width:14.28%;height:48px;text-align:center;vertical-align:middle;">${d}</td>`;
+            } else {
+                html += '<td style="width:14.28%;height:48px;"></td>';
+            }
+        }
+        html += '</tr>';
+    }
+    html += '</tbody></table>';
+    mobileCal.innerHTML = html;
+}
+  // Generate mobile calendar - always render month table
+  const mobileCalendar = document.querySelector(".mobile-calendar");
+  if (mobileCalendar) {
+    // Fallback: altijd een maandtabel tonen
+    let html = '<table class="mobile-calendar-table" style="width:100%"><thead><tr>';
+    const daysOfWeek = ['MA', 'DI', 'WO', 'DO', 'VR', 'ZA', 'ZO'];
+    for (let i = 0; i < 7; i++) {
+      html += `<th>${daysOfWeek[i]}</th>`;
+    }
+    html += '</tr></thead><tbody>';
+    let firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    firstDay = firstDay === 0 ? 6 : firstDay - 1;
+    let day = 1;
+    for (let week = 0; week < 6; week++) {
+      html += '<tr>';
+      for (let i = 0; i < 7; i++) {
+        if ((week === 0 && i < firstDay) || day > daysInMonth) {
+          html += '<td></td>';
+        } else {
+          html += `<td style="height:44px;text-align:center;">${day}</td>`;
+          day++;
+        }
+      }
+      html += '</tr>';
+      if (day > daysInMonth) break;
+    }
+    html += '</tbody></table>';
+    mobileCalendar.innerHTML = html;
+  }
 }
 
 // Helper function to get ISO week number
@@ -1123,37 +1252,36 @@ function regenerateWeekView() {
             contentClass = "pink-day";
           // Genereer de dagcel
           mobileDay.innerHTML = `
-                        <div class="mobile-day-label">${daysOfWeek[i]}</div>
-                        <div class="mobile-day-content ${contentClass}">
-                            <div class="mobile-day-number">${dayNumber}</div>
-                            ${events
-                              .map(
-                                (ev, idx) => `
-                                <div class=\"mobile-week-event\" data-idx=\"${idx}\" style=\"cursor:pointer;\">
-                                    <div class=\"event-time\">${ev.start} - ${ev.end}</div>
-                                    <div class=\"event-title\">${ev.title}</div>
-                                </div>
-                            `,
-                              )
-                              .join("")}
-                            ${events.length > 0 ? `<div class=\"event-author\">${events[0].author || ""}</div>` : ""}
-                        </div>
-                    `;
+            <div class="mobile-day-label">${daysOfWeek[i]}</div>
+            <div class="mobile-day-content ${contentClass}">
+                <div class="mobile-day-number">${dayNumber}</div>
+                ${events
+                  .map(
+                    (ev, idx) => `
+                    <div class=\"mobile-week-event\" data-idx=\"${idx}\" style=\"cursor:pointer;\">
+                        <div class=\"event-time\">${ev.start} - ${ev.end}</div>
+                        <div class=\"event-title\">${ev.title}</div>
+                    </div>
+                `,
+                  )
+                  .join("")}
+                ${events.length > 0 ? `<div class=\"event-author\">${events[0].author || ""}</div>` : ""}
+            </div>
+          `;
           // Click handler op dag zelf (voor dagen zonder taken)
           mobileDay.onclick = function (e) {
-              if (!e.target.closest(".mobile-week-event")) {
-                if (events.length > 0) {
-                  showTasksModal(dateKey, events);
-                }
-              }
+            // Alleen uitvoeren als er niet op een taak geklikt is
+            if (!e.target.closest(".mobile-week-event")) {
+              showMobileTasksForDay(dateKey, events);
+            }
           };
           // Click handler op elke taak
           setTimeout(() => {
             const eventDivs = mobileDay.querySelectorAll(".mobile-week-event");
             eventDivs.forEach((evDiv) => {
               evDiv.onclick = function (e) {
-                  e.stopPropagation();
-                  showTasksModal(dateKey, events);
+                e.stopPropagation();
+                showMobileTasksForDay(dateKey, events);
               };
             });
           }, 0);

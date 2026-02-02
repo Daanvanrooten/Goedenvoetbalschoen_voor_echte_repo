@@ -17,7 +17,6 @@ $isAdmin = isset($_SESSION['user']['role_id']) && $_SESSION['user']['role_id'] =
 $start = isset($_GET['start']) ? $_GET['start'] : '2026-01-01';
 $end = isset($_GET['end']) ? $_GET['end'] : '2026-01-31';
 
-
 // 1. Haal alle slots in het bereik op
 // Als admin: alle taken
 // Als user: alleen taken waar deze user aan toegewezen is

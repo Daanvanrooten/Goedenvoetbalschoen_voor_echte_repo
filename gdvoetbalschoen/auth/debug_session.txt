@@ -1,9 +1,9 @@
 Array
 (
-    [id] => 7
-    [first_name] => Danoo
-    [last_name] => Roott
-    [email] => daa123212131221312312nvanrooten@gmail.com
-    [username] => Danoroot1
-    [role_id] => 2
+    [id] => 8
+    [first_name] => Naam2
+    [last_name] => Achternaam2
+    [email] => kaimarkies@gmail.com
+    [username] => bob3
+    [role_id] => 1
 )

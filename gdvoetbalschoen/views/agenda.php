@@ -73,6 +73,7 @@ while (count($weekNumbers) < 2) {
 </head>
 
 <body>
+
     <header>
         <div class="container">
             <div class="logo">
@@ -97,9 +98,23 @@ while (count($weekNumbers) < 2) {
                     </a>
                 <?php endif; ?>
                 <?php if ($userInitial): ?>
-                    <div class="nav-icon profile-icon" title="Profiel" style="cursor:pointer;">
-                        <div class="profile-circle" id="profileBtn"><?php echo $userInitial; ?></div>
-                    </div>
+                    <a href="UserPage.php" style="
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 50%;
+                        background: linear-gradient(135deg, #6b7adb 0%, #8b9bef 100%);
+                        color: white;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 18px;
+                        font-weight: 600;
+                        box-shadow: 0 2px 8px rgba(107, 122, 219, 0.3);
+                        cursor: pointer;
+                        transition: all 0.3s;
+                    ">
+                        <div class="profile-" id="profileBtn">N</div>
+                    </a>
                 <?php else: ?>
                     <a href="login.php" class="nav-icon profile-icon" title="Profiel" id="profileBtn">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -511,18 +526,7 @@ while (count($weekNumbers) < 2) {
                         <label>Beschrijving</label>
                         <textarea name="beschrijving" placeholder="Placeholder" rows="4"></textarea>
                     </div>
-                    <div class="form-group full-width">
-                        <label>Foto toevoegen</label>
-                        <div class="file-upload">
-                            <div class="upload-icon">
-                                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                                <p>Voeg foto toe</p>
-                            </div>
-                            <input type="file" name="foto" accept="image/*" style="display: none;" id="fotoInput">
-                        </div>
-                    </div>
+                    
                     <div class="form-actions">
                         <button type="submit" class="submit-btn">Taak aanmaken</button>
                     </div>
