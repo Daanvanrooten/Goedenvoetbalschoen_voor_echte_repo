@@ -87,7 +87,7 @@ function showTasksModal(date, events) {
 
   modal.innerHTML = `<div class="task-modal-content" style="background:#fff;border-radius:16px;max-width:500px;width:90vw;padding:0;box-shadow:0 2px 16px rgba(0,0,0,0.15);overflow:hidden;">
         <div style='display:flex;align-items:center;gap:12px;padding:16px 20px 0 20px;'>
-            <div style='background:#e5dbfa;color:#6b5b95;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:600;'>A</div>
+            <div style='background:#e5dbfa;color:#6b5b95;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:600;'>📋</div>
             <span style='font-weight:600;font-size:18px;'>Taak Details</span>
             <button id='closeTasksModal' style='margin-left:auto;background:none;border:none;font-size:22px;cursor:pointer;'>&times;</button>
         </div>
@@ -97,13 +97,30 @@ function showTasksModal(date, events) {
         <div style='padding:0 20px 20px 20px;max-height:400px;overflow-y:auto;'>
             ${events
               .map(
-                (ev, idx) => `
+                (ev, idx) => {
+                  const capacity = ev.capacity || 1;
+                  const registered = ev.registered_count || 0;
+                  const spotsLeft = capacity - registered;
+                  const isFull = spotsLeft <= 0;
+                  const userRegistered = ev.user_is_registered || false;
+                  
+                  return `
                 <div class='task-item-modal' style='margin-bottom:18px;padding:16px;background:#f9f9f9;border-radius:8px;position:relative;' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}'>
                     <div style='font-weight:600;font-size:17px;margin-bottom:6px;'>${ev.title}</div>
                     <div style='color:#888;font-size:14px;margin-bottom:8px;'>
                         <span style='display:inline-block;margin-right:12px;'>🕐 ${ev.start} - ${ev.end}</span>
                         ${ev.frequency ? `<span style='background:#e5dbfa;color:#6b5b95;padding:2px 8px;border-radius:4px;font-size:12px;'>${ev.frequency}</span>` : ""}
                     </div>
+                    
+                    ${!isAdmin ? `
+                    <div style='background:#fff;padding:10px;border-radius:6px;margin:10px 0;border-left:3px solid ${isFull ? '#dc3545' : '#28a745'};'>
+                        <div style='font-size:13px;color:#666;margin-bottom:4px;'>Beschikbare plekken</div>
+                        <div style='font-size:18px;font-weight:600;color:${isFull ? '#dc3545' : '#28a745'};'>
+                            ${registered} / ${capacity} ${isFull ? '(VOL)' : ''}
+                        </div>
+                    </div>
+                    ` : ''}
+                    
                     <div class='task-members-${ev.slot_id}' style='margin:8px 0;font-size:14px;color:#666;'>
                         <div style='font-weight:500;margin-bottom:4px;'>Ingeschreven leden:</div>
                         <div style='font-style:italic;color:#999;'>Laden...</div>
@@ -122,14 +139,24 @@ function showTasksModal(date, events) {
                     `
                         : `
                     <div class='signup-container-${ev.slot_id}' style='margin-top:12px;'>
-                        <button class='signup-task-btn' data-slot-id='${ev.slot_id || ""}' style='width:100%;background:#28a745;color:#fff;border:none;padding:10px 16px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:500;'>
-                            ✓ Inschrijven
-                        </button>
+                        ${userRegistered 
+                          ? `<button class='signout-task-btn' data-slot-id='${ev.slot_id || ""}' style='width:100%;background:#dc3545;color:#fff;border:none;padding:12px 16px;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;transition:all 0.2s;box-shadow:0 2px 4px rgba(220,53,69,0.3);'>
+                              ✗ Uitschrijven
+                             </button>`
+                          : isFull
+                            ? `<button disabled style='width:100%;background:#6c757d;color:#fff;border:none;padding:12px 16px;border-radius:8px;cursor:not-allowed;font-size:15px;font-weight:600;opacity:0.6;'>
+                                🚫 Taak is vol
+                               </button>`
+                            : `<button class='signup-task-btn' data-slot-id='${ev.slot_id || ""}' style='width:100%;background:#28a745;color:#fff;border:none;padding:12px 16px;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;transition:all 0.2s;box-shadow:0 2px 4px rgba(40,167,69,0.3);'>
+                                ✓ Inschrijven voor taak
+                               </button>`
+                        }
                     </div>
                     `
                     }
                 </div>
-            `,
+            `;
+                }
               )
               .join("")}
         </div>
@@ -171,11 +198,36 @@ function showTasksModal(date, events) {
       };
     });
   } else {
-    // Event listeners voor signup knoppen (users)
+    // Event listeners voor signup/signout knoppen (users)
     modal.querySelectorAll(".signup-task-btn").forEach((btn) => {
       btn.onclick = function () {
         const slotId = this.dataset.slotId;
-        handleSignupToggle(slotId);
+        handleSignupToggle(slotId, false);
+      };
+      // Hover effect
+      btn.onmouseenter = function() {
+        this.style.transform = 'translateY(-2px)';
+        this.style.boxShadow = '0 4px 8px rgba(40,167,69,0.4)';
+      };
+      btn.onmouseleave = function() {
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 2px 4px rgba(40,167,69,0.3)';
+      };
+    });
+    
+    modal.querySelectorAll(".signout-task-btn").forEach((btn) => {
+      btn.onclick = function () {
+        const slotId = this.dataset.slotId;
+        handleSignupToggle(slotId, true);
+      };
+      // Hover effect
+      btn.onmouseenter = function() {
+        this.style.transform = 'translateY(-2px)';
+        this.style.boxShadow = '0 4px 8px rgba(220,53,69,0.4)';
+      };
+      btn.onmouseleave = function() {
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 2px 4px rgba(220,53,69,0.3)';
       };
     });
   }
@@ -1467,28 +1519,11 @@ function loadTaskMembers(slotId) {
           <div style='font-weight:500;margin-bottom:4px;'>Ingeschreven leden (${data.assigned.length}):</div>
           <div>${membersList}</div>
         `;
-
-        // Check of huidige user is ingeschreven
-        const currentUserId =
-          typeof currentUser !== "undefined" ? currentUser.id : null;
-        const isSignedUp = data.assigned.some(
-          (u) => u.user_id == currentUserId,
-        );
-
-        // Update signup knop als user niet admin is
-        if (!userIsAdmin) {
-          updateSignupButton(slotId, isSignedUp);
-        }
       } else {
         container.innerHTML = `
           <div style='font-weight:500;margin-bottom:4px;'>Ingeschreven leden:</div>
           <div style='color:#999;font-style:italic;'>Nog niemand ingeschreven</div>
         `;
-
-        // Update signup knop
-        if (!userIsAdmin) {
-          updateSignupButton(slotId, false);
-        }
       }
     })
     .catch((err) => {
@@ -1500,42 +1535,8 @@ function loadTaskMembers(slotId) {
     });
 }
 
-// Update signup/uitschrijven knop
-function updateSignupButton(slotId, isSignedUp) {
-  const container = document.querySelector(`.signup-container-${slotId}`);
-  if (!container) return;
-
-  if (isSignedUp) {
-    container.innerHTML = `
-      <button class='signout-task-btn' data-slot-id='${slotId}' style='width:100%;background:#dc3545;color:#fff;border:none;padding:10px 16px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:500;'>
-        ✗ Uitschrijven
-      </button>
-    `;
-    const btn = container.querySelector(".signout-task-btn");
-    btn.onclick = function () {
-      handleSignupToggle(slotId);
-    };
-  } else {
-    container.innerHTML = `
-      <button class='signup-task-btn' data-slot-id='${slotId}' style='width:100%;background:#28a745;color:#fff;border:none;padding:10px 16px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:500;'>
-        ✓ Inschrijven
-      </button>
-    `;
-    const btn = container.querySelector(".signup-task-btn");
-    btn.onclick = function () {
-      handleSignupToggle(slotId);
-    };
-  }
-}
-
 // Inschrijven/Uitschrijven toggle
-function handleSignupToggle(slotId) {
-  const container = document.querySelector(`.signup-container-${slotId}`);
-  if (!container) return;
-
-  const btn = container.querySelector("button");
-  const isSignedUp = btn.classList.contains("signout-task-btn");
-
+function handleSignupToggle(slotId, isSignedUp) {
   if (isSignedUp) {
     // Uitschrijven
     if (!confirm("Weet je zeker dat je je wilt uitschrijven van deze taak?")) {
@@ -1552,8 +1553,10 @@ function handleSignupToggle(slotId) {
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
+          // Sluit modal en herlaad
+          const modal = document.getElementById("tasksModal");
+          if (modal) modal.style.display = "none";
           alert(data.message);
-          loadTaskMembers(slotId);
           regenerateCalendar();
           regenerateWeekView();
         } else {
@@ -1576,8 +1579,10 @@ function handleSignupToggle(slotId) {
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
+          // Sluit modal en herlaad
+          const modal = document.getElementById("tasksModal");
+          if (modal) modal.style.display = "none";
           alert(data.message);
-          loadTaskMembers(slotId);
           regenerateCalendar();
           regenerateWeekView();
         } else {

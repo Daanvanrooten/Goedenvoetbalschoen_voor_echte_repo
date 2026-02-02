@@ -19,57 +19,32 @@ $end = isset($_GET['end']) ? $_GET['end'] : '2026-01-31';
 
 
 // 1. Haal alle slots in het bereik op
-// Als admin: alle taken
-// Als user: alleen taken waar deze user aan toegewezen is
-if ($isAdmin) {
-    $stmt = $pdo->prepare("
-        SELECT 
-            ts.slot_id,
-            ts.slot_date,
-            ts.start_time,
-            ts.end_time,
-            t.title,
-            t.task_id,
-            tc.color_hex,
-            t.frequency
-        FROM task_slots ts
-        JOIN tasks t ON t.task_id = ts.task_id
-        LEFT JOIN task_categories tc ON tc.category_id = t.category_id
-        WHERE ts.slot_date BETWEEN :start AND :end
-        AND t.is_active = 1
-        ORDER BY ts.slot_date, ts.start_time
-    ");
-    $stmt->execute([
-        ':start' => $start,
-        ':end'   => $end
-    ]);
-} else {
-    // User: alleen taken waar ze aan toegewezen zijn
-    $stmt = $pdo->prepare("
-        SELECT 
-            ts.slot_id,
-            ts.slot_date,
-            ts.start_time,
-            ts.end_time,
-            t.title,
-            t.task_id,
-            tc.color_hex,
-            t.frequency
-        FROM task_slots ts
-        JOIN tasks t ON t.task_id = ts.task_id
-        LEFT JOIN task_categories tc ON tc.category_id = t.category_id
-        INNER JOIN task_registrations tr ON tr.slot_id = ts.slot_id
-        WHERE ts.slot_date BETWEEN :start AND :end
-        AND t.is_active = 1
-        AND tr.user_id = :user_id
-        ORDER BY ts.slot_date, ts.start_time
-    ");
-    $stmt->execute([
-        ':start' => $start,
-        ':end'   => $end,
-        ':user_id' => $currentUserId
-    ]);
-}
+// Zowel admin als user kunnen alle taken zien
+$stmt = $pdo->prepare("
+    SELECT 
+        ts.slot_id,
+        ts.slot_date,
+        ts.start_time,
+        ts.end_time,
+        ts.capacity,
+        t.title,
+        t.task_id,
+        tc.color_hex,
+        t.frequency,
+        (SELECT COUNT(*) FROM task_registrations WHERE slot_id = ts.slot_id) as registered_count,
+        (SELECT COUNT(*) FROM task_registrations WHERE slot_id = ts.slot_id AND user_id = :user_id) as user_is_registered
+    FROM task_slots ts
+    JOIN tasks t ON t.task_id = ts.task_id
+    LEFT JOIN task_categories tc ON tc.category_id = t.category_id
+    WHERE ts.slot_date BETWEEN :start AND :end
+    AND t.is_active = 1
+    ORDER BY ts.slot_date, ts.start_time
+");
+$stmt->execute([
+    ':start' => $start,
+    ':end'   => $end,
+    ':user_id' => $currentUserId
+]);
 
 $tasksByDate = [];
 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -81,35 +56,22 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         'color' => $row['color_hex'],
         'slot_id' => $row['slot_id'],
         'task_id' => $row['task_id'],
-        'frequency' => $row['frequency']
+        'frequency' => $row['frequency'],
+        'capacity' => $row['capacity'],
+        'registered_count' => $row['registered_count'],
+        'user_is_registered' => $row['user_is_registered'] > 0
     ];
 }
 
 // 2. Haal alle maandelijkse taken op
-// Als admin: alle maandelijkse taken
-// Als user: alleen maandelijkse taken waar ze aan toegewezen zijn
-if ($isAdmin) {
-    $monthlyStmt = $pdo->prepare("
-        SELECT t.*, tc.color_hex
-        FROM tasks t
-        LEFT JOIN task_categories tc ON tc.category_id = t.category_id
-        WHERE t.frequency = 'MONTHLY' AND t.is_active = 1
-    ");
-    $monthlyStmt->execute();
-} else {
-    // Voor users: alleen maandelijkse taken waar ze aan toegewezen zijn
-    // Dit is complex omdat maandelijkse taken meerdere slots kunnen hebben
-    $monthlyStmt = $pdo->prepare("
-        SELECT DISTINCT t.*, tc.color_hex
-        FROM tasks t
-        LEFT JOIN task_categories tc ON tc.category_id = t.category_id
-        INNER JOIN task_slots ts ON ts.task_id = t.task_id
-        INNER JOIN task_registrations tr ON tr.slot_id = ts.slot_id
-        WHERE t.frequency = 'MONTHLY' AND t.is_active = 1
-        AND tr.user_id = :user_id
-    ");
-    $monthlyStmt->execute([':user_id' => $currentUserId]);
-}
+// Zowel admin als user kunnen alle maandelijkse taken zien
+$monthlyStmt = $pdo->prepare("
+    SELECT t.*, tc.color_hex
+    FROM tasks t
+    LEFT JOIN task_categories tc ON tc.category_id = t.category_id
+    WHERE t.frequency = 'MONTHLY' AND t.is_active = 1
+");
+$monthlyStmt->execute();
 
 while ($task = $monthlyStmt->fetch(PDO::FETCH_ASSOC)) {
     // Voor elke maand in het bereik
