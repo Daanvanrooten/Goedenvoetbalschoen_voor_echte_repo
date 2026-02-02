@@ -760,10 +760,14 @@ if (taakForm) {
         alert(data.message);
         this.reset();
         closeTaakModal();
+        // Ververs de kalender en weekview
+        regenerateCalendar();
+        regenerateWeekView();
       } else {
         alert(data.message);
       }
     } catch (err) {
+      console.error("Create task error:", err);
       alert("Er is een fout opgetreden. Probeer het opnieuw.");
     } finally {
       submitBtn.disabled = false;
@@ -1520,6 +1524,14 @@ document.addEventListener("DOMContentLoaded", function () {
   regenerateCalendar(); // 👈 deze ontbrak
   updateWeekInfo();
   regenerateWeekView();
+  
+  // Auto-refresh elke 30 seconden om data synchroon te houden
+  setInterval(function() {
+    regenerateCalendar();
+    regenerateWeekView();
+    console.log("Agenda automatisch ververst");
+  }, 30000); // 30 seconden
+});
 });
 
 console.log("Agenda pagina geladen!");
