@@ -1205,6 +1205,22 @@ nav {
     box-shadow: 0 4px 12px rgba(107, 91, 149, 0.3);
 }
 
+/* Verberg Dag, Week, Maand, Jaar velden */
+#dayInput,
+#weekInput,
+#monthInput,
+#yearInput {
+    display: none !important;
+}
+
+/* Verberg ook de labels van deze velden */
+.form-group:has(#dayInput),
+.form-group:has(#weekInput),
+.form-group:has(#monthInput),
+.form-group:has(#yearInput) {
+    display: none !important;
+}
+
 @media screen and (max-width: 968px) {
     .logout-modal-content {
         padding: 30px 24px;
