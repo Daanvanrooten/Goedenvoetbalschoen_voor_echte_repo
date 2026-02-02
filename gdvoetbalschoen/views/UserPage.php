@@ -13,7 +13,7 @@
     $AllTasks = [];
     
     $sqla = "SELECT slot_id FROM task_registrations WHERE user_id = :user_id";
-    $sqlb = "SELECT task_id FROM task_slots WHERE slot_id = :slot_id LIMIT 1";
+    $sqlb = "SELECT task_id FROM task_slots WHERE slot_id = :slot_id";
     $sqlc = "SELECT * FROM task_categories WHERE category_id = :category_id";
     $sql = "SELECT * FROM tasks WHERE task_id = :task_id";
 
@@ -34,10 +34,11 @@
             $stmt = $conn->prepare($sql);
             $stmt->execute([':task_id' => $taskID["task_id"]]);
             $GetTask = $stmt->fetchall(PDO::FETCH_ASSOC);
-            $AllTasks = $GetTask;
             
             //get the category names
             foreach($GetTask as $task){
+                $AllTasks[] = $task;
+
                 $stmtc = $conn->prepare($sqlc);
                 $stmtc->execute([':category_id' => $task["category_id"]]);
                 $GetCategories = $stmtc->fetch(PDO::FETCH_ASSOC);
@@ -86,48 +87,41 @@
         <div class="logoutBar">
             <a class="LogoutButton" href="logout.php">Log out ></a>
         </div>
+
         <!-- TaskArea is voor Task display -->
         <div class="TaskArea">
         <?php
             //get the taskcontainers from the array
             if($AllTasks != Null){
+
                 foreach($AllTasks as $GetTask){
-                    //get singular task information
-                    foreach($GetTask as $task){
-                        if($task["frequency"] == null){
-                            $task["frequency"] = "ONCE";
-                        }
-                        echo "<div class='TaskBox'>";
-                            //Title and Description
-                            echo "<div class='descriptionArea'>";
-                            echo "<h3>" . htmlspecialchars($task["title"]) . "</h3>";
-                            echo "<div class='description'>" . htmlspecialchars($task["description"]) . "</div>";
-                            echo "</div>";
-                            //Times and dates
-                            echo "<div class='TimeArea'>";
-                            echo "<div>date: " . $task["day"] . "-" . $task["month"] . "-" . $task["year"]  . "</div>";
-                            echo "<div>Starts: " . $task["start_time"] . "</div>";
-                            echo "<div>Ends: " . $task["end_time"] . "</div>";
-                            echo "</div>";
-                            //Frequency and Category
-                            echo "<div class='OthersArea'>";
-                            echo "<div>Frequency: " . htmlspecialchars($task["frequency"]) . "</div>";
-                            echo "<div>Task Category: " . htmlspecialchars($Categories[0]) . "</div>";  // Changed this too
-                            echo "</div>";
-                        echo "</div>";
+                    if($GetTask["frequency"] == null){
+                        $GetTask["frequency"] = "ONCE";
                     }
+                    echo "<div class='TaskBox'>";
+                        //Title and Description
+                        echo "<div class='descriptionArea'>";
+                        echo "<h3>" . htmlspecialchars($GetTask["title"]) . "</h3>";
+                        echo "<div class='description'>" . htmlspecialchars($GetTask["description"]) . "</div>";
+                        echo "</div>";
+                        //Times and dates
+                        echo "<div class='TimeArea'>";
+                        echo "<div>date: " . $GetTask["day"] . "-" . $GetTask["month"] . "-" . $GetTask["year"]  . "</div>";
+                        echo "<div>Starts: " . $GetTask["start_time"] . "</div>";
+                        echo "<div>Ends: " . $GetTask["end_time"] . "</div>";
+                        echo "</div>";
+                        //Frequency and Category
+                        echo "<div class='OthersArea'>";
+                        echo "<div>Frequency: " . htmlspecialchars($GetTask["frequency"]) . "</div>";
+                        echo "<div>Task Category: " . htmlspecialchars($Categories[0]) . "</div>";  // Changed this too
+                        echo "</div>";
+                    echo "</div>";
                 }
             }else{
                 echo "<div class='NoTasks'> U heeft geen taken </div>";
             }
-            
         ?>
-
-            
         </div>
-        
     </div>
-    
-    
 </body>
 </html>
