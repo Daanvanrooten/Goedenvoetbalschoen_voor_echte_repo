@@ -104,7 +104,10 @@ function showTasksModal(date, events) {
                         <span style='display:inline-block;margin-right:12px;'>🕐 ${ev.start} - ${ev.end}</span>
                         ${ev.frequency ? `<span style='background:#e5dbfa;color:#6b5b95;padding:2px 8px;border-radius:4px;font-size:12px;'>${ev.frequency}</span>` : ""}
                     </div>
-                    <div style='margin:8px 0 0 0;font-size:15px;color:#666;'>Toegewezen aan leden</div>
+                    <div class='task-members-${ev.slot_id}' style='margin:8px 0;font-size:14px;color:#666;'>
+                        <div style='font-weight:500;margin-bottom:4px;'>Ingeschreven leden:</div>
+                        <div style='font-style:italic;color:#999;'>Laden...</div>
+                    </div>
                     ${
                       isAdmin && (ev.slot_id || ev.task_id)
                         ? `
@@ -117,7 +120,13 @@ function showTasksModal(date, events) {
                         </button>
                     </div>
                     `
-                        : ""
+                        : `
+                    <div class='signup-container-${ev.slot_id}' style='margin-top:12px;'>
+                        <button class='signup-task-btn' data-slot-id='${ev.slot_id || ""}' style='width:100%;background:#28a745;color:#fff;border:none;padding:10px 16px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:500;'>
+                            ✓ Inschrijven
+                        </button>
+                    </div>
+                    `
                     }
                 </div>
             `,
@@ -132,7 +141,14 @@ function showTasksModal(date, events) {
     modal.style.display = "none";
   };
 
-  // Event listeners voor edit en delete knoppen
+  // Laad ingeschreven leden voor elke taak
+  events.forEach((ev) => {
+    if (ev.slot_id) {
+      loadTaskMembers(ev.slot_id);
+    }
+  });
+
+  // Event listeners voor edit en delete knoppen (admin)
   if (isAdmin) {
     modal.querySelectorAll(".edit-task-btn").forEach((btn) => {
       btn.onclick = function () {
@@ -152,6 +168,14 @@ function showTasksModal(date, events) {
         const taskId = this.dataset.taskId || null;
         const frequency = this.dataset.frequency || null;
         deleteTask(slotId, taskId, frequency);
+      };
+    });
+  } else {
+    // Event listeners voor signup knoppen (users)
+    modal.querySelectorAll(".signup-task-btn").forEach((btn) => {
+      btn.onclick = function () {
+        const slotId = this.dataset.slotId;
+        handleSignupToggle(slotId);
       };
     });
   }
@@ -1393,6 +1417,146 @@ function removeSelectedUser(userId) {
 function updatePersoneelHidden() {
   if (personeelHidden) {
     personeelHidden.value = selectedUsers.map((u) => u.user_id).join(",");
+  }
+}
+
+// Functie om ingeschreven leden van een taak te laden
+function loadTaskMembers(slotId) {
+  const container = document.querySelector(`.task-members-${slotId}`);
+  if (!container) return;
+
+  fetch(`${baseUrl}/api/users/get_assigned_users.php?slot_id=${slotId}`)
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success && data.assigned && data.assigned.length > 0) {
+        const membersList = data.assigned
+          .map(
+            (user) =>
+              `<span style='display:inline-block;background:#e5dbfa;color:#6b5b95;padding:4px 8px;border-radius:4px;font-size:13px;margin:2px;'>${user.first_name} ${user.last_name}</span>`,
+          )
+          .join("");
+        container.innerHTML = `
+          <div style='font-weight:500;margin-bottom:4px;'>Ingeschreven leden (${data.assigned.length}):</div>
+          <div>${membersList}</div>
+        `;
+        
+        // Check of huidige user is ingeschreven
+        const currentUserId = typeof currentUser !== "undefined" ? currentUser.id : null;
+        const isSignedUp = data.assigned.some((u) => u.user_id == currentUserId);
+        
+        // Update signup knop als user niet admin is
+        if (!userIsAdmin) {
+          updateSignupButton(slotId, isSignedUp);
+        }
+      } else {
+        container.innerHTML = `
+          <div style='font-weight:500;margin-bottom:4px;'>Ingeschreven leden:</div>
+          <div style='color:#999;font-style:italic;'>Nog niemand ingeschreven</div>
+        `;
+        
+        // Update signup knop
+        if (!userIsAdmin) {
+          updateSignupButton(slotId, false);
+        }
+      }
+    })
+    .catch((err) => {
+      console.error("Error loading task members:", err);
+      container.innerHTML = `
+        <div style='font-weight:500;margin-bottom:4px;'>Ingeschreven leden:</div>
+        <div style='color:#dc3545;'>Fout bij laden</div>
+      `;
+    });
+}
+
+// Update signup/uitschrijven knop
+function updateSignupButton(slotId, isSignedUp) {
+  const container = document.querySelector(`.signup-container-${slotId}`);
+  if (!container) return;
+
+  if (isSignedUp) {
+    container.innerHTML = `
+      <button class='signout-task-btn' data-slot-id='${slotId}' style='width:100%;background:#dc3545;color:#fff;border:none;padding:10px 16px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:500;'>
+        ✗ Uitschrijven
+      </button>
+    `;
+    const btn = container.querySelector(".signout-task-btn");
+    btn.onclick = function () {
+      handleSignupToggle(slotId);
+    };
+  } else {
+    container.innerHTML = `
+      <button class='signup-task-btn' data-slot-id='${slotId}' style='width:100%;background:#28a745;color:#fff;border:none;padding:10px 16px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:500;'>
+        ✓ Inschrijven
+      </button>
+    `;
+    const btn = container.querySelector(".signup-task-btn");
+    btn.onclick = function () {
+      handleSignupToggle(slotId);
+    };
+  }
+}
+
+// Inschrijven/Uitschrijven toggle
+function handleSignupToggle(slotId) {
+  const container = document.querySelector(`.signup-container-${slotId}`);
+  if (!container) return;
+
+  const btn = container.querySelector("button");
+  const isSignedUp = btn.classList.contains("signout-task-btn");
+
+  if (isSignedUp) {
+    // Uitschrijven
+    if (!confirm("Weet je zeker dat je je wilt uitschrijven van deze taak?")) {
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("slot_id", slotId);
+
+    fetch(`${baseUrl}/api/tasks/signout_task.php`, {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          alert(data.message);
+          loadTaskMembers(slotId);
+          regenerateCalendar();
+          regenerateWeekView();
+        } else {
+          alert("Fout: " + data.message);
+        }
+      })
+      .catch((err) => {
+        console.error("Signout error:", err);
+        alert("Er ging iets fout bij het uitschrijven");
+      });
+  } else {
+    // Inschrijven
+    const formData = new FormData();
+    formData.append("slot_id", slotId);
+
+    fetch(`${baseUrl}/api/tasks/signup_task.php`, {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          alert(data.message);
+          loadTaskMembers(slotId);
+          regenerateCalendar();
+          regenerateWeekView();
+        } else {
+          alert("Fout: " + data.message);
+        }
+      })
+      .catch((err) => {
+        console.error("Signup error:", err);
+        alert("Er ging iets fout bij het inschrijven");
+      });
   }
 }
 
