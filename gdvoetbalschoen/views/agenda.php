@@ -495,6 +495,11 @@ while (count($weekNumbers) < 2) {
                                 </label>
                             </div>
                         </div>
+                        <div class="form-group" id="eindDatumGroup" style="display:none;">
+                            <label>Eind datum</label>
+                            <input type="date" name="eind_datum" id="eindDatumInput">
+                            <small>Wanneer stopt de herhaling?</small>
+                        </div>
                         <div class="form-group">
                             <label>Max aantal leden</label>
                             <select name="maxleden">
@@ -563,6 +568,24 @@ while (count($weekNumbers) < 2) {
             const weekInput = document.getElementById('weekInput');
             const monthInput = document.getElementById('monthInput');
             const yearInput = document.getElementById('yearInput');
+            const eindDatumGroup = document.getElementById('eindDatumGroup');
+            const herhalingRadios = document.querySelectorAll('input[name="herhaling"]');
+            
+            // Toon/verberg einddatum veld op basis van herhaling
+            if (herhalingRadios && eindDatumGroup) {
+                herhalingRadios.forEach(radio => {
+                    radio.addEventListener('change', function() {
+                        if (this.value === 'eenmalig') {
+                            eindDatumGroup.style.display = 'none';
+                            document.getElementById('eindDatumInput').removeAttribute('required');
+                        } else {
+                            eindDatumGroup.style.display = 'block';
+                            document.getElementById('eindDatumInput').setAttribute('required', 'required');
+                        }
+                    });
+                });
+            }
+            
             if (datumInput) {
                 datumInput.addEventListener('change', function() {
                     if (!this.value) return;

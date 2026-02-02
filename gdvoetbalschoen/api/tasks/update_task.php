@@ -111,6 +111,41 @@ try {
         }
     }
 
+    // Update personeel assignments als task_id gegeven is (recurring tasks)
+    if ($task_id && !$slot_id && $personeel !== null) {
+        // Haal slots op voor deze task, gefilterd op datum indien opgegeven
+        if ($slot_date) {
+            $stmt = $conn->prepare("SELECT slot_id FROM task_slots WHERE task_id = ? AND slot_date = ?");
+            $stmt->execute([$task_id, $slot_date]);
+        } else {
+            $stmt = $conn->prepare("SELECT slot_id FROM task_slots WHERE task_id = ?");
+            $stmt->execute([$task_id]);
+        }
+        $slots = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        if (!empty($slots)) {
+            // Verwijder ALLEEN huidige assignments voor de geselecteerde slots (niet alle!)
+            $placeholders = implode(',', array_fill(0, count($slots), '?'));
+            $stmt = $conn->prepare("DELETE FROM task_registrations WHERE slot_id IN ($placeholders)");
+            $stmt->execute($slots);
+
+            // Voeg nieuwe assignments toe voor de geselecteerde slots
+            if (!empty($personeel)) {
+                $userIds = array_filter(array_map('trim', explode(',', $personeel)));
+                if (!empty($userIds)) {
+                    $stmtReg = $conn->prepare("INSERT INTO task_registrations (slot_id, user_id) VALUES (?, ?)");
+                    foreach ($slots as $slotId) {
+                        foreach ($userIds as $userId) {
+                            if (is_numeric($userId) && $userId > 0) {
+                                $stmtReg->execute([$slotId, intval($userId)]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     echo json_encode(['success' => true, 'message' => 'Taak succesvol bijgewerkt']);
 } catch (PDOException $e) {
     error_log('Taak updaten fout: ' . $e->getMessage());

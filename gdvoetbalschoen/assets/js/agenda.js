@@ -98,7 +98,7 @@ function showTasksModal(date, events) {
             ${events
               .map(
                 (ev, idx) => `
-                <div class='task-item-modal' style='margin-bottom:18px;padding:16px;background:#f9f9f9;border-radius:8px;position:relative;' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}'>
+                <div class='task-item-modal' style='margin-bottom:18px;padding:16px;background:#f9f9f9;border-radius:8px;position:relative;' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-slot-date='${ev.slot_date || ""}'>
                     <div style='font-weight:600;font-size:17px;margin-bottom:6px;'>${ev.title}</div>
                     <div style='color:#888;font-size:14px;margin-bottom:8px;'>
                         <span style='display:inline-block;margin-right:12px;'>🕐 ${ev.start} - ${ev.end}</span>
@@ -109,7 +109,7 @@ function showTasksModal(date, events) {
                       isAdmin && (ev.slot_id || ev.task_id)
                         ? `
                     <div style='margin-top:12px;display:flex;gap:8px;'>
-                        <button class='edit-task-btn' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-frequency='${ev.frequency || ""}' style='flex:1;background:#6b5b95;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;'>
+                        <button class='edit-task-btn' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-frequency='${ev.frequency || ""}' data-slot-date='${ev.slot_date || ""}' style='flex:1;background:#6b5b95;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;'>
                             ✏️ Bewerken
                         </button>
                         <button class='delete-task-btn' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-frequency='${ev.frequency || ""}' style='flex:1;background:#dc3545;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;'>
@@ -139,10 +139,11 @@ function showTasksModal(date, events) {
         const slotId = this.dataset.slotId || null;
         const taskId = this.dataset.taskId || null;
         const frequency = this.dataset.frequency || null;
+        const slotDate = this.dataset.slotDate || null;
         const task = events.find(
           (e) => e.slot_id == slotId || e.task_id == taskId,
         );
-        editTask(slotId, taskId, frequency, task);
+        editTask(slotId, taskId, frequency, task, slotDate);
       };
     });
 
@@ -208,7 +209,7 @@ function deleteTask(slotId, taskId, frequency) {
 }
 
 // Edit task functie (alleen voor admins)
-function editTask(slotId, taskId, frequency, task) {
+function editTask(slotId, taskId, frequency, task, slotDate) {
   // Sluit de huidige modal
   const modal = document.getElementById("tasksModal");
   if (modal) modal.style.display = "none";
@@ -265,7 +266,7 @@ function editTask(slotId, taskId, frequency, task) {
           </div>
         </div>
         ${
-          slotId
+          slotId || taskId
             ? `
         <div style='margin-bottom:16px;'>
           <label style='display:block;margin-bottom:6px;font-weight:600;'>Personeel toevoegen</label>
@@ -290,10 +291,10 @@ function editTask(slotId, taskId, frequency, task) {
 
   editModal.style.display = "flex";
 
-  // Initialiseer personeel selector (alleen als slotId bestaat)
+  // Initialiseer personeel selector (als slotId of taskId bestaat)
   let editSelectedUsers = [];
 
-  if (slotId) {
+  if (slotId || taskId) {
     const editPersoneelInput = document.getElementById("editPersoneelInput");
     const editPersoneelSuggestions = document.getElementById(
       "editPersoneelSuggestions",
@@ -304,7 +305,10 @@ function editTask(slotId, taskId, frequency, task) {
     const editPersoneelHidden = document.getElementById("editPersoneelHidden");
 
     // Laad huidige toegewezen personeel
-    fetch(`${baseUrl}/api/users/get_assigned_users.php?slot_id=${slotId}`)
+    const fetchUrl = slotId 
+      ? `${baseUrl}/api/users/get_assigned_users.php?slot_id=${slotId}`
+      : `${baseUrl}/api/users/get_assigned_users.php?task_id=${taskId}&slot_date=${encodeURIComponent(slotDate)}`;
+    fetch(fetchUrl)
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.assigned) {
@@ -410,14 +414,17 @@ function editTask(slotId, taskId, frequency, task) {
     const formData = new FormData();
     if (slotId) {
       formData.append("slot_id", slotId);
-      // Voeg personeel toe als het veld bestaat
-      const personeelHidden = document.getElementById("editPersoneelHidden");
-      if (personeelHidden) {
-        formData.append("personeel", personeelHidden.value);
-      }
     }
     if (taskId) {
       formData.append("task_id", taskId);
+    }
+    if (slotDate) {
+      formData.append("slot_date", slotDate);
+    }
+    // Voeg personeel toe als het veld bestaat
+    const personeelHidden = document.getElementById("editPersoneelHidden");
+    if (personeelHidden) {
+      formData.append("personeel", personeelHidden.value);
     }
     formData.append("title", document.getElementById("editTitle").value);
     formData.append(
