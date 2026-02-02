@@ -15,9 +15,33 @@ function getEventClass(colorHex) {
 
 // Render week events in een kolom
 function renderWeekEvents(dayColumn, events) {
+  const isAdmin = typeof userIsAdmin !== "undefined" && userIsAdmin === true;
+  
   events.forEach((ev) => {
     const el = document.createElement("div");
-    el.classList.add("week-event", getEventClass(ev.color));
+    
+    // Bepaal de kleur op basis van inschrijfstatus (voor niet-admins)
+    let colorClass = getEventClass(ev.color); // Standaard kleur
+    
+    if (!isAdmin) {
+      const capacity = ev.capacity || 1;
+      const registered = ev.registered_count || 0;
+      const isFull = registered >= capacity;
+      const userRegistered = ev.user_is_registered || false;
+      
+      // Groen: ingeschreven
+      // Oranje: niet ingeschreven, nog plek
+      // Rood: vol
+      if (userRegistered) {
+        colorClass = 'green-bg';
+      } else if (isFull) {
+        colorClass = 'red-bg';
+      } else {
+        colorClass = 'orange-bg';
+      }
+    }
+    
+    el.classList.add("week-event", colorClass);
     el.innerHTML = `
             <div class="event-time">${ev.start} - ${ev.end}</div>
             <div class="event-title">${ev.title}</div>
@@ -546,7 +570,31 @@ function renderEventsForDay(dayCell, events) {
   // Toon alleen een blokje, klikbaar voor alle taken
   if (events.length > 0) {
     const el = document.createElement("div");
-    el.classList.add("event", getEventClass(events[0].color));
+    
+    // Bepaal de kleur op basis van inschrijfstatus (voor niet-admins)
+    const isAdmin = typeof userIsAdmin !== "undefined" && userIsAdmin === true;
+    let colorClass = getEventClass(events[0].color); // Standaard kleur
+    
+    if (!isAdmin && events.length === 1) {
+      const event = events[0];
+      const capacity = event.capacity || 1;
+      const registered = event.registered_count || 0;
+      const isFull = registered >= capacity;
+      const userRegistered = event.user_is_registered || false;
+      
+      // Groen: ingeschreven
+      // Oranje: niet ingeschreven, nog plek
+      // Rood: vol
+      if (userRegistered) {
+        colorClass = 'green';
+      } else if (isFull) {
+        colorClass = 'red';
+      } else {
+        colorClass = 'orange';
+      }
+    }
+    
+    el.classList.add("event", colorClass);
     el.style.cursor = "pointer";
     let freqLabel = "";
     if (events.length === 1 && events[0].frequency) {
@@ -941,7 +989,6 @@ function regenerateCalendar() {
         const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
         if (tasksByDate[dateKey]) {
           renderEventsForDay(dayCell, tasksByDate[dateKey]);
-          dayCell.classList.add("green"); // optioneel: hele dag kleuren
         }
 
         daysGrid.appendChild(dayCell);
