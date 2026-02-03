@@ -23,6 +23,7 @@ $date = $_POST['datum'] ?? null;
 $start_time = $_POST['start_time'] ?? null;
 $end_time = $_POST['end_time'] ?? null;
 $herhaling = $_POST['herhaling'] ?? 'eenmalig';
+$eind_datum = $_POST['eind_datum'] ?? null;
 $maxleden = $_POST['maxleden'] ?? null;
 $beschrijving = trim($_POST['beschrijving'] ?? '');
 // Personeel (array van user_id's)
@@ -47,6 +48,7 @@ if (empty($category)) $errors[] = 'Categorie is verplicht';
 if (empty($date)) $errors[] = 'Datum is verplicht';
 if (empty($start_time)) $errors[] = 'Start tijd is verplicht';
 if (empty($end_time)) $errors[] = 'Eind tijd is verplicht';
+if ($herhaling !== 'eenmalig' && empty($eind_datum)) $errors[] = 'Eind datum is verplicht voor herhalende taken';
 if (!empty($errors)) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => implode(', ', $errors)]);
@@ -60,17 +62,47 @@ try {
     $stmt->execute([$title, $beschrijving, $category, $frequency, $start_time, $end_time, $day, $week, $month, $year]);
     $task_id = $conn->lastInsertId();
 
-    // Voeg slot toe met start en eind uur
-    $stmtSlot = $conn->prepare("INSERT INTO task_slots (task_id, slot_date, start_time, end_time, capacity, created_at) VALUES (?, ?, ?, ?, ?, NOW())");
-    $stmtSlot->execute([$task_id, $date, $start_time, $end_time, $maxleden ?? 1]);
-    $slot_id = $conn->lastInsertId();
+    // Bereken welke datums slots moeten krijgen
+    $slotDates = [];
+    if ($frequency === null) {
+        // Eenmalige taak
+        $slotDates[] = $date;
+    } else {
+        // Herhalende taak - genereer slots tot einddatum
+        $currentDate = new DateTime($date);
+        $endDate = new DateTime($eind_datum);
+        
+        while ($currentDate <= $endDate) {
+            $slotDates[] = $currentDate->format('Y-m-d');
+            
+            // Verhoog datum op basis van frequentie
+            if ($frequency === 'DAILY') {
+                $currentDate->modify('+1 day');
+            } elseif ($frequency === 'WEEKLY') {
+                $currentDate->modify('+1 week');
+            } elseif ($frequency === 'MONTHLY') {
+                $currentDate->modify('+1 month');
+            }
+        }
+    }
 
-    // Personeel koppelen aan taak (task_registrations)
+    // Voeg slots toe voor alle berekende datums
+    $stmtSlot = $conn->prepare("INSERT INTO task_slots (task_id, slot_date, start_time, end_time, capacity, created_at) VALUES (?, ?, ?, ?, ?, NOW())");
+    $slotIds = [];
+    foreach ($slotDates as $slotDate) {
+        $stmtSlot->execute([$task_id, $slotDate, $start_time, $end_time, $maxleden ?? 1]);
+        $slotIds[] = $conn->lastInsertId();
+    }
+
+    // Personeel koppelen aan taak (task_registrations) - OPTIONEEL
+    // Admin kan nu taken aanmaken zonder personeel toe te wijzen
     if (!empty($personeel)) {
         $stmtReg = $conn->prepare("INSERT INTO task_registrations (slot_id, user_id) VALUES (?, ?)");
-        foreach ($personeel as $userId) {
-            if (!empty($userId)) {
-                $stmtReg->execute([$slot_id, $userId]);
+        foreach ($slotIds as $slot_id) {
+            foreach ($personeel as $userId) {
+                if (!empty($userId)) {
+                    $stmtReg->execute([$slot_id, $userId]);
+                }
             }
         }
     }

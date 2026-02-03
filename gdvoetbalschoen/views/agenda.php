@@ -458,15 +458,15 @@ while (count($weekNumbers) < 2) {
                     <div class="form-row">
                         <div class="form-group">
                             <label>Datum</label>
-                            <input type="date" name="datum" id="datumInput" required>
+                            <input type="date" name="datum" id="datumInput" required min="<?php echo date('Y-m-d'); ?>">
                         </div>
                         <div class="form-group">
                             <label>Start tijd</label>
-                            <input type="time" name="start_time" required>
+                            <input type="time" name="start_time" id="startTimeInput" required>
                         </div>
                         <div class="form-group">
                             <label>Eind tijd</label>
-                            <input type="time" name="end_time" required>
+                            <input type="time" name="end_time" id="endTimeInput" required>
                         </div>
                     </div>
                     <div class="form-row">
@@ -509,9 +509,14 @@ while (count($weekNumbers) < 2) {
                                 </label>
                             </div>
                         </div>
+                        <div class="form-group" id="eindDatumGroup" style="display:none;">
+                            <label>Eind datum</label>
+                            <input type="date" name="eind_datum" id="eindDatumInput">
+                            <small>Wanneer stopt de herhaling?</small>
+                        </div>
                         <div class="form-group">
                             <label>Max aantal leden</label>
-                            <select name="maxleden">
+                            <select name="maxleden" id="maxLedenSelect" required>
                                 <option value="">Selecteer aantal</option>
                                 <option value="1">1</option>
                                 <option value="2">2</option>
@@ -519,6 +524,8 @@ while (count($weekNumbers) < 2) {
                                 <option value="4">4</option>
                                 <option value="5">5</option>
                                 <option value="10">10</option>
+                                <option value="15">15</option>
+                                <option value="20">20</option>
                             </select>
                         </div>
                     </div>
@@ -526,7 +533,7 @@ while (count($weekNumbers) < 2) {
                         <label>Beschrijving</label>
                         <textarea name="beschrijving" placeholder="Placeholder" rows="4"></textarea>
                     </div>
-                    
+
                     <div class="form-actions">
                         <button type="submit" class="submit-btn">Taak aanmaken</button>
                     </div>
@@ -551,6 +558,12 @@ while (count($weekNumbers) < 2) {
     <script>
         // User role voor admin checks
         const userIsAdmin = <?php echo (isset($user['role_id']) && $user['role_id'] == 2) ? 'true' : 'false'; ?>;
+
+        // Current user data voor signup functionaliteit
+        const currentUser = {
+            id: <?php echo $user['id']; ?>,
+            name: '<?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?>'
+        };
 
         // Gebruik de baseUrl uit agenda.js (al geladen hierboven)
         // Dynamisch categorieën laden
@@ -577,6 +590,119 @@ while (count($weekNumbers) < 2) {
             const weekInput = document.getElementById('weekInput');
             const monthInput = document.getElementById('monthInput');
             const yearInput = document.getElementById('yearInput');
+            const eindDatumGroup = document.getElementById('eindDatumGroup');
+            const herhalingRadios = document.querySelectorAll('input[name="herhaling"]');
+            const startTimeInput = document.getElementById('startTimeInput');
+            const endTimeInput = document.getElementById('endTimeInput');
+            const taakForm = document.getElementById('taakForm');
+            
+            // Toon/verberg einddatum veld op basis van herhaling
+            if (herhalingRadios && eindDatumGroup) {
+                herhalingRadios.forEach(radio => {
+                    radio.addEventListener('change', function() {
+                        if (this.value === 'eenmalig') {
+                            eindDatumGroup.style.display = 'none';
+                            document.getElementById('eindDatumInput').removeAttribute('required');
+                        } else {
+                            eindDatumGroup.style.display = 'block';
+                            document.getElementById('eindDatumInput').setAttribute('required', 'required');
+                        }
+                    });
+                });
+            }
+            
+            // Validatie voor datum en tijd in het verleden
+            if (taakForm) {
+                taakForm.addEventListener('submit', function(e) {
+                    if (!datumInput || !startTimeInput) {
+                        e.preventDefault();
+                        alert('Vul alle verplichte velden in.');
+                        return false;
+                    }
+                    
+                    if (!datumInput.value) {
+                        e.preventDefault();
+                        alert('Selecteer een datum.');
+                        return false;
+                    }
+                    
+                    const selectedDate = new Date(datumInput.value);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    selectedDate.setHours(0, 0, 0, 0);
+                    
+                    // Check of datum in het verleden is
+                    if (selectedDate < today) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                        alert('Je kunt geen taak aanmaken in het verleden. Kies een datum vanaf vandaag.');
+                        datumInput.focus();
+                        return false;
+                    }
+                    
+                    // Als datum vandaag is, check of tijd in het verleden is
+                    if (selectedDate.getTime() === today.getTime() && startTimeInput.value) {
+                        const now = new Date();
+                        const currentTime = now.getHours() * 60 + now.getMinutes();
+                        const [startHour, startMin] = startTimeInput.value.split(':').map(Number);
+                        const selectedTime = startHour * 60 + startMin;
+                        
+                        if (selectedTime < currentTime) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            e.stopImmediatePropagation();
+                            alert('Je kunt geen taak aanmaken met een starttijd in het verleden. Kies een latere tijd.');
+                            startTimeInput.focus();
+                            return false;
+                        }
+                    }
+                    
+                    // Check of eindtijd na starttijd is
+                    if (startTimeInput.value && endTimeInput && endTimeInput.value) {
+                        const [startHour, startMin] = startTimeInput.value.split(':').map(Number);
+                        const [endHour, endMin] = endTimeInput.value.split(':').map(Number);
+                        const startMinutes = startHour * 60 + startMin;
+                        const endMinutes = endHour * 60 + endMin;
+                        
+                        if (endMinutes <= startMinutes) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            e.stopImmediatePropagation();
+                            alert('Eindtijd moet later zijn dan starttijd.');
+                            endTimeInput.focus();
+                            return false;
+                        }
+                    }
+                    
+                    // Check einddatum voor herhalende taken
+                    const eindDatumInput = document.getElementById('eindDatumInput');
+                    const selectedHerhaling = document.querySelector('input[name="herhaling"]:checked');
+                    if (selectedHerhaling && selectedHerhaling.value !== 'eenmalig' && eindDatumInput && eindDatumInput.value) {
+                        const eindDate = new Date(eindDatumInput.value);
+                        eindDate.setHours(0, 0, 0, 0);
+                        
+                        if (eindDate < selectedDate) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            e.stopImmediatePropagation();
+                            alert('Einddatum moet later zijn dan de startdatum.');
+                            eindDatumInput.focus();
+                            return false;
+                        }
+                        
+                        if (eindDate < today) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            e.stopImmediatePropagation();
+                            alert('Einddatum kan niet in het verleden liggen.');
+                            eindDatumInput.focus();
+                            return false;
+                        }
+                    }
+                }, true);
+            }
+            
             if (datumInput) {
                 datumInput.addEventListener('change', function() {
                     if (!this.value) return;

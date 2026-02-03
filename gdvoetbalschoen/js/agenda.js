@@ -15,9 +15,33 @@ function getEventClass(colorHex) {
 
 // Render week events in een kolom
 function renderWeekEvents(dayColumn, events) {
+  const isAdmin = typeof userIsAdmin !== "undefined" && userIsAdmin === true;
+  
   events.forEach((ev) => {
     const el = document.createElement("div");
-    el.classList.add("week-event", getEventClass(ev.color));
+    
+    // Bepaal de kleur op basis van inschrijfstatus (voor niet-admins)
+    let colorClass = getEventClass(ev.color); // Standaard kleur
+    
+    if (!isAdmin) {
+      const capacity = ev.capacity || 1;
+      const registered = ev.registered_count || 0;
+      const isFull = registered >= capacity;
+      const userRegistered = ev.user_is_registered || false;
+      
+      // Groen: ingeschreven
+      // Oranje: niet ingeschreven, nog plek
+      // Rood: vol
+      if (userRegistered) {
+        colorClass = 'green-bg';
+      } else if (isFull) {
+        colorClass = 'red-bg';
+      } else {
+        colorClass = 'orange-bg';
+      }
+    }
+    
+    el.classList.add("week-event", colorClass);
     el.innerHTML = `
             <div class="event-time">${ev.start} - ${ev.end}</div>
             <div class="event-title">${ev.title}</div>
@@ -87,7 +111,7 @@ function showTasksModal(date, events) {
 
   modal.innerHTML = `<div class="task-modal-content" style="background:#fff;border-radius:16px;max-width:500px;width:90vw;padding:0;box-shadow:0 2px 16px rgba(0,0,0,0.15);overflow:hidden;">
         <div style='display:flex;align-items:center;gap:12px;padding:16px 20px 0 20px;'>
-            <div style='background:#e5dbfa;color:#6b5b95;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:600;'>A</div>
+            <div style='background:#e5dbfa;color:#6b5b95;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:600;'>📋</div>
             <span style='font-weight:600;font-size:18px;'>Taak Details</span>
             <button id='closeTasksModal' style='margin-left:auto;background:none;border:none;font-size:22px;cursor:pointer;'>&times;</button>
         </div>
@@ -104,12 +128,29 @@ function showTasksModal(date, events) {
                         <span style='display:inline-block;margin-right:12px;'>🕐 ${ev.start} - ${ev.end}</span>
                         ${ev.frequency ? `<span style='background:#e5dbfa;color:#6b5b95;padding:2px 8px;border-radius:4px;font-size:12px;'>${ev.frequency}</span>` : ""}
                     </div>
-                    <div style='margin:8px 0 0 0;font-size:15px;color:#666;'>Toegewezen aan leden</div>
+                    
+                    ${
+                      !isAdmin
+                        ? `
+                    <div style='background:#fff;padding:10px;border-radius:6px;margin:10px 0;border-left:3px solid ${isFull ? "#dc3545" : "#28a745"};'>
+                        <div style='font-size:13px;color:#666;margin-bottom:4px;'>Beschikbare plekken</div>
+                        <div style='font-size:18px;font-weight:600;color:${isFull ? "#dc3545" : "#28a745"};'>
+                            ${registered} / ${capacity} ${isFull ? "(VOL)" : ""}
+                        </div>
+                    </div>
+                    `
+                        : ""
+                    }
+                    
+                    <div class='task-members-${ev.slot_id}' style='margin:8px 0;font-size:14px;color:#666;'>
+                        <div style='font-weight:500;margin-bottom:4px;'>Ingeschreven leden:</div>
+                        <div style='font-style:italic;color:#999;'>Laden...</div>
+                    </div>
                     ${
                       isAdmin && (ev.slot_id || ev.task_id)
                         ? `
                     <div style='margin-top:12px;display:flex;gap:8px;'>
-                        <button class='edit-task-btn' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-frequency='${ev.frequency || ""}' style='flex:1;background:#6b5b95;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;'>
+                        <button class='edit-task-btn' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-frequency='${ev.frequency || ""}' data-slot-date='${ev.slot_date || ""}' style='flex:1;background:#6b5b95;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;'>
                             ✏️ Bewerken
                         </button>
                         <button class='delete-task-btn' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-frequency='${ev.frequency || ""}' style='flex:1;background:#dc3545;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;'>
@@ -117,11 +158,29 @@ function showTasksModal(date, events) {
                         </button>
                     </div>
                     `
+                        : !isAdmin && ev.slot_id
+                        ? `
+                    <div class='signup-container-${ev.slot_id}' style='margin-top:12px;'>
+                        ${
+                          userRegistered
+                            ? `<button class='signout-task-btn' data-slot-id='${ev.slot_id}' style='width:100%;background:#dc3545;color:#fff;border:none;padding:12px 16px;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;transition:all 0.2s;box-shadow:0 2px 4px rgba(220,53,69,0.3);'>
+                              ✗ Uitschrijven
+                             </button>`
+                            : isFull
+                              ? `<button disabled style='width:100%;background:#6c757d;color:#fff;border:none;padding:12px 16px;border-radius:8px;cursor:not-allowed;font-size:15px;font-weight:600;opacity:0.6;'>
+                                🚫 Taak is vol
+                               </button>`
+                              : `<button class='signup-task-btn' data-slot-id='${ev.slot_id}' style='width:100%;background:#28a745;color:#fff;border:none;padding:12px 16px;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;transition:all 0.2s;box-shadow:0 2px 4px rgba(40,167,69,0.3);'>
+                                ✓ Inschrijven voor taak
+                               </button>`
+                        }
+                    </div>
+                    `
                         : ""
                     }
                 </div>
-            `,
-              )
+            `;
+              })
               .join("")}
         </div>
     </div>`;
@@ -132,17 +191,25 @@ function showTasksModal(date, events) {
     modal.style.display = "none";
   };
 
-  // Event listeners voor edit en delete knoppen
+  // Laad ingeschreven leden voor elke taak
+  events.forEach((ev) => {
+    if (ev.slot_id) {
+      loadTaskMembers(ev.slot_id);
+    }
+  });
+
+  // Event listeners voor edit en delete knoppen (admin)
   if (isAdmin) {
     modal.querySelectorAll(".edit-task-btn").forEach((btn) => {
       btn.onclick = function () {
         const slotId = this.dataset.slotId || null;
         const taskId = this.dataset.taskId || null;
         const frequency = this.dataset.frequency || null;
+        const slotDate = this.dataset.slotDate || null;
         const task = events.find(
           (e) => e.slot_id == slotId || e.task_id == taskId,
         );
-        editTask(slotId, taskId, frequency, task);
+        editTask(slotId, taskId, frequency, task, slotDate);
       };
     });
 
@@ -152,6 +219,39 @@ function showTasksModal(date, events) {
         const taskId = this.dataset.taskId || null;
         const frequency = this.dataset.frequency || null;
         deleteTask(slotId, taskId, frequency);
+      };
+    });
+  } else {
+    // Event listeners voor signup/signout knoppen (users)
+    modal.querySelectorAll(".signup-task-btn").forEach((btn) => {
+      btn.onclick = function () {
+        const slotId = this.dataset.slotId;
+        handleSignupToggle(slotId, false);
+      };
+      // Hover effect
+      btn.onmouseenter = function () {
+        this.style.transform = "translateY(-2px)";
+        this.style.boxShadow = "0 4px 8px rgba(40,167,69,0.4)";
+      };
+      btn.onmouseleave = function () {
+        this.style.transform = "translateY(0)";
+        this.style.boxShadow = "0 2px 4px rgba(40,167,69,0.3)";
+      };
+    });
+
+    modal.querySelectorAll(".signout-task-btn").forEach((btn) => {
+      btn.onclick = function () {
+        const slotId = this.dataset.slotId;
+        handleSignupToggle(slotId, true);
+      };
+      // Hover effect
+      btn.onmouseenter = function () {
+        this.style.transform = "translateY(-2px)";
+        this.style.boxShadow = "0 4px 8px rgba(220,53,69,0.4)";
+      };
+      btn.onmouseleave = function () {
+        this.style.transform = "translateY(0)";
+        this.style.boxShadow = "0 2px 4px rgba(220,53,69,0.3)";
       };
     });
   }
@@ -208,7 +308,7 @@ function deleteTask(slotId, taskId, frequency) {
 }
 
 // Edit task functie (alleen voor admins)
-function editTask(slotId, taskId, frequency, task) {
+function editTask(slotId, taskId, frequency, task, slotDate) {
   // Sluit de huidige modal
   const modal = document.getElementById("tasksModal");
   if (modal) modal.style.display = "none";
@@ -265,7 +365,7 @@ function editTask(slotId, taskId, frequency, task) {
           </div>
         </div>
         ${
-          slotId
+          slotId || taskId
             ? `
         <div style='margin-bottom:16px;'>
           <label style='display:block;margin-bottom:6px;font-weight:600;'>Personeel toevoegen</label>
@@ -300,10 +400,10 @@ function editTask(slotId, taskId, frequency, task) {
 
   editModal.style.display = "flex";
 
-  // Initialiseer personeel selector (alleen als slotId bestaat)
+  // Initialiseer personeel selector (als slotId of taskId bestaat)
   let editSelectedUsers = [];
 
-  if (slotId) {
+  if (slotId || taskId) {
     const editPersoneelInput = document.getElementById("editPersoneelInput");
     const editPersoneelSuggestions = document.getElementById(
       "editPersoneelSuggestions",
@@ -314,7 +414,10 @@ function editTask(slotId, taskId, frequency, task) {
     const editPersoneelHidden = document.getElementById("editPersoneelHidden");
 
     // Laad huidige toegewezen personeel
-    fetch(`${baseUrl}/api/users/get_assigned_users.php?slot_id=${slotId}`)
+    const fetchUrl = slotId 
+      ? `${baseUrl}/api/users/get_assigned_users.php?slot_id=${slotId}`
+      : `${baseUrl}/api/users/get_assigned_users.php?task_id=${taskId}&slot_date=${encodeURIComponent(slotDate)}`;
+    fetch(fetchUrl)
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.assigned) {
@@ -420,14 +523,17 @@ function editTask(slotId, taskId, frequency, task) {
     const formData = new FormData();
     if (slotId) {
       formData.append("slot_id", slotId);
-      // Voeg personeel toe als het veld bestaat
-      const personeelHidden = document.getElementById("editPersoneelHidden");
-      if (personeelHidden) {
-        formData.append("personeel", personeelHidden.value);
-      }
     }
     if (taskId) {
       formData.append("task_id", taskId);
+    }
+    if (slotDate) {
+      formData.append("slot_date", slotDate);
+    }
+    // Voeg personeel toe als het veld bestaat
+    const personeelHidden = document.getElementById("editPersoneelHidden");
+    if (personeelHidden) {
+      formData.append("personeel", personeelHidden.value);
     }
     formData.append("title", document.getElementById("editTitle").value);
     formData.append(
@@ -474,7 +580,31 @@ function renderEventsForDay(dayCell, events) {
   // Toon alleen een blokje, klikbaar voor alle taken
   if (events.length > 0) {
     const el = document.createElement("div");
-    el.classList.add("event", getEventClass(events[0].color));
+    
+    // Bepaal de kleur op basis van inschrijfstatus (voor niet-admins)
+    const isAdmin = typeof userIsAdmin !== "undefined" && userIsAdmin === true;
+    let colorClass = getEventClass(events[0].color); // Standaard kleur
+    
+    if (!isAdmin && events.length === 1) {
+      const event = events[0];
+      const capacity = event.capacity || 1;
+      const registered = event.registered_count || 0;
+      const isFull = registered >= capacity;
+      const userRegistered = event.user_is_registered || false;
+      
+      // Groen: ingeschreven
+      // Oranje: niet ingeschreven, nog plek
+      // Rood: vol
+      if (userRegistered) {
+        colorClass = 'green';
+      } else if (isFull) {
+        colorClass = 'red';
+      } else {
+        colorClass = 'orange';
+      }
+    }
+    
+    el.classList.add("event", colorClass);
     el.style.cursor = "pointer";
     let freqLabel = "";
     if (events.length === 1 && events[0].frequency) {
@@ -767,51 +897,62 @@ if (prevMonthBtn) {
       const daysInMonth = new Date(year, month + 1, 0).getDate();
       const start = `${year}-${String(month + 1).padStart(2, "0")}-01`;
       const end = `${year}-${String(month + 1).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
-      fetch(`${baseUrl}/api/tasks/get_calendar_tasks.php?start=${start}&end=${end}`)
+      fetch(
+        `${baseUrl}/api/tasks/get_calendar_tasks.php?start=${start}&end=${end}`,
+      )
         .then((res) => res.json())
         .then((tasksByDate) => {
           // Render mobile calendar
           const mobileCalendar = document.querySelector(".mobile-calendar");
           if (mobileCalendar) {
             // ...existing code for rendering mobile calendar...
-            let html = '<table class="mobile-calendar-table" style="width:100%"><thead><tr>';
-            const daysOfWeek = ['MA', 'DI', 'WO', 'DO', 'VR', 'ZA', 'ZO'];
+            let html =
+              '<table class="mobile-calendar-table" style="width:100%"><thead><tr>';
+            const daysOfWeek = ["MA", "DI", "WO", "DO", "VR", "ZA", "ZO"];
             for (let i = 0; i < 7; i++) {
               html += `<th>${daysOfWeek[i]}</th>`;
             }
-            html += '</tr></thead><tbody>';
+            html += "</tr></thead><tbody>";
             let firstDay = new Date(currentYear, currentMonth, 1).getDay();
             firstDay = firstDay === 0 ? 6 : firstDay - 1;
             let day = 1;
             for (let week = 0; week < 6; week++) {
-              html += '<tr>';
+              html += "<tr>";
               for (let i = 0; i < 7; i++) {
                 if ((week === 0 && i < firstDay) || day > daysInMonth) {
-                  html += '<td></td>';
+                  html += "<td></td>";
                 } else {
                   const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-                  const tasks = typeof tasksByDate !== "undefined" && tasksByDate[dateKey] ? tasksByDate[dateKey] : [];
+                  const tasks =
+                    typeof tasksByDate !== "undefined" && tasksByDate[dateKey]
+                      ? tasksByDate[dateKey]
+                      : [];
                   let cellContent = `<div class="mobile-day-number">${day}</div>`;
                   let cellClass = "";
                   if (tasks.length > 0) {
-                    if (tasks[0].color === "#cccccc") cellClass = "has-task-green";
-                    else if (tasks[0].color === "#ffb8d1") cellClass = "has-task-pink";
+                    if (tasks[0].color === "#cccccc")
+                      cellClass = "has-task-green";
+                    else if (tasks[0].color === "#ffb8d1")
+                      cellClass = "has-task-pink";
                     else cellClass = "has-task-green";
-                    cellContent += tasks.map(ev => {
-                      let colorClass = "";
-                      if (ev.color === "#cccccc") colorClass = "green-cell";
-                      else if (ev.color === "#ffb8d1") colorClass = "pink-cell";
-                      return `<div class=\"mobile-task-badge ${colorClass}\" style=\"margin:2px 0;padding:2px 6px;border-radius:4px;font-size:13px;display:inline-block;\">${ev.title}</div>`;
-                    }).join("");
+                    cellContent += tasks
+                      .map((ev) => {
+                        let colorClass = "";
+                        if (ev.color === "#cccccc") colorClass = "green-cell";
+                        else if (ev.color === "#ffb8d1")
+                          colorClass = "pink-cell";
+                        return `<div class=\"mobile-task-badge ${colorClass}\" style=\"margin:2px 0;padding:2px 6px;border-radius:4px;font-size:13px;display:inline-block;\">${ev.title}</div>`;
+                      })
+                      .join("");
                   }
                   html += `<td class=\"${cellClass}\" style=\"height:44px;text-align:center;vertical-align:top;\">${cellContent}</td>`;
                   day++;
                 }
               }
-              html += '</tr>';
+              html += "</tr>";
               if (day > daysInMonth) break;
             }
-            html += '</tbody></table>';
+            html += "</tbody></table>";
             mobileCalendar.innerHTML = html;
           }
         });
@@ -837,51 +978,62 @@ if (nextMonthBtn) {
       const daysInMonth = new Date(year, month + 1, 0).getDate();
       const start = `${year}-${String(month + 1).padStart(2, "0")}-01`;
       const end = `${year}-${String(month + 1).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
-      fetch(`${baseUrl}/api/tasks/get_calendar_tasks.php?start=${start}&end=${end}`)
+      fetch(
+        `${baseUrl}/api/tasks/get_calendar_tasks.php?start=${start}&end=${end}`,
+      )
         .then((res) => res.json())
         .then((tasksByDate) => {
           // Render mobile calendar
           const mobileCalendar = document.querySelector(".mobile-calendar");
           if (mobileCalendar) {
             // ...existing code for rendering mobile calendar...
-            let html = '<table class="mobile-calendar-table" style="width:100%"><thead><tr>';
-            const daysOfWeek = ['MA', 'DI', 'WO', 'DO', 'VR', 'ZA', 'ZO'];
+            let html =
+              '<table class="mobile-calendar-table" style="width:100%"><thead><tr>';
+            const daysOfWeek = ["MA", "DI", "WO", "DO", "VR", "ZA", "ZO"];
             for (let i = 0; i < 7; i++) {
               html += `<th>${daysOfWeek[i]}</th>`;
             }
-            html += '</tr></thead><tbody>';
+            html += "</tr></thead><tbody>";
             let firstDay = new Date(currentYear, currentMonth, 1).getDay();
             firstDay = firstDay === 0 ? 6 : firstDay - 1;
             let day = 1;
             for (let week = 0; week < 6; week++) {
-              html += '<tr>';
+              html += "<tr>";
               for (let i = 0; i < 7; i++) {
                 if ((week === 0 && i < firstDay) || day > daysInMonth) {
-                  html += '<td></td>';
+                  html += "<td></td>";
                 } else {
                   const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-                  const tasks = typeof tasksByDate !== "undefined" && tasksByDate[dateKey] ? tasksByDate[dateKey] : [];
+                  const tasks =
+                    typeof tasksByDate !== "undefined" && tasksByDate[dateKey]
+                      ? tasksByDate[dateKey]
+                      : [];
                   let cellContent = `<div class="mobile-day-number">${day}</div>`;
                   let cellClass = "";
                   if (tasks.length > 0) {
-                    if (tasks[0].color === "#cccccc") cellClass = "has-task-green";
-                    else if (tasks[0].color === "#ffb8d1") cellClass = "has-task-pink";
+                    if (tasks[0].color === "#cccccc")
+                      cellClass = "has-task-green";
+                    else if (tasks[0].color === "#ffb8d1")
+                      cellClass = "has-task-pink";
                     else cellClass = "has-task-green";
-                    cellContent += tasks.map(ev => {
-                      let colorClass = "";
-                      if (ev.color === "#cccccc") colorClass = "green-cell";
-                      else if (ev.color === "#ffb8d1") colorClass = "pink-cell";
-                      return `<div class=\"mobile-task-badge ${colorClass}\" style=\"margin:2px 0;padding:2px 6px;border-radius:4px;font-size:13px;display:inline-block;\">${ev.title}</div>`;
-                    }).join("");
+                    cellContent += tasks
+                      .map((ev) => {
+                        let colorClass = "";
+                        if (ev.color === "#cccccc") colorClass = "green-cell";
+                        else if (ev.color === "#ffb8d1")
+                          colorClass = "pink-cell";
+                        return `<div class=\"mobile-task-badge ${colorClass}\" style=\"margin:2px 0;padding:2px 6px;border-radius:4px;font-size:13px;display:inline-block;\">${ev.title}</div>`;
+                      })
+                      .join("");
                   }
                   html += `<td class=\"${cellClass}\" style=\"height:44px;text-align:center;vertical-align:top;\">${cellContent}</td>`;
                   day++;
                 }
               }
-              html += '</tr>';
+              html += "</tr>";
               if (day > daysInMonth) break;
             }
-            html += '</tbody></table>';
+            html += "</tbody></table>";
             mobileCalendar.innerHTML = html;
           }
         });
@@ -978,7 +1130,6 @@ function regenerateCalendar() {
         const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
         if (tasksByDate[dateKey]) {
           renderEventsForDay(dayCell, tasksByDate[dateKey]);
-          dayCell.classList.add("green"); // optioneel: hele dag kleuren
         }
 
         daysGrid.appendChild(dayCell);
@@ -1005,10 +1156,10 @@ function regenerateCalendar() {
       }
     });
   });
-function renderMobileMonthCalendar(year, month, tasksByDate) {
-    const mobileCal = document.querySelector('.mobile-calendar');
+  function renderMobileMonthCalendar(year, month, tasksByDate) {
+    const mobileCal = document.querySelector(".mobile-calendar");
     if (!mobileCal) return;
-    const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THUR', 'FRI', 'SAT']; // 7 kolommen
+    const daysOfWeek = ["SUN", "MON", "TUE", "WED", "THUR", "FRI", "SAT"]; // 7 kolommen
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     // Bepaal op welke dag van de week de 1e van de maand valt (0=Zon, 1=Ma, ...)
     let firstDay = new Date(year, month, 1).getDay();
@@ -1019,74 +1170,80 @@ function renderMobileMonthCalendar(year, month, tasksByDate) {
     let weeks = [];
     let day = 1;
     while (day <= daysInMonth) {
-        let week = [];
-        for (let i = 0; i < 7; i++) {
-            if (weeks.length === 0 && i < startOffset && day === 1) {
-                week.push('');
-            } else if (day <= daysInMonth) {
-                week.push(day++);
-            } else {
-                week.push('');
-            }
+      let week = [];
+      for (let i = 0; i < 7; i++) {
+        if (weeks.length === 0 && i < startOffset && day === 1) {
+          week.push("");
+        } else if (day <= daysInMonth) {
+          week.push(day++);
+        } else {
+          week.push("");
         }
-        weeks.push(week);
+      }
+      weeks.push(week);
     }
     // Bouw de tabel
-    let html = '<table class="mobile-calendar-table" style="table-layout:fixed;width:100%"><tbody>';
+    let html =
+      '<table class="mobile-calendar-table" style="table-layout:fixed;width:100%"><tbody>';
     // Header
-    html += '<tr>';
+    html += "<tr>";
     for (let i = 0; i < 7; i++) {
-        html += `<td class="day-label" style="width:14.28%">${daysOfWeek[i]}</td>`;
+      html += `<td class="day-label" style="width:14.28%">${daysOfWeek[i]}</td>`;
     }
-    html += '</tr>';
+    html += "</tr>";
     // Dagen
     for (let w = 0; w < weeks.length; w++) {
-        html += '<tr>';
-        for (let i = 0; i < 7; i++) {
-            const d = weeks[w][i];
-            if (d) {
-                const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                let eventClass = '';
-                if (tasksByDate && tasksByDate[dateKey] && tasksByDate[dateKey].length > 0) {
-                    eventClass = 'green-cell';
-                }
-                html += `<td class="${eventClass}" style="width:14.28%;height:48px;text-align:center;vertical-align:middle;">${d}</td>`;
-            } else {
-                html += '<td style="width:14.28%;height:48px;"></td>';
-            }
+      html += "<tr>";
+      for (let i = 0; i < 7; i++) {
+        const d = weeks[w][i];
+        if (d) {
+          const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+          let eventClass = "";
+          if (
+            tasksByDate &&
+            tasksByDate[dateKey] &&
+            tasksByDate[dateKey].length > 0
+          ) {
+            eventClass = "green-cell";
+          }
+          html += `<td class="${eventClass}" style="width:14.28%;height:48px;text-align:center;vertical-align:middle;">${d}</td>`;
+        } else {
+          html += '<td style="width:14.28%;height:48px;"></td>';
         }
-        html += '</tr>';
+      }
+      html += "</tr>";
     }
-    html += '</tbody></table>';
+    html += "</tbody></table>";
     mobileCal.innerHTML = html;
-}
+  }
   // Generate mobile calendar - always render month table
   const mobileCalendar = document.querySelector(".mobile-calendar");
   if (mobileCalendar) {
     // Fallback: altijd een maandtabel tonen
-    let html = '<table class="mobile-calendar-table" style="width:100%"><thead><tr>';
-    const daysOfWeek = ['MA', 'DI', 'WO', 'DO', 'VR', 'ZA', 'ZO'];
+    let html =
+      '<table class="mobile-calendar-table" style="width:100%"><thead><tr>';
+    const daysOfWeek = ["MA", "DI", "WO", "DO", "VR", "ZA", "ZO"];
     for (let i = 0; i < 7; i++) {
       html += `<th>${daysOfWeek[i]}</th>`;
     }
-    html += '</tr></thead><tbody>';
+    html += "</tr></thead><tbody>";
     let firstDay = new Date(currentYear, currentMonth, 1).getDay();
     firstDay = firstDay === 0 ? 6 : firstDay - 1;
     let day = 1;
     for (let week = 0; week < 6; week++) {
-      html += '<tr>';
+      html += "<tr>";
       for (let i = 0; i < 7; i++) {
         if ((week === 0 && i < firstDay) || day > daysInMonth) {
-          html += '<td></td>';
+          html += "<td></td>";
         } else {
           html += `<td style="height:44px;text-align:center;">${day}</td>`;
           day++;
         }
       }
-      html += '</tr>';
+      html += "</tr>";
       if (day > daysInMonth) break;
     }
-    html += '</tbody></table>';
+    html += "</tbody></table>";
     mobileCalendar.innerHTML = html;
   }
 }
@@ -1393,6 +1550,102 @@ function removeSelectedUser(userId) {
 function updatePersoneelHidden() {
   if (personeelHidden) {
     personeelHidden.value = selectedUsers.map((u) => u.user_id).join(",");
+  }
+}
+
+// Functie om ingeschreven leden van een taak te laden
+function loadTaskMembers(slotId) {
+  const container = document.querySelector(`.task-members-${slotId}`);
+  if (!container) return;
+
+  fetch(`${baseUrl}/api/users/get_assigned_users.php?slot_id=${slotId}`)
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success && data.assigned && data.assigned.length > 0) {
+        const membersList = data.assigned
+          .map(
+            (user) =>
+              `<span style='display:inline-block;background:#e5dbfa;color:#6b5b95;padding:4px 8px;border-radius:4px;font-size:13px;margin:2px;'>${user.first_name} ${user.last_name}</span>`,
+          )
+          .join("");
+        container.innerHTML = `
+          <div style='font-weight:500;margin-bottom:4px;'>Ingeschreven leden (${data.assigned.length}):</div>
+          <div>${membersList}</div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div style='font-weight:500;margin-bottom:4px;'>Ingeschreven leden:</div>
+          <div style='color:#999;font-style:italic;'>Nog niemand ingeschreven</div>
+        `;
+      }
+    })
+    .catch((err) => {
+      console.error("Error loading task members:", err);
+      container.innerHTML = `
+        <div style='font-weight:500;margin-bottom:4px;'>Ingeschreven leden:</div>
+        <div style='color:#dc3545;'>Fout bij laden</div>
+      `;
+    });
+}
+
+// Inschrijven/Uitschrijven toggle
+function handleSignupToggle(slotId, isSignedUp) {
+  if (isSignedUp) {
+    // Uitschrijven
+    if (!confirm("Weet je zeker dat je je wilt uitschrijven van deze taak?")) {
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("slot_id", slotId);
+
+    fetch(`${baseUrl}/api/tasks/signout_task.php`, {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          // Sluit modal en herlaad
+          const modal = document.getElementById("tasksModal");
+          if (modal) modal.style.display = "none";
+          alert(data.message);
+          regenerateCalendar();
+          regenerateWeekView();
+        } else {
+          alert("Fout: " + data.message);
+        }
+      })
+      .catch((err) => {
+        console.error("Signout error:", err);
+        alert("Er ging iets fout bij het uitschrijven");
+      });
+  } else {
+    // Inschrijven
+    const formData = new FormData();
+    formData.append("slot_id", slotId);
+
+    fetch(`${baseUrl}/api/tasks/signup_task.php`, {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          // Sluit modal en herlaad
+          const modal = document.getElementById("tasksModal");
+          if (modal) modal.style.display = "none";
+          alert(data.message);
+          regenerateCalendar();
+          regenerateWeekView();
+        } else {
+          alert("Fout: " + data.message);
+        }
+      })
+      .catch((err) => {
+        console.error("Signup error:", err);
+        alert("Er ging iets fout bij het inschrijven");
+      });
   }
 }
 
