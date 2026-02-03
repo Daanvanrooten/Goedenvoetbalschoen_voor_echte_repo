@@ -11,11 +11,17 @@
     $user = $_SESSION['user'];
     $UserID = $user['id'];
     $AllTasks = [];
+
+    $sqlGetUserInfo = "SELECT * FROM users WHERE user_id = :user_id";
     
     $sqla = "SELECT slot_id FROM task_registrations WHERE user_id = :user_id";
     $sqlb = "SELECT task_id FROM task_slots WHERE slot_id = :slot_id";
     $sqlc = "SELECT * FROM task_categories WHERE category_id = :category_id";
     $sql = "SELECT * FROM tasks WHERE task_id = :task_id";
+
+    $stmtUser = $conn->prepare($sqlGetUserInfo);
+    $stmtUser->execute([':user_id' => $UserID]);
+    $UserInfo = $stmtUser->fetch(PDO::FETCH_ASSOC);
 
     //get slot_id(s) from registration to call task_id
     $stmta = $conn->prepare($sqla);
@@ -45,6 +51,35 @@
                 $Categories[] = $GetCategories["name"];
             }
         }
+    }
+
+    if (isset($_POST['QuitTask'])) {
+        $TaskID = $_POST['id'];
+        $sqlGetSlot = "SELECT slot_id FROM task_slots WHERE task_id = :task_id LIMIT 1";
+        $sqlDeleteSlot = "DELETE FROM task_slots WHERE task_id = :task_id AND slot_id = :slot_id";
+        $sqlDeleteReg = "DELETE FROM task_registrations WHERE user_id = :user_id AND slot_id = :slot_id";
+
+        //get the slot ID
+        $stmtGetSlot = $conn->prepare($sqlGetSlot);
+        $stmtGetSlot->execute([':task_id' => $TaskID]);
+        $GetSlotID = $stmtGetSlot->fetch(PDO::FETCH_ASSOC);
+
+        //user the slot ID to delete the slot connection
+        $stmtDeleteSlot = $conn->prepare($sqlDeleteSlot);
+        $stmtDeleteSlot->execute([
+            ':task_id' => $TaskID,
+            ':slot_id' => $GetSlotID['slot_id']
+        ]);
+
+        //now delete the registration with the slot and the user
+        $stmtDeleteReg = $conn->prepare($sqlDeleteReg);
+        $stmtDeleteReg->execute([
+            ':user_id' => $UserID,
+            ':slot_id' => $GetSlotID['slot_id']
+        ]);
+
+        header('Location: UserPage.php');
+        exit();
     }
 ?>
 
@@ -83,44 +118,63 @@
             </nav>
         </div>
     </header>
+
+    <!-- password change aanmaken -->
     <div class="MainArea">
         <div class="logoutBar">
             <a class="LogoutButton" href="logout.php">Log out ></a>
         </div>
 
+        <!-- User Information -->
+        <div class="UserArea">
+            <div class="UserBox">
+                <?php
+                    echo "<div class='UserName'>UserName: " . $UserInfo["username"] . "</div>" .
+                    "<div>FirstName: " . $UserInfo["first_name"] . "</div>" .
+                    "<div>LastName: " . $UserInfo["last_name"] . "</div>" . 
+                    "<div>Email: " . $UserInfo["email"] . "</div>"
+                    ;
+                ?>
+            </div>
+        </div>
+
         <!-- TaskArea is voor Task display -->
         <div class="TaskArea">
-        <?php
-            //get the taskcontainers from the array
-            if($AllTasks != Null){
-
-                foreach($AllTasks as $GetTask){
-                    if($GetTask["frequency"] == null){
-                        $GetTask["frequency"] = "ONCE";
+            <?php
+                //get the taskcontainers from the array
+                if($AllTasks != Null){
+                    foreach($AllTasks as $Task){
+                        if($Task["frequency"] == null){
+                            $Task["frequency"] = "ONCE";
+                        }
+                        echo "<div class='TaskBox'>" .
+                            //Title and Description
+                            "<div class='descriptionArea'>" . 
+                                "<h3>" . htmlspecialchars($Task["title"]) . "</h3>" .
+                                "<div class='description'>" . htmlspecialchars($Task["description"]) . "</div>" .
+                            "</div>" .
+                            //Times and dates
+                            "<div class='TimeArea'>" .
+                                "<div>Date: " . $Task["day"] . "-" . $Task["month"] . "-" . $Task["year"]  . "</div>" .
+                                "<div>Starts: " . $Task["start_time"] . "</div>" .
+                                "<div>Ends: " . $Task["end_time"] . "</div>" .
+                            "</div>" .
+                            //Frequency and Category
+                            "<div class='OthersArea'>" .
+                                "<div>Frequency: " . htmlspecialchars($Task["frequency"]) . "</div>" .
+                                "<div>Task Category: " . htmlspecialchars($Categories[0]) . "</div>" .
+                            "</div>" .
+                            //Quit Task button
+                            "<form class='ButtonArea' action='UserPage.php' method='POST'>" .
+                                "<input type='hidden' name='id' value='" . $Task["task_id"] . "' />" .
+                                "<button name='QuitTask'>Quit Task</button>" .
+                            "</form>" .
+                        "</div>";
                     }
-                    echo "<div class='TaskBox'>";
-                        //Title and Description
-                        echo "<div class='descriptionArea'>";
-                        echo "<h3>" . htmlspecialchars($GetTask["title"]) . "</h3>";
-                        echo "<div class='description'>" . htmlspecialchars($GetTask["description"]) . "</div>";
-                        echo "</div>";
-                        //Times and dates
-                        echo "<div class='TimeArea'>";
-                        echo "<div>date: " . $GetTask["day"] . "-" . $GetTask["month"] . "-" . $GetTask["year"]  . "</div>";
-                        echo "<div>Starts: " . $GetTask["start_time"] . "</div>";
-                        echo "<div>Ends: " . $GetTask["end_time"] . "</div>";
-                        echo "</div>";
-                        //Frequency and Category
-                        echo "<div class='OthersArea'>";
-                        echo "<div>Frequency: " . htmlspecialchars($GetTask["frequency"]) . "</div>";
-                        echo "<div>Task Category: " . htmlspecialchars($Categories[0]) . "</div>";  // Changed this too
-                        echo "</div>";
-                    echo "</div>";
+                }else{
+                    echo "<div class='NoTasks'> U heeft geen taken </div>";
                 }
-            }else{
-                echo "<div class='NoTasks'> U heeft geen taken </div>";
-            }
-        ?>
+            ?>
         </div>
     </div>
 </body>

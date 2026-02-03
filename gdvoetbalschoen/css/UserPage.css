@@ -1,5 +1,6 @@
 body{
     margin:0;
+    background-color:#f8f8f8;
 }
 
 /* Header Styles */
@@ -81,17 +82,20 @@ nav {
 .logoutBar{
     padding:15px;
     text-align: right;
-    width:90%;
+    width:99%;
 }
 .LogoutButton{
     text-decoration: none;
     font-size: 20px;
     font-family: Arial, Helvetica, sans-serif;
     font-weight: bold;
-    color:black;
+    color:white;
+    border-radius: 8px;
+    padding:6px;
+    background-color: #6b7adb;
 }
 .LogoutButton:hover{
-    color:rgb(133, 133, 133);
+    background-color: #8b9bef;
 }
 
 /* Main User Area */
@@ -103,7 +107,37 @@ nav {
     align-items: center;
 }
 
+/* User Info Display Area */
+.UserArea{
+    border-radius: 8px;
+    width:80%;
+    margin:20px;
+    justify-self: center;
+    background-color: White;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.UserBox{
+    margin:50px;
+    padding-left: 60px;
+    width:80%;
+    font-family: Arial, Helvetica, sans-serif;
+
+    display:flex;
+    flex-direction: column;
+    gap:10px;
+}
+.UserName{
+    font-size: 18px;
+    font-weight: bold;
+    color:#6b7adb;
+}
+
 /* Task Display Area */
+h3{
+    font-size: 20px;
+    color:#6b7adb;
+}
 
 .TaskArea{
     margin:50px;
@@ -113,12 +147,13 @@ nav {
     gap:50px;
 }
 .TaskBox{
-    height:150px;
+    min-height:150px;
     width:100%;
-    border-radius: 15px;
-    background-color: rgb(236, 236, 236);
+    border-radius: 8px;
+    background-color: White;
     display:flex;
     justify-content: space-around;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 .description{
     max-width: 300px;
@@ -126,15 +161,44 @@ nav {
 .descriptionArea{
     padding-left:30px;
     width:33%;
+    font-family: Arial, Helvetica, sans-serif;
 }
 .TimeArea{
     width:33%;
     padding:30px;
+    font-size: 18px;
+    font-family: Arial, Helvetica, sans-serif;
+    display:flex;
+    flex-direction: column;
+    gap:10px;
 }
 .OthersArea{
     width:33%;
     padding:30px;
+    font-size: 18px;
+    font-family: Arial, Helvetica, sans-serif;
+    display:flex;
+    flex-direction: column;
+    gap:10px;
 }
+
+.ButtonArea button{
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    margin:10px;
+    border:none;
+    background-color: #6b7adb;
+    color:white;
+    width:50px;
+    height:50px;
+    border-radius: 5px;
+}
+
+.ButtonArea button:hover{
+    cursor:pointer;
+    background-color: #8b9bef;
+}
+
 .NoTasks{
     font-weight: bold;
     font-family: Arial, Helvetica, sans-serif;
@@ -142,6 +206,17 @@ nav {
 }
 
 @media (max-width: 968px) {
+
+    .UserArea{
+        width:60%;
+    }
+
+    .UserBox{
+        margin:30px;
+        padding-left: 20px;
+    }
+
+
     .TaskArea{
         margin:50px;
         width:60%;
@@ -151,10 +226,9 @@ nav {
     }
 
     .TaskBox{
-    min-height:400px;
+        min-height:400px;
         width:100%;
         border-radius: 15px;
-        background-color: rgb(236, 236, 236);
         display:flex;
         flex-direction: column;
         justify-content: center;
@@ -176,6 +250,18 @@ nav {
     }
     .description{
         max-height: 200px;
+    }
+
+    .ButtonArea button{
+        justify-self: center;
+        border:none;
+        width:100px;
+        height:25px;
+        border-radius: 5px;
+    }
+    .ButtonArea{
+        display:flex;
+        justify-content: center;
     }
 }
 }
