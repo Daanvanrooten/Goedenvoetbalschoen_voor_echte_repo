@@ -760,14 +760,10 @@ if (taakForm) {
         alert(data.message);
         this.reset();
         closeTaakModal();
-        // Ververs de kalender en weekview
-        regenerateCalendar();
-        regenerateWeekView();
       } else {
         alert(data.message);
       }
     } catch (err) {
-      console.error("Create task error:", err);
       alert("Er is een fout opgetreden. Probeer het opnieuw.");
     } finally {
       submitBtn.disabled = false;
@@ -961,6 +957,42 @@ function regenerateCalendar() {
     daysGrid.appendChild(dayCell);
   }
 
+  // Add current month's days first
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dayCell = document.createElement("div");
+    dayCell.className = "day-cell current-month";
+
+    // Check if it's today
+    const today = new Date();
+    if (
+      day === today.getDate() &&
+      currentMonth === today.getMonth() &&
+      currentYear === today.getFullYear()
+    ) {
+      dayCell.classList.add("today");
+    }
+
+    // Check if it's weekend (Saturday of Sunday)
+    const dayOfWeek = new Date(currentYear, currentMonth, day).getDay();
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      dayCell.classList.add("weekend");
+    }
+
+    dayCell.textContent = day;
+    daysGrid.appendChild(dayCell);
+  }
+
+  // Add next month's days to fill the grid
+  const totalCells = adjustedFirstDay + daysInMonth;
+  const remainingCells = Math.ceil(totalCells / 7) * 7 - totalCells;
+
+  for (let day = 1; day <= remainingCells; day++) {
+    const dayCell = document.createElement("div");
+    dayCell.className = "day-cell next-month";
+    dayCell.textContent = day;
+    daysGrid.appendChild(dayCell);
+  }
+
   // Haal taken op en render ze in de juiste dag
   const year = currentYear;
   const month = currentMonth;
@@ -974,48 +1006,17 @@ function regenerateCalendar() {
     .then((data) => {
       window.tasksByDate = data;
       const tasksByDate = window.tasksByDate;
-      for (let day = 1; day <= daysInMonth; day++) {
-        const dayCell = document.createElement("div");
-        dayCell.className = "day-cell current-month";
-
-        // Check if it's today
-        const today = new Date();
-        if (
-          day === today.getDate() &&
-          currentMonth === today.getMonth() &&
-          currentYear === today.getFullYear()
-        ) {
-          dayCell.classList.add("today");
-        }
-
-        // Check if it's weekend (Saturday of Sunday)
-        const dayOfWeek = new Date(currentYear, currentMonth, day).getDay();
-        if (dayOfWeek === 0 || dayOfWeek === 6) {
-          dayCell.classList.add("weekend");
-        }
-
-        dayCell.textContent = day;
-
-        // Render events voor deze dag
+      
+      // Loop door alle day cells en voeg events toe
+      const allDayCells = daysGrid.querySelectorAll(".day-cell.current-month");
+      allDayCells.forEach((dayCell, index) => {
+        const day = index + 1;
         const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
         if (tasksByDate[dateKey]) {
           renderEventsForDay(dayCell, tasksByDate[dateKey]);
         }
-
-        daysGrid.appendChild(dayCell);
-      }
+      });
     });
-
-  // Add next month's days to fill the grid
-  const totalCells = adjustedFirstDay + daysInMonth;
-  const remainingCells = Math.ceil(totalCells / 7) * 7 - totalCells;
-
-  for (let day = 1; day <= remainingCells; day++) {
-    const dayCell = document.createElement("div");
-    dayCell.className = "day-cell prev-month";
-    dayCell.textContent = day;
-    daysGrid.appendChild(dayCell);
-  }
 
   // Re-add click handlers to new day cells
   const newDayCells = daysGrid.querySelectorAll(".day-cell");
@@ -1524,13 +1525,6 @@ document.addEventListener("DOMContentLoaded", function () {
   regenerateCalendar(); // 👈 deze ontbrak
   updateWeekInfo();
   regenerateWeekView();
-  
-  // Auto-refresh elke 30 seconden om data synchroon te houden
-  setInterval(function() {
-    regenerateCalendar();
-    regenerateWeekView();
-    console.log("Agenda automatisch ververst");
-  }, 30000); // 30 seconden
 });
 
 console.log("Agenda pagina geladen!");
