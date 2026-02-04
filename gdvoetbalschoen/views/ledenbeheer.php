@@ -289,7 +289,7 @@ $totalPages = 1;
                 if (deleteBtn) {
                     deleteUserId = deleteBtn.dataset.userId;
                     deleteUserName = deleteBtn.dataset.userName;
-                    document.querySelector('#deleteModal .modal-text').textContent = 
+                    document.querySelector('#deleteModal .modal-text').textContent =
                         `Weet je zeker dat je ${deleteUserName} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.`;
                     deleteModal.classList.add('active');
                 }

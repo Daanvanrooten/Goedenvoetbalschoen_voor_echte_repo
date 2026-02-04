@@ -25,23 +25,23 @@ if ($user_id === $_SESSION['user']['user_id']) {
 
 try {
     $conn = getDbConnection();
-    
+
     // Haal eerst de gebruikersinformatie op voor feedback
     $stmt = $conn->prepare("SELECT first_name, last_name FROM users WHERE user_id = ?");
     $stmt->execute([$user_id]);
     $user = $stmt->fetch();
-    
+
     if (!$user) {
         echo json_encode(['success' => false, 'message' => 'Gebruiker niet gevonden']);
         exit;
     }
-    
+
     // Verwijder de gebruiker
     $stmt = $conn->prepare("DELETE FROM users WHERE user_id = ?");
     $stmt->execute([$user_id]);
-    
+
     echo json_encode([
-        'success' => true, 
+        'success' => true,
         'message' => 'Gebruiker ' . $user['first_name'] . ' ' . $user['last_name'] . ' succesvol verwijderd'
     ]);
 } catch (PDOException $e) {
