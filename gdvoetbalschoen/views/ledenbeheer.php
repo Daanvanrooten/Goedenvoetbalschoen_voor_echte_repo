@@ -267,7 +267,7 @@ $totalPages = 1;
             let deleteUserId = null;
             let deleteUserName = '';
 
-            // Admin role change modal
+            // Admin role change modal and delete button handler
             ledenBody.addEventListener('click', function(e) {
                 const moreBtn = e.target.closest('.more-btn');
                 if (moreBtn) {
@@ -275,11 +275,11 @@ $totalPages = 1;
                     selectedRole = parseInt(moreBtn.dataset.role);
                     selectedName = moreBtn.dataset.memberName;
                     // Pas modal tekst aan
-                    document.querySelector('.modal-title').textContent = 'Admin beheer';
+                    document.querySelector('#adminModal .modal-title').textContent = 'Admin beheer';
                     if (selectedRole === 2) {
-                        document.querySelector('.modal-text').textContent = `Wil je ${selectedName} geen admin meer maken?`;
+                        document.querySelector('#adminModal .modal-text').textContent = `Wil je ${selectedName} geen admin meer maken?`;
                     } else {
-                        document.querySelector('.modal-text').textContent = `Wil je ${selectedName} admin maken?`;
+                        document.querySelector('#adminModal .modal-text').textContent = `Wil je ${selectedName} admin maken?`;
                     }
                     adminModal.classList.add('active');
                 }
