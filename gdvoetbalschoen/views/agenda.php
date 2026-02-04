@@ -594,7 +594,7 @@ while (count($weekNumbers) < 2) {
             const startTimeInput = document.getElementById('startTimeInput');
             const endTimeInput = document.getElementById('endTimeInput');
             const taakForm = document.getElementById('taakForm');
-            
+
             // Toon/verberg einddatum veld op basis van herhaling
             if (herhalingRadios && eindDatumGroup) {
                 herhalingRadios.forEach(radio => {
@@ -609,7 +609,7 @@ while (count($weekNumbers) < 2) {
                     });
                 });
             }
-            
+
             // Validatie voor datum en tijd in het verleden
             if (taakForm) {
                 taakForm.addEventListener('submit', function(e) {
@@ -618,21 +618,21 @@ while (count($weekNumbers) < 2) {
                         alert('Vul alle verplichte velden in.');
                         return false;
                     }
-                    
+
                     // Haal ACTUELE waarden op bij elke submit
                     const datumValue = datumInput.value.trim();
-                    
+
                     if (!datumValue) {
                         e.preventDefault();
                         alert('Selecteer een datum.');
                         return false;
                     }
-                    
+
                     const selectedDate = new Date(datumValue);
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
                     selectedDate.setHours(0, 0, 0, 0);
-                    
+
                     // Check of datum in het verleden is
                     if (selectedDate < today) {
                         e.preventDefault();
@@ -642,7 +642,7 @@ while (count($weekNumbers) < 2) {
                         datumInput.focus();
                         return false;
                     }
-                    
+
                     // Als datum vandaag is, check of tijd in het verleden is
                     const startTimeValue = startTimeInput.value.trim();
                     if (selectedDate.getTime() === today.getTime() && startTimeValue) {
@@ -650,7 +650,7 @@ while (count($weekNumbers) < 2) {
                         const currentTime = now.getHours() * 60 + now.getMinutes();
                         const [startHour, startMin] = startTimeValue.split(':').map(Number);
                         const selectedTime = startHour * 60 + startMin;
-                        
+
                         // Geef 2 minuten speling voor kleine vertragingen
                         if (selectedTime < (currentTime - 2)) {
                             e.preventDefault();
@@ -661,7 +661,7 @@ while (count($weekNumbers) < 2) {
                             return false;
                         }
                     }
-                    
+
                     // Check of taaknaam niet leeg is (geen spaties)
                     const taakNaamInput = document.querySelector('input[name="taaknaam"]');
                     if (taakNaamInput && taakNaamInput.value.trim() === '') {
@@ -672,11 +672,11 @@ while (count($weekNumbers) < 2) {
                         taakNaamInput.focus();
                         return false;
                     }
-                    
+
                     // Backend validatie handelt eindtijd en einddatum af - geen frontend dubbele check meer
                 });
             }
-            
+
             if (datumInput) {
                 datumInput.addEventListener('change', function() {
                     if (!this.value) return;
