@@ -16,31 +16,31 @@ function getEventClass(colorHex) {
 // Render week events in een kolom
 function renderWeekEvents(dayColumn, events) {
   const isAdmin = typeof userIsAdmin !== "undefined" && userIsAdmin === true;
-  
+
   events.forEach((ev) => {
     const el = document.createElement("div");
-    
+
     // Bepaal de kleur op basis van inschrijfstatus (voor niet-admins)
     let colorClass = getEventClass(ev.color); // Standaard kleur
-    
+
     if (!isAdmin) {
       const capacity = ev.capacity || 1;
       const registered = ev.registered_count || 0;
       const isFull = registered >= capacity;
       const userRegistered = ev.user_is_registered || false;
-      
+
       // Groen: ingeschreven
       // Oranje: niet ingeschreven, nog plek
       // Rood: vol
       if (userRegistered) {
-        colorClass = 'green-bg';
+        colorClass = "green-bg";
       } else if (isFull) {
-        colorClass = 'red-bg';
+        colorClass = "red-bg";
       } else {
-        colorClass = 'orange-bg';
+        colorClass = "orange-bg";
       }
     }
-    
+
     el.classList.add("week-event", colorClass);
     el.innerHTML = `
             <div class="event-time">${ev.start} - ${ev.end}</div>
@@ -111,7 +111,7 @@ function showTasksModal(date, events) {
 
   modal.innerHTML = `<div class="task-modal-content" style="background:#fff;border-radius:16px;max-width:500px;width:90vw;padding:0;box-shadow:0 2px 16px rgba(0,0,0,0.15);overflow:hidden;">
         <div style='display:flex;align-items:center;gap:12px;padding:16px 20px 0 20px;'>
-            <div style='background:#e5dbfa;color:#6b5b95;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:600;'>📋</div>
+            <div style='background:#e5dbfa;color:#6b5b95;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:600;'>A</div>
             <span style='font-weight:600;font-size:18px;'>Taak Details</span>
             <button id='closeTasksModal' style='margin-left:auto;background:none;border:none;font-size:22px;cursor:pointer;'>&times;</button>
         </div>
@@ -120,27 +120,36 @@ function showTasksModal(date, events) {
         </div>
         <div style='padding:0 20px 20px 20px;max-height:400px;overflow-y:auto;'>
             ${events
-              .map(
-                (ev, idx) => `
+              .map((ev, idx) => {
+                const capacity = ev.capacity || 1;
+                const registered = ev.registered_count || 0;
+                const spotsLeft = capacity - registered;
+                const isFull = spotsLeft <= 0;
+                const userRegistered = ev.user_is_registered || false;
+
+                return `
                 <div class='task-item-modal' style='margin-bottom:18px;padding:16px;background:#f9f9f9;border-radius:8px;position:relative;' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}'>
-                    <div style='font-weight:600;font-size:17px;margin-bottom:6px;'>${ev.title}</div>
+                    <div style='font-weight:600;font-size:17px;margin-bottom:6px;'>
+                        ${ev.title}
+                        ${isAdmin && ev.task_id ? `<span style='color:#888;font-size:12px;font-weight:normal;'> (ID: ${ev.task_id})</span>` : ""}
+                    </div>
+                    ${ev.category_name ? `<div style='margin-bottom:8px;'><span style='background:#e5dbfa;color:#6b5b95;padding:4px 10px;border-radius:12px;font-size:13px;font-weight:500;'>📁 ${ev.category_name}</span></div>` : ""}
                     <div style='color:#888;font-size:14px;margin-bottom:8px;'>
                         <span style='display:inline-block;margin-right:12px;'>🕐 ${ev.start} - ${ev.end}</span>
                         ${ev.frequency ? `<span style='background:#e5dbfa;color:#6b5b95;padding:2px 8px;border-radius:4px;font-size:12px;'>${ev.frequency}</span>` : ""}
                     </div>
                     
-                    ${
-                      !isAdmin
-                        ? `
+                    ${ev.description ? `<div style='background:#fff;padding:10px;border-radius:6px;margin:10px 0;border-left:3px solid #6b5b95;'>
+                        <div style='font-size:13px;color:#666;margin-bottom:4px;font-weight:500;'>Beschrijving</div>
+                        <div style='font-size:14px;color:#333;line-height:1.5;'>${ev.description}</div>
+                    </div>` : ""}
+                    
                     <div style='background:#fff;padding:10px;border-radius:6px;margin:10px 0;border-left:3px solid ${isFull ? "#dc3545" : "#28a745"};'>
-                        <div style='font-size:13px;color:#666;margin-bottom:4px;'>Beschikbare plekken</div>
+                        <div style='font-size:13px;color:#666;margin-bottom:4px;'>${isAdmin ? 'Max aantal leden / Ingeschreven' : 'Beschikbare plekken'}</div>
                         <div style='font-size:18px;font-weight:600;color:${isFull ? "#dc3545" : "#28a745"};'>
                             ${registered} / ${capacity} ${isFull ? "(VOL)" : ""}
                         </div>
                     </div>
-                    `
-                        : ""
-                    }
                     
                     <div class='task-members-${ev.slot_id}' style='margin:8px 0;font-size:14px;color:#666;'>
                         <div style='font-weight:500;margin-bottom:4px;'>Ingeschreven leden:</div>
@@ -150,16 +159,36 @@ function showTasksModal(date, events) {
                       isAdmin && (ev.slot_id || ev.task_id)
                         ? `
                     <div style='margin-top:12px;display:flex;gap:8px;'>
-                        <button class='edit-task-btn' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-frequency='${ev.frequency || ""}' data-slot-date='${ev.slot_date || ""}' style='flex:1;background:#6b5b95;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;'>
+                        <button class='edit-task-btn' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-frequency='${ev.frequency || ""}' data-slot-date='${ev.slot_date || ""}' data-capacity='${capacity}' data-category-id='${ev.category_id || ""}' style='flex:1;background:#6b5b95;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;'>
                             ✏️ Bewerken
                         </button>
-                        <button class='delete-task-btn' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-frequency='${ev.frequency || ""}' style='flex:1;background:#dc3545;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;'>
+                    </div>
+                    ${
+                      ev.frequency &&
+                      (ev.frequency === "DAILY" ||
+                        ev.frequency === "WEEKLY" ||
+                        ev.frequency === "MONTHLY")
+                        ? `
+                    <div style='margin-top:8px;display:flex;gap:8px;'>
+                        <button class='delete-all-task-btn' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-frequency='${ev.frequency || ""}' style='flex:1;background:#dc3545;color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;'>
+                            🗑️ Alles verwijderen
+                        </button>
+                        <button class='delete-single-task-btn' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-slot-date='${ev.slot_date || ""}' style='flex:1;background:#ff6b6b;color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;'>
+                            🗑️ Alleen deze dag
+                        </button>
+                    </div>
+                    `
+                        : `
+                    <div style='margin-top:8px;'>
+                        <button class='delete-task-btn' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-frequency='${ev.frequency || ""}' style='width:100%;background:#dc3545;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;'>
                             🗑️ Verwijderen
                         </button>
                     </div>
                     `
+                    }
+                    `
                         : !isAdmin && ev.slot_id
-                        ? `
+                          ? `
                     <div class='signup-container-${ev.slot_id}' style='margin-top:12px;'>
                         ${
                           userRegistered
@@ -176,7 +205,7 @@ function showTasksModal(date, events) {
                         }
                     </div>
                     `
-                        : ""
+                          : ""
                     }
                 </div>
             `;
@@ -213,6 +242,27 @@ function showTasksModal(date, events) {
       };
     });
 
+    // Delete all instances (recurring tasks)
+    modal.querySelectorAll(".delete-all-task-btn").forEach((btn) => {
+      btn.onclick = function () {
+        const slotId = this.dataset.slotId || null;
+        const taskId = this.dataset.taskId || null;
+        const frequency = this.dataset.frequency || null;
+        deleteTask(slotId, taskId, frequency);
+      };
+    });
+
+    // Delete single instance (recurring tasks)
+    modal.querySelectorAll(".delete-single-task-btn").forEach((btn) => {
+      btn.onclick = function () {
+        const slotId = this.dataset.slotId || null;
+        const taskId = this.dataset.taskId || null;
+        const slotDate = this.dataset.slotDate || null;
+        deleteSingleTask(slotId, taskId, slotDate);
+      };
+    });
+
+    // Delete regular task (non-recurring)
     modal.querySelectorAll(".delete-task-btn").forEach((btn) => {
       btn.onclick = function () {
         const slotId = this.dataset.slotId || null;
@@ -261,15 +311,99 @@ function showTasksModal(date, events) {
 
 // Delete task functie (alleen voor admins)
 function deleteTask(slotId, taskId, frequency) {
-  let confirmMsg = "Weet je zeker dat je deze taak wilt verwijderen?";
+  console.log("deleteTask called:", { slotId, taskId, frequency });
+
+  let confirmMsg = `Weet je zeker dat je deze taak wilt verwijderen?`;
 
   // Voor frequency taken: waarschuwing dat alle herhalingen verwijderd worden
   if (
     frequency &&
     (frequency === "DAILY" || frequency === "WEEKLY" || frequency === "MONTHLY")
   ) {
-    confirmMsg = `Deze taak herhaalt zich ${frequency === "DAILY" ? "dagelijks" : frequency === "WEEKLY" ? "wekelijks" : "maandelijks"}. Weet je zeker dat je ALLE herhalingen wilt verwijderen?`;
+    const frequencyText =
+      frequency === "DAILY"
+        ? "dagelijks"
+        : frequency === "WEEKLY"
+          ? "wekelijks"
+          : "maandelijks";
+    confirmMsg = `⚠️ WAARSCHUWING ⚠️\n\nDeze taak herhaalt zich ${frequencyText}.\n\nJe staat op het punt om ALLE herhalingen van Task ID ${taskId} te verwijderen (tot de einddatum).\n\nLET OP: Als je meerdere herhalende taken met dezelfde naam hebt, wordt alleen Task ID ${taskId} verwijderd.\n\nWeet je het zeker?`;
   }
+
+  if (!confirm(confirmMsg)) {
+    return;
+  }
+
+  const formData = new FormData();
+
+  // Als er een frequency is (recurring task), stuur ALLEEN task_id
+  if (
+    frequency &&
+    (frequency === "DAILY" || frequency === "WEEKLY" || frequency === "MONTHLY")
+  ) {
+    console.log("Recurring task detected, sending only task_id:", taskId);
+    if (taskId) {
+      formData.append("task_id", taskId);
+    }
+  } else {
+    // Voor niet-recurring tasks, stuur slot_id
+    console.log("Non-recurring task, sending slot_id:", slotId);
+    if (slotId) {
+      formData.append("slot_id", slotId);
+    }
+    if (taskId) {
+      formData.append("task_id", taskId);
+    }
+  }
+
+  console.log("FormData contents:");
+  for (let [key, value] of formData.entries()) {
+    console.log(key, value);
+  }
+
+  fetch(`${baseUrl}/api/tasks/delete_task.php`, {
+    method: "POST",
+    body: formData,
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      console.log("Server response:", data);
+      if (data.success) {
+        alert(data.message);
+        // Sluit modal
+        const modal = document.getElementById("tasksModal");
+        if (modal) modal.style.display = "none";
+        // Force hard refresh van calendar data
+        currentMonthEvents = {}; // Clear cache
+        regenerateCalendar();
+        regenerateWeekView();
+      } else {
+        alert("Fout: " + data.message);
+      }
+    })
+    .catch((err) => {
+      console.error("Delete error:", err);
+      alert("Er ging iets fout bij het verwijderen");
+    });
+}
+
+// Delete single task instance functie (alleen voor recurring tasks)
+function deleteSingleTask(slotId, taskId, slotDate) {
+  console.log("deleteSingleTask called:", { slotId, taskId, slotDate });
+
+  // Format date voor weergave
+  let dateDisplay = slotDate || "deze datum";
+  if (slotDate) {
+    const dateObj = new Date(slotDate + "T00:00:00");
+    const options = {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+    dateDisplay = dateObj.toLocaleDateString("nl-NL", options);
+  }
+
+  const confirmMsg = `Weet je zeker dat je alleen de taak op ${dateDisplay} wilt verwijderen?\n\nDe andere herhalingen blijven behouden.`;
 
   if (!confirm(confirmMsg)) {
     return;
@@ -279,9 +413,8 @@ function deleteTask(slotId, taskId, frequency) {
   if (slotId) {
     formData.append("slot_id", slotId);
   }
-  if (taskId) {
-    formData.append("task_id", taskId);
-  }
+
+  console.log("Deleting single slot_id:", slotId);
 
   fetch(`${baseUrl}/api/tasks/delete_task.php`, {
     method: "POST",
@@ -289,12 +422,14 @@ function deleteTask(slotId, taskId, frequency) {
   })
     .then((res) => res.json())
     .then((data) => {
+      console.log("Server response:", data);
       if (data.success) {
         alert(data.message);
         // Sluit modal
         const modal = document.getElementById("tasksModal");
         if (modal) modal.style.display = "none";
-        // Refresh calendar
+        // Force hard refresh van calendar data
+        currentMonthEvents = {}; // Clear cache
         regenerateCalendar();
         regenerateWeekView();
       } else {
@@ -302,7 +437,7 @@ function deleteTask(slotId, taskId, frequency) {
       }
     })
     .catch((err) => {
-      console.error("Delete error:", err);
+      console.error("Delete single error:", err);
       alert("Er ging iets fout bij het verwijderen");
     });
 }
@@ -354,6 +489,12 @@ function editTask(slotId, taskId, frequency, task, slotDate) {
           <label style='display:block;margin-bottom:6px;font-weight:600;'>Taak naam</label>
           <input type='text' id='editTitle' value='${task.title}' style='width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box;' required>
         </div>
+        <div style='margin-bottom:16px;'>
+          <label style='display:block;margin-bottom:6px;font-weight:600;'>Categorie</label>
+          <select id='editCategory' style='width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box;' required>
+            <option value=''>Laden...</option>
+          </select>
+        </div>
         <div style='margin-bottom:16px;display:flex;gap:12px;'>
           <div style='flex:1;'>
             <label style='display:block;margin-bottom:6px;font-weight:600;'>Start tijd</label>
@@ -363,6 +504,11 @@ function editTask(slotId, taskId, frequency, task, slotDate) {
             <label style='display:block;margin-bottom:6px;font-weight:600;'>Eind tijd</label>
             <input type='time' id='editEndTime' value='${task.end}' style='width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box;' required>
           </div>
+        </div>
+        <div style='margin-bottom:16px;'>
+          <label style='display:block;margin-bottom:6px;font-weight:600;'>Max aantal leden</label>
+          <input type='number' id='editCapacity' value='${task.capacity || 1}' min='1' style='width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box;' required>
+          <small style='color:#888;font-size:13px;'>Aantal personen dat zich kan inschrijven voor deze taak</small>
         </div>
         ${
           slotId || taskId
@@ -384,21 +530,36 @@ function editTask(slotId, taskId, frequency, task, slotDate) {
           <button type='button' id='cancelEdit' style='flex:1;padding:10px;background:#ccc;border:none;border-radius:6px;cursor:pointer;font-size:14px;'>Annuleren</button>
           <button type='submit' style='flex:1;padding:10px;background:#6b5b95;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px;'>Opslaan</button>
         </div>
-          </div>
-          <div style='flex:1;'>
-            <label style='display:block;margin-bottom:6px;font-weight:600;'>Eind tijd</label>
-            <input type='time' id='editEndTime' value='${task.end}' style='width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;' required>
-          </div>
-        </div>
-        <div style='display:flex;gap:12px;margin-top:20px;'>
-          <button type='button' id='cancelEdit' style='flex:1;padding:10px;background:#ccc;border:none;border-radius:6px;cursor:pointer;font-size:14px;'>Annuleren</button>
-          <button type='submit' style='flex:1;padding:10px;background:#6b5b95;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px;'>Opslaan</button>
-        </div>
       </form>
     </div>
   `;
 
   editModal.style.display = "flex";
+
+  // Laad categorieën voor de dropdown
+  const editCategorySelect = document.getElementById("editCategory");
+  if (editCategorySelect) {
+    fetch(`${baseUrl}/api/categories/get_categories.php`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.categories) {
+          editCategorySelect.innerHTML = '<option value="">Selecteer categorie</option>';
+          data.categories.forEach((cat) => {
+            const option = document.createElement("option");
+            option.value = cat.category_id;
+            option.textContent = cat.category_name;
+            if (task.category_id && cat.category_id == task.category_id) {
+              option.selected = true;
+            }
+            editCategorySelect.appendChild(option);
+          });
+        }
+      })
+      .catch((err) => {
+        console.error("Error loading categories:", err);
+        editCategorySelect.innerHTML = '<option value="">Fout bij laden</option>';
+      });
+  }
 
   // Initialiseer personeel selector (als slotId of taskId bestaat)
   let editSelectedUsers = [];
@@ -413,8 +574,8 @@ function editTask(slotId, taskId, frequency, task, slotDate) {
     );
     const editPersoneelHidden = document.getElementById("editPersoneelHidden");
 
-    // Laadt huidige toegewezen personeel
-    const fetchUrl = slotId 
+    // Laad huidige toegewezen personeel
+    const fetchUrl = slotId
       ? `${baseUrl}/api/users/get_assigned_users.php?slot_id=${slotId}`
       : `${baseUrl}/api/users/get_assigned_users.php?task_id=${taskId}&slot_date=${encodeURIComponent(slotDate)}`;
     fetch(fetchUrl)
@@ -520,6 +681,30 @@ function editTask(slotId, taskId, frequency, task, slotDate) {
   document.getElementById("editTaskForm").onsubmit = function (e) {
     e.preventDefault();
 
+    // Validatie: check of title niet leeg is
+    const titleInput = document.getElementById("editTitle");
+    if (titleInput.value.trim() === "") {
+      alert("Taaknaam mag niet leeg zijn.");
+      titleInput.focus();
+      return false;
+    }
+
+    // Validatie: check of eindtijd na starttijd is
+    const startTimeInput = document.getElementById("editStartTime");
+    const endTimeInput = document.getElementById("editEndTime");
+    if (startTimeInput.value && endTimeInput.value) {
+      const [startHour, startMin] = startTimeInput.value.split(":").map(Number);
+      const [endHour, endMin] = endTimeInput.value.split(":").map(Number);
+      const startMinutes = startHour * 60 + startMin;
+      const endMinutes = endHour * 60 + endMin;
+
+      if (endMinutes <= startMinutes) {
+        alert("Eindtijd moet later zijn dan starttijd.");
+        endTimeInput.focus();
+        return false;
+      }
+    }
+
     const formData = new FormData();
     if (slotId) {
       formData.append("slot_id", slotId);
@@ -535,12 +720,19 @@ function editTask(slotId, taskId, frequency, task, slotDate) {
     if (personeelHidden) {
       formData.append("personeel", personeelHidden.value);
     }
-    formData.append("title", document.getElementById("editTitle").value);
-    formData.append(
-      "start_time",
-      document.getElementById("editStartTime").value,
-    );
-    formData.append("end_time", document.getElementById("editEndTime").value);
+    formData.append("title", titleInput.value.trim());
+    formData.append("start_time", startTimeInput.value);
+    formData.append("end_time", endTimeInput.value);
+    
+    const capacityInput = document.getElementById("editCapacity");
+    if (capacityInput) {
+      formData.append("capacity", capacityInput.value);
+    }
+    
+    const categoryInput = document.getElementById("editCategory");
+    if (categoryInput && categoryInput.value) {
+      formData.append("category_id", categoryInput.value);
+    }
 
     fetch(`${baseUrl}/api/tasks/update_task.php`, {
       method: "POST",
@@ -580,30 +772,30 @@ function renderEventsForDay(dayCell, events) {
   // Toon alleen een blokje, klikbaar voor alle taken
   if (events.length > 0) {
     const el = document.createElement("div");
-    
+
     // Bepaal de kleur op basis van inschrijfstatus (voor niet-admins)
     const isAdmin = typeof userIsAdmin !== "undefined" && userIsAdmin === true;
     let colorClass = getEventClass(events[0].color); // Standaard kleur
-    
+
     if (!isAdmin && events.length === 1) {
       const event = events[0];
       const capacity = event.capacity || 1;
       const registered = event.registered_count || 0;
       const isFull = registered >= capacity;
       const userRegistered = event.user_is_registered || false;
-      
+
       // Groen: ingeschreven
       // Oranje: niet ingeschreven, nog plek
       // Rood: vol
       if (userRegistered) {
-        colorClass = 'green';
+        colorClass = "green";
       } else if (isFull) {
-        colorClass = 'red';
+        colorClass = "red";
       } else {
-        colorClass = 'orange';
+        colorClass = "orange";
       }
     }
-    
+
     el.classList.add("event", colorClass);
     el.style.cursor = "pointer";
     let freqLabel = "";
@@ -652,8 +844,8 @@ toggleBtns.forEach((btn) => {
       // Toon weeknavigatie altijd in weekview
       const weekNav = document.getElementById("weekNavigation");
       if (weekNav) weekNav.style.display = "flex";
-      // Hide mobile tasks section in week view (telefoon)
-      if (mobileTasksSection) {
+      // Hide mobile tasks section in week view
+      if (mobileTasksSection && window.innerWidth <= 768) {
         mobileTasksSection.style.display = "none";
       }
       // Initialize week view
@@ -749,26 +941,48 @@ if (fileUpload && fotoInput) {
 if (taakForm) {
   taakForm.addEventListener("submit", async function (e) {
     e.preventDefault();
+
     const formData = new FormData(this);
     const submitBtn = this.querySelector(".submit-btn");
+
+    // Disable button om dubbele submits te voorkomen
+    if (submitBtn.disabled) {
+      return; // Stop als al bezig
+    }
+
     submitBtn.disabled = true;
     submitBtn.textContent = "Bezig...";
+
     try {
       const response = await fetch(baseUrl + "/api/tasks/create_task.php", {
         method: "POST",
         body: formData,
       });
-      const data = await response.json();
+
+      // Parse JSON response - werkt voor zowel success als error responses
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error("JSON parse error:", jsonError);
+        throw new Error("Ongeldig serverantwoord");
+      }
+
       if (data.success) {
         alert(data.message);
         this.reset();
         closeTaakModal();
+        // Herlaad pagina om nieuwe taak te tonen
+        location.reload();
       } else {
+        // Toon validatie foutmelding - formulier blijft open voor correctie
         alert(data.message);
       }
     } catch (err) {
+      console.error("Fetch error:", err);
       alert("Er is een fout opgetreden. Probeer het opnieuw.");
     } finally {
+      // Zorg dat button altijd weer enabled wordt zodat gebruiker opnieuw kan submitten
       submitBtn.disabled = false;
       submitBtn.textContent = "Taak aanmaken";
     }
@@ -804,14 +1018,14 @@ const logoutModal = document.getElementById("logoutModal");
 const cancelLogoutBtn = document.querySelector(".cancel-logout-btn");
 const confirmLogoutBtn = document.querySelector(".confirm-logout-btn");
 
-// if (profileCircle) {
-//   profileCircle.addEventListener("click", function (e) {
-//     e.preventDefault();
-//     // Open logout modal
-//     logoutModal.classList.add("active");
-//     document.body.style.overflow = "hidden";
-//   });
-// }
+if (profileCircle) {
+  profileCircle.addEventListener("click", function (e) {
+    e.preventDefault();
+    // Open logout modal
+    logoutModal.classList.add("active");
+    document.body.style.overflow = "hidden";
+  });
+}
 
 // Close logout modal functions
 function closeLogoutModal() {
@@ -889,74 +1103,6 @@ if (prevMonthBtn) {
     }
     updateCalendarTitle();
     regenerateCalendar();
-    // Regenerate mobile calendar for month view
-    if (window.innerWidth <= 768) {
-      // Get tasks for new month
-      const year = currentYear;
-      const month = currentMonth;
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      const start = `${year}-${String(month + 1).padStart(2, "0")}-01`;
-      const end = `${year}-${String(month + 1).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
-      fetch(
-        `${baseUrl}/api/tasks/get_calendar_tasks.php?start=${start}&end=${end}`,
-      )
-        .then((res) => res.json())
-        .then((tasksByDate) => {
-          // Render mobile calendar
-          const mobileCalendar = document.querySelector(".mobile-calendar");
-          if (mobileCalendar) {
-            // ...existing code for rendering mobile calendar...
-            let html =
-              '<table class="mobile-calendar-table" style="width:100%"><thead><tr>';
-            const daysOfWeek = ["MA", "DI", "WO", "DO", "VR", "ZA", "ZO"];
-            for (let i = 0; i < 7; i++) {
-              html += `<th>${daysOfWeek[i]}</th>`;
-            }
-            html += "</tr></thead><tbody>";
-            let firstDay = new Date(currentYear, currentMonth, 1).getDay();
-            firstDay = firstDay === 0 ? 6 : firstDay - 1;
-            let day = 1;
-            for (let week = 0; week < 6; week++) {
-              html += "<tr>";
-              for (let i = 0; i < 7; i++) {
-                if ((week === 0 && i < firstDay) || day > daysInMonth) {
-                  html += "<td></td>";
-                } else {
-                  const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-                  const tasks =
-                    typeof tasksByDate !== "undefined" && tasksByDate[dateKey]
-                      ? tasksByDate[dateKey]
-                      : [];
-                  let cellContent = `<div class="mobile-day-number">${day}</div>`;
-                  let cellClass = "";
-                  if (tasks.length > 0) {
-                    if (tasks[0].color === "#cccccc")
-                      cellClass = "has-task-green";
-                    else if (tasks[0].color === "#ffb8d1")
-                      cellClass = "has-task-pink";
-                    else cellClass = "has-task-green";
-                    cellContent += tasks
-                      .map((ev) => {
-                        let colorClass = "";
-                        if (ev.color === "#cccccc") colorClass = "green-cell";
-                        else if (ev.color === "#ffb8d1")
-                          colorClass = "pink-cell";
-                        return `<div class=\"mobile-task-badge ${colorClass}\" style=\"margin:2px 0;padding:2px 6px;border-radius:4px;font-size:13px;display:inline-block;\">${ev.title}</div>`;
-                      })
-                      .join("");
-                  }
-                  html += `<td class=\"${cellClass}\" style=\"height:44px;text-align:center;vertical-align:top;\">${cellContent}</td>`;
-                  day++;
-                }
-              }
-              html += "</tr>";
-              if (day > daysInMonth) break;
-            }
-            html += "</tbody></table>";
-            mobileCalendar.innerHTML = html;
-          }
-        });
-    }
   });
 }
 
@@ -970,74 +1116,6 @@ if (nextMonthBtn) {
     }
     updateCalendarTitle();
     regenerateCalendar();
-    // Regenerate mobile calendar for month view
-    if (window.innerWidth <= 768) {
-      // Get tasks for new month
-      const year = currentYear;
-      const month = currentMonth;
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      const start = `${year}-${String(month + 1).padStart(2, "0")}-01`;
-      const end = `${year}-${String(month + 1).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
-      fetch(
-        `${baseUrl}/api/tasks/get_calendar_tasks.php?start=${start}&end=${end}`,
-      )
-        .then((res) => res.json())
-        .then((tasksByDate) => {
-          // Render mobile calendar
-          const mobileCalendar = document.querySelector(".mobile-calendar");
-          if (mobileCalendar) {
-            // ...existing code for rendering mobile calendar...
-            let html =
-              '<table class="mobile-calendar-table" style="width:100%"><thead><tr>';
-            const daysOfWeek = ["MA", "DI", "WO", "DO", "VR", "ZA", "ZO"];
-            for (let i = 0; i < 7; i++) {
-              html += `<th>${daysOfWeek[i]}</th>`;
-            }
-            html += "</tr></thead><tbody>";
-            let firstDay = new Date(currentYear, currentMonth, 1).getDay();
-            firstDay = firstDay === 0 ? 6 : firstDay - 1;
-            let day = 1;
-            for (let week = 0; week < 6; week++) {
-              html += "<tr>";
-              for (let i = 0; i < 7; i++) {
-                if ((week === 0 && i < firstDay) || day > daysInMonth) {
-                  html += "<td></td>";
-                } else {
-                  const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-                  const tasks =
-                    typeof tasksByDate !== "undefined" && tasksByDate[dateKey]
-                      ? tasksByDate[dateKey]
-                      : [];
-                  let cellContent = `<div class="mobile-day-number">${day}</div>`;
-                  let cellClass = "";
-                  if (tasks.length > 0) {
-                    if (tasks[0].color === "#cccccc")
-                      cellClass = "has-task-green";
-                    else if (tasks[0].color === "#ffb8d1")
-                      cellClass = "has-task-pink";
-                    else cellClass = "has-task-green";
-                    cellContent += tasks
-                      .map((ev) => {
-                        let colorClass = "";
-                        if (ev.color === "#cccccc") colorClass = "green-cell";
-                        else if (ev.color === "#ffb8d1")
-                          colorClass = "pink-cell";
-                        return `<div class=\"mobile-task-badge ${colorClass}\" style=\"margin:2px 0;padding:2px 6px;border-radius:4px;font-size:13px;display:inline-block;\">${ev.title}</div>`;
-                      })
-                      .join("");
-                  }
-                  html += `<td class=\"${cellClass}\" style=\"height:44px;text-align:center;vertical-align:top;\">${cellContent}</td>`;
-                  day++;
-                }
-              }
-              html += "</tr>";
-              if (day > daysInMonth) break;
-            }
-            html += "</tbody></table>";
-            mobileCalendar.innerHTML = html;
-          }
-        });
-    }
   });
 }
 
@@ -1096,45 +1174,30 @@ function regenerateCalendar() {
     daysGrid.appendChild(dayCell);
   }
 
-  // Haal taken op en render ze in de juiste dag
-  const year = currentYear;
-  const month = currentMonth;
-  const start = `${year}-${String(month + 1).padStart(2, "0")}-01`;
-  const end = `${year}-${String(month + 1).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
-  fetch(`${baseUrl}/api/tasks/get_calendar_tasks.php?start=${start}&end=${end}`)
-    .then((res) => res.json())
-    .then((tasksByDate) => {
-      for (let day = 1; day <= daysInMonth; day++) {
-        const dayCell = document.createElement("div");
-        dayCell.className = "day-cell current-month";
+  // Add current month's days first
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dayCell = document.createElement("div");
+    dayCell.className = "day-cell current-month";
 
-        // Check if it's today
-        const today = new Date();
-        if (
-          day === today.getDate() &&
-          currentMonth === today.getMonth() &&
-          currentYear === today.getFullYear()
-        ) {
-          dayCell.classList.add("today");
-        }
+    // Check if it's today
+    const today = new Date();
+    if (
+      day === today.getDate() &&
+      currentMonth === today.getMonth() &&
+      currentYear === today.getFullYear()
+    ) {
+      dayCell.classList.add("today");
+    }
 
-        // Check if it's weekend (Saturday or Sunday)
-        const dayOfWeek = new Date(currentYear, currentMonth, day).getDay();
-        if (dayOfWeek === 0 || dayOfWeek === 6) {
-          dayCell.classList.add("weekend");
-        }
+    // Check if it's weekend (Saturday of Sunday)
+    const dayOfWeek = new Date(currentYear, currentMonth, day).getDay();
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      dayCell.classList.add("weekend");
+    }
 
-        dayCell.textContent = day;
-
-        // Render events voor deze dag
-        const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-        if (tasksByDate[dateKey]) {
-          renderEventsForDay(dayCell, tasksByDate[dateKey]);
-        }
-
-        daysGrid.appendChild(dayCell);
-      }
-    });
+    dayCell.textContent = day;
+    daysGrid.appendChild(dayCell);
+  }
 
   // Add next month's days to fill the grid
   const totalCells = adjustedFirstDay + daysInMonth;
@@ -1142,10 +1205,35 @@ function regenerateCalendar() {
 
   for (let day = 1; day <= remainingCells; day++) {
     const dayCell = document.createElement("div");
-    dayCell.className = "day-cell prev-month";
+    dayCell.className = "day-cell next-month";
     dayCell.textContent = day;
     daysGrid.appendChild(dayCell);
   }
+
+  // Haal taken op en render ze in de juiste dag
+  const year = currentYear;
+  const month = currentMonth;
+  const start = `${year}-${String(month + 1).padStart(2, "0")}-01`;
+  const end = `${year}-${String(month + 1).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
+
+  // Maak tasksByDate globaal zodat andere functies het kunnen gebruiken
+  window.tasksByDate = {};
+  fetch(`${baseUrl}/api/tasks/get_calendar_tasks.php?start=${start}&end=${end}`)
+    .then((res) => res.json())
+    .then((data) => {
+      window.tasksByDate = data;
+      const tasksByDate = window.tasksByDate;
+
+      // Loop door alle day cells en voeg events toe
+      const allDayCells = daysGrid.querySelectorAll(".day-cell.current-month");
+      allDayCells.forEach((dayCell, index) => {
+        const day = index + 1;
+        const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        if (tasksByDate[dateKey]) {
+          renderEventsForDay(dayCell, tasksByDate[dateKey]);
+        }
+      });
+    });
 
   // Re-add click handlers to new day cells
   const newDayCells = daysGrid.querySelectorAll(".day-cell");
@@ -1156,95 +1244,92 @@ function regenerateCalendar() {
       }
     });
   });
-  function renderMobileMonthCalendar(year, month, tasksByDate) {
-    const mobileCal = document.querySelector(".mobile-calendar");
-    if (!mobileCal) return;
-    const daysOfWeek = ["SUN", "MON", "TUE", "WED", "THUR", "FRI", "SAT"]; // 7 kolommen
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    // Bepaal op welke dag van de week de 1e van de maand valt (0=Zon, 1=Ma, ...)
-    let firstDay = new Date(year, month, 1).getDay();
-    // Zet op 0=Zon, 1=Ma, ... 4=Do, 5=Vr, 6=Za, maar we tonen alleen 5 kolommen (zo nodig schuiven)
-    // Start altijd op zondag, maar max 5 kolommen
-    let startOffset = firstDay;
-    // Bouw weken
-    let weeks = [];
-    let day = 1;
-    while (day <= daysInMonth) {
-      let week = [];
-      for (let i = 0; i < 7; i++) {
-        if (weeks.length === 0 && i < startOffset && day === 1) {
-          week.push("");
-        } else if (day <= daysInMonth) {
-          week.push(day++);
-        } else {
-          week.push("");
-        }
-      }
-      weeks.push(week);
-    }
-    // Bouw de tabel
-    let html =
-      '<table class="mobile-calendar-table" style="table-layout:fixed;width:100%"><tbody>';
-    // Header
-    html += "<tr>";
-    for (let i = 0; i < 7; i++) {
-      html += `<td class="day-label" style="width:14.28%">${daysOfWeek[i]}</td>`;
-    }
-    html += "</tr>";
-    // Dagen
-    for (let w = 0; w < weeks.length; w++) {
-      html += "<tr>";
-      for (let i = 0; i < 7; i++) {
-        const d = weeks[w][i];
-        if (d) {
-          const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-          let eventClass = "";
-          if (
-            tasksByDate &&
-            tasksByDate[dateKey] &&
-            tasksByDate[dateKey].length > 0
-          ) {
-            eventClass = "green-cell";
-          }
-          html += `<td class="${eventClass}" style="width:14.28%;height:48px;text-align:center;vertical-align:middle;">${d}</td>`;
-        } else {
-          html += '<td style="width:14.28%;height:48px;"></td>';
-        }
-      }
-      html += "</tr>";
-    }
-    html += "</tbody></table>";
-    mobileCal.innerHTML = html;
-  }
-  // Generate mobile calendar - always render month table
+
+  // Generate mobile calendar - horizontal layout with weekdays as rows
   const mobileCalendar = document.querySelector(".mobile-calendar");
   if (mobileCalendar) {
-    // Fallback: altijd een maandtabel tonen
-    let html =
-      '<table class="mobile-calendar-table" style="width:100%"><thead><tr>';
-    const daysOfWeek = ["MA", "DI", "WO", "DO", "VR", "ZA", "ZO"];
-    for (let i = 0; i < 7; i++) {
-      html += `<th>${daysOfWeek[i]}</th>`;
+    mobileCalendar.innerHTML = "";
+
+    // Create mobile calendar table with horizontal layout
+    const table = document.createElement("table");
+    table.className = "mobile-calendar-table";
+
+    const tbody = document.createElement("tbody");
+
+    // Days of week labels
+    const daysOfWeek = ["SUN", "MON", "TUE", "WED", "THUR", "FRI", "Sat"];
+
+    // Build array of all days with their weekday
+    const calendarDays = [];
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(currentYear, currentMonth, day);
+      const weekday = date.getDay(); // 0 = Sunday, 6 = Saturday
+      calendarDays.push({ day, weekday, date });
     }
-    html += "</tr></thead><tbody>";
-    let firstDay = new Date(currentYear, currentMonth, 1).getDay();
-    firstDay = firstDay === 0 ? 6 : firstDay - 1;
-    let day = 1;
-    for (let week = 0; week < 6; week++) {
-      html += "<tr>";
-      for (let i = 0; i < 7; i++) {
-        if ((week === 0 && i < firstDay) || day > daysInMonth) {
-          html += "<td></td>";
-        } else {
-          html += `<td style="height:44px;text-align:center;">${day}</td>`;
-          day++;
+
+    // Group days by weekday (0-6)
+    const daysByWeekday = [[], [], [], [], [], [], []];
+    // Definieer 'today' zodat deze beschikbaar is
+    const today = new Date();
+    // Gebruik window.tasksByDate als fallback als tasksByDate niet bestaat
+    const safeTasksByDate =
+      typeof tasksByDate !== "undefined"
+        ? tasksByDate
+        : window.tasksByDate || {};
+    calendarDays.forEach(({ day, weekday, date }) => {
+      const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      const hasTasks =
+        safeTasksByDate[dateKey] && safeTasksByDate[dateKey].length > 0;
+      const isToday =
+        day === today.getDate() &&
+        currentMonth === today.getMonth() &&
+        currentYear === today.getFullYear();
+
+      daysByWeekday[weekday].push({ day, date, dateKey, hasTasks, isToday });
+    });
+
+    // Create one row per weekday
+    for (let weekday = 0; weekday < 7; weekday++) {
+      const weekdayRow = document.createElement("tr");
+
+      // First cell: weekday label
+      const labelCell = document.createElement("td");
+      labelCell.className = "day-label";
+      labelCell.textContent = daysOfWeek[weekday];
+      weekdayRow.appendChild(labelCell);
+
+      // Add cells for each occurrence of this weekday in the month
+      const daysForThisWeekday = daysByWeekday[weekday];
+      daysForThisWeekday.forEach(({ day, dateKey, hasTasks, isToday }) => {
+        const dayCell = document.createElement("td");
+        dayCell.textContent = day;
+
+        // Add green background if there are tasks
+        if (hasTasks) {
+          dayCell.classList.add("green-cell");
         }
-      }
-      html += "</tr>";
-      if (day > daysInMonth) break;
+
+        // Add today class if it's today
+        if (isToday) {
+          dayCell.classList.add("today");
+        }
+
+        // Make clickable to show tasks
+        if (hasTasks) {
+          dayCell.style.cursor = "pointer";
+          dayCell.addEventListener("click", () => {
+            showTasksModal(tasksByDate[dateKey], dateKey);
+          });
+        }
+
+        weekdayRow.appendChild(dayCell);
+      });
+
+      tbody.appendChild(weekdayRow);
     }
-    html += "</tbody></table>";
-    mobileCalendar.innerHTML = html;
+
+    table.appendChild(tbody);
+    mobileCalendar.appendChild(table);
   }
 }
 
@@ -1409,22 +1494,22 @@ function regenerateWeekView() {
             contentClass = "pink-day";
           // Genereer de dagcel
           mobileDay.innerHTML = `
-            <div class="mobile-day-label">${daysOfWeek[i]}</div>
-            <div class="mobile-day-content ${contentClass}">
-                <div class="mobile-day-number">${dayNumber}</div>
-                ${events
-                  .map(
-                    (ev, idx) => `
-                    <div class=\"mobile-week-event\" data-idx=\"${idx}\" style=\"cursor:pointer;\">
-                        <div class=\"event-time\">${ev.start} - ${ev.end}</div>
-                        <div class=\"event-title\">${ev.title}</div>
-                    </div>
-                `,
-                  )
-                  .join("")}
-                ${events.length > 0 ? `<div class=\"event-author\">${events[0].author || ""}</div>` : ""}
-            </div>
-          `;
+                        <div class="mobile-day-label">${daysOfWeek[i]}</div>
+                        <div class="mobile-day-content ${contentClass}">
+                            <div class="mobile-day-number">${dayNumber}</div>
+                            ${events
+                              .map(
+                                (ev, idx) => `
+                                <div class=\"mobile-week-event\" data-idx=\"${idx}\" style=\"cursor:pointer;\">
+                                    <div class=\"event-time\">${ev.start} - ${ev.end}</div>
+                                    <div class=\"event-title\">${ev.title}</div>
+                                </div>
+                            `,
+                              )
+                              .join("")}
+                            ${events.length > 0 ? `<div class=\"event-author\">${events[0].author || ""}</div>` : ""}
+                        </div>
+                    `;
           // Click handler op dag zelf (voor dagen zonder taken)
           mobileDay.onclick = function (e) {
             // Alleen uitvoeren als er niet op een taak geklikt is
@@ -1553,7 +1638,7 @@ function updatePersoneelHidden() {
   }
 }
 
-// Functie om ingeschreven leden van een taak te laden
+// Load task members functie
 function loadTaskMembers(slotId) {
   const container = document.querySelector(`.task-members-${slotId}`);
   if (!container) return;
@@ -1588,7 +1673,7 @@ function loadTaskMembers(slotId) {
     });
 }
 
-// Inschrijven/Uitschrijven toggle
+// Handle signup/signout toggle functie
 function handleSignupToggle(slotId, isSignedUp) {
   if (isSignedUp) {
     // Uitschrijven
@@ -1644,7 +1729,7 @@ function handleSignupToggle(slotId, isSignedUp) {
       })
       .catch((err) => {
         console.error("Signup error:", err);
-        alert("Er ging iets fout bij het inschrijven");
+        alert("Er ging iets fong bij het inschrijven");
       });
   }
 }
