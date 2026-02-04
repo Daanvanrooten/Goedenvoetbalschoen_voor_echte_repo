@@ -133,23 +133,23 @@ function showTasksModal(date, events) {
                         ${ev.title}
                         ${isAdmin && ev.task_id ? `<span style='color:#888;font-size:12px;font-weight:normal;'> (ID: ${ev.task_id})</span>` : ""}
                     </div>
+                    ${ev.category_name ? `<div style='margin-bottom:8px;'><span style='background:#e5dbfa;color:#6b5b95;padding:4px 10px;border-radius:12px;font-size:13px;font-weight:500;'>📁 ${ev.category_name}</span></div>` : ""}
                     <div style='color:#888;font-size:14px;margin-bottom:8px;'>
                         <span style='display:inline-block;margin-right:12px;'>🕐 ${ev.start} - ${ev.end}</span>
                         ${ev.frequency ? `<span style='background:#e5dbfa;color:#6b5b95;padding:2px 8px;border-radius:4px;font-size:12px;'>${ev.frequency}</span>` : ""}
                     </div>
                     
-                    ${
-                      !isAdmin
-                        ? `
+                    ${ev.description ? `<div style='background:#fff;padding:10px;border-radius:6px;margin:10px 0;border-left:3px solid #6b5b95;'>
+                        <div style='font-size:13px;color:#666;margin-bottom:4px;font-weight:500;'>Beschrijving</div>
+                        <div style='font-size:14px;color:#333;line-height:1.5;'>${ev.description}</div>
+                    </div>` : ""}
+                    
                     <div style='background:#fff;padding:10px;border-radius:6px;margin:10px 0;border-left:3px solid ${isFull ? "#dc3545" : "#28a745"};'>
-                        <div style='font-size:13px;color:#666;margin-bottom:4px;'>Beschikbare plekken</div>
+                        <div style='font-size:13px;color:#666;margin-bottom:4px;'>${isAdmin ? 'Max aantal leden / Ingeschreven' : 'Beschikbare plekken'}</div>
                         <div style='font-size:18px;font-weight:600;color:${isFull ? "#dc3545" : "#28a745"};'>
                             ${registered} / ${capacity} ${isFull ? "(VOL)" : ""}
                         </div>
                     </div>
-                    `
-                        : ""
-                    }
                     
                     <div class='task-members-${ev.slot_id}' style='margin:8px 0;font-size:14px;color:#666;'>
                         <div style='font-weight:500;margin-bottom:4px;'>Ingeschreven leden:</div>
@@ -159,7 +159,7 @@ function showTasksModal(date, events) {
                       isAdmin && (ev.slot_id || ev.task_id)
                         ? `
                     <div style='margin-top:12px;display:flex;gap:8px;'>
-                        <button class='edit-task-btn' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-frequency='${ev.frequency || ""}' data-slot-date='${ev.slot_date || ""}' style='flex:1;background:#6b5b95;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;'>
+                        <button class='edit-task-btn' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-frequency='${ev.frequency || ""}' data-slot-date='${ev.slot_date || ""}' data-capacity='${capacity}' data-category-id='${ev.category_id || ""}' style='flex:1;background:#6b5b95;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;'>
                             ✏️ Bewerken
                         </button>
                     </div>
@@ -489,6 +489,12 @@ function editTask(slotId, taskId, frequency, task, slotDate) {
           <label style='display:block;margin-bottom:6px;font-weight:600;'>Taak naam</label>
           <input type='text' id='editTitle' value='${task.title}' style='width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box;' required>
         </div>
+        <div style='margin-bottom:16px;'>
+          <label style='display:block;margin-bottom:6px;font-weight:600;'>Categorie</label>
+          <select id='editCategory' style='width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box;' required>
+            <option value=''>Laden...</option>
+          </select>
+        </div>
         <div style='margin-bottom:16px;display:flex;gap:12px;'>
           <div style='flex:1;'>
             <label style='display:block;margin-bottom:6px;font-weight:600;'>Start tijd</label>
@@ -498,6 +504,11 @@ function editTask(slotId, taskId, frequency, task, slotDate) {
             <label style='display:block;margin-bottom:6px;font-weight:600;'>Eind tijd</label>
             <input type='time' id='editEndTime' value='${task.end}' style='width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box;' required>
           </div>
+        </div>
+        <div style='margin-bottom:16px;'>
+          <label style='display:block;margin-bottom:6px;font-weight:600;'>Max aantal leden</label>
+          <input type='number' id='editCapacity' value='${task.capacity || 1}' min='1' style='width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box;' required>
+          <small style='color:#888;font-size:13px;'>Aantal personen dat zich kan inschrijven voor deze taak</small>
         </div>
         ${
           slotId || taskId
@@ -524,6 +535,31 @@ function editTask(slotId, taskId, frequency, task, slotDate) {
   `;
 
   editModal.style.display = "flex";
+
+  // Laad categorieën voor de dropdown
+  const editCategorySelect = document.getElementById("editCategory");
+  if (editCategorySelect) {
+    fetch(`${baseUrl}/api/categories/get_categories.php`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.categories) {
+          editCategorySelect.innerHTML = '<option value="">Selecteer categorie</option>';
+          data.categories.forEach((cat) => {
+            const option = document.createElement("option");
+            option.value = cat.category_id;
+            option.textContent = cat.category_name;
+            if (task.category_id && cat.category_id == task.category_id) {
+              option.selected = true;
+            }
+            editCategorySelect.appendChild(option);
+          });
+        }
+      })
+      .catch((err) => {
+        console.error("Error loading categories:", err);
+        editCategorySelect.innerHTML = '<option value="">Fout bij laden</option>';
+      });
+  }
 
   // Initialiseer personeel selector (als slotId of taskId bestaat)
   let editSelectedUsers = [];
@@ -687,6 +723,16 @@ function editTask(slotId, taskId, frequency, task, slotDate) {
     formData.append("title", titleInput.value.trim());
     formData.append("start_time", startTimeInput.value);
     formData.append("end_time", endTimeInput.value);
+    
+    const capacityInput = document.getElementById("editCapacity");
+    if (capacityInput) {
+      formData.append("capacity", capacityInput.value);
+    }
+    
+    const categoryInput = document.getElementById("editCategory");
+    if (categoryInput && categoryInput.value) {
+      formData.append("category_id", categoryInput.value);
+    }
 
     fetch(`${baseUrl}/api/tasks/update_task.php`, {
       method: "POST",

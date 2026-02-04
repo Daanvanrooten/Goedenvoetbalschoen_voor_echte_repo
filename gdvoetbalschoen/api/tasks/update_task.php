@@ -28,6 +28,8 @@ $title = isset($_POST['title']) ? trim($_POST['title']) : null;
 $start_time = isset($_POST['start_time']) ? $_POST['start_time'] : null;
 $end_time = isset($_POST['end_time']) ? $_POST['end_time'] : null;
 $slot_date = isset($_POST['slot_date']) ? $_POST['slot_date'] : null;
+$capacity = isset($_POST['capacity']) ? intval($_POST['capacity']) : null;
+$category_id = isset($_POST['category_id']) ? intval($_POST['category_id']) : null;
 $personeel = isset($_POST['personeel']) ? $_POST['personeel'] : null; // Comma-separated user IDs
 
 if (!$task_id && !$slot_id) {
@@ -57,10 +59,25 @@ if ($start_time && $end_time) {
 try {
     $conn = getDbConnection();
 
-    // Update task title en times als task_id gegeven is
-    if ($task_id && $title) {
-        $stmt = $conn->prepare("UPDATE tasks SET title = ? WHERE task_id = ?");
-        $stmt->execute([$title, $task_id]);
+    // Update task title en/of category als task_id gegeven is
+    if ($task_id && ($title || $category_id)) {
+        $updates = [];
+        $params = [];
+        
+        if ($title) {
+            $updates[] = "title = ?";
+            $params[] = $title;
+        }
+        if ($category_id) {
+            $updates[] = "category_id = ?";
+            $params[] = $category_id;
+        }
+        
+        if (!empty($updates)) {
+            $params[] = $task_id;
+            $stmt = $conn->prepare("UPDATE tasks SET " . implode(', ', $updates) . " WHERE task_id = ?");
+            $stmt->execute($params);
+        }
     }
 
     // Update task times (voor frequency-based tasks)
@@ -84,8 +101,8 @@ try {
         }
     }
 
-    // Update slot times als slot_id gegeven is (voor specifieke slots)
-    if ($slot_id && ($start_time || $end_time || $slot_date)) {
+    // Update slot times en capacity als slot_id gegeven is (voor specifieke slots)
+    if ($slot_id && ($start_time || $end_time || $slot_date || $capacity)) {
         $updates = [];
         $params = [];
 
@@ -101,12 +118,22 @@ try {
             $updates[] = "slot_date = ?";
             $params[] = $slot_date;
         }
+        if ($capacity !== null && $capacity > 0) {
+            $updates[] = "capacity = ?";
+            $params[] = $capacity;
+        }
 
         if (!empty($updates)) {
             $params[] = $slot_id;
             $stmt = $conn->prepare("UPDATE task_slots SET " . implode(', ', $updates) . " WHERE slot_id = ?");
             $stmt->execute($params);
         }
+    }
+    
+    // Update capacity voor alle slots van een task als task_id gegeven is
+    if ($task_id && !$slot_id && $capacity !== null && $capacity > 0) {
+        $stmt = $conn->prepare("UPDATE task_slots SET capacity = ? WHERE task_id = ?");
+        $stmt->execute([$capacity, $task_id]);
     }
 
     // Update personeel assignments als slot_id gegeven is
