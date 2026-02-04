@@ -35,7 +35,38 @@ try {
     $conn = getDbConnection();
     $conn->beginTransaction();
 
-    if ($slot_id) {
+    // Prioriteit aan task_id (voor recurring tasks)
+    if ($task_id) {
+        error_log("Deleting all instances of task_id: $task_id");
+        
+        // Haal alle slot_ids op voor deze taak
+        $stmt = $conn->prepare("SELECT slot_id FROM task_slots WHERE task_id = ?");
+        $stmt->execute([$task_id]);
+        $slot_ids = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        error_log("Found " . count($slot_ids) . " slots to delete");
+        
+        // Verwijder registraties voor elk slot
+        foreach ($slot_ids as $sid) {
+            $stmt = $conn->prepare("DELETE FROM task_registrations WHERE slot_id = ?");
+            $stmt->execute([$sid]);
+        }
+        
+        // Verwijder alle slots
+        $stmt = $conn->prepare("DELETE FROM task_slots WHERE task_id = ?");
+        $stmt->execute([$task_id]);
+        $deletedSlots = $stmt->rowCount();
+        error_log("Deleted $deletedSlots slots");
+        
+        // Set is_active = 0 op de taak
+        $stmt = $conn->prepare("UPDATE tasks SET is_active = 0 WHERE task_id = ?");
+        $stmt->execute([$task_id]);
+        $updatedTasks = $stmt->rowCount();
+        error_log("Updated $updatedTasks task(s) to inactive");
+        
+        $message = "Alle herhalingen verwijderd ($deletedSlots slots)";
+    } elseif ($slot_id) {
+        error_log("Deleting single slot_id: $slot_id");
+        
         // Verwijder specifieke slot en bijbehorende registraties
         $stmt = $conn->prepare("DELETE FROM task_registrations WHERE slot_id = ?");
         $stmt->execute([$slot_id]);
@@ -44,21 +75,6 @@ try {
         $stmt->execute([$slot_id]);
 
         $message = 'Slot succesvol verwijderd';
-    } else {
-        // Verwijder hele taak met alle slots en registraties
-        // Eerst alle registraties van alle slots van deze taak
-        $stmt = $conn->prepare("DELETE tr FROM task_registrations tr INNER JOIN task_slots ts ON tr.slot_id = ts.slot_id WHERE ts.task_id = ?");
-        $stmt->execute([$task_id]);
-
-        // Dan alle slots
-        $stmt = $conn->prepare("DELETE FROM task_slots WHERE task_id = ?");
-        $stmt->execute([$task_id]);
-
-        // Dan de taak zelf (of set is_active = 0 voor soft delete)
-        $stmt = $conn->prepare("UPDATE tasks SET is_active = 0 WHERE task_id = ?");
-        $stmt->execute([$task_id]);
-
-        $message = 'Taak succesvol verwijderd';
     }
 
     $conn->commit();

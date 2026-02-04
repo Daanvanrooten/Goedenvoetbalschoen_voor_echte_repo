@@ -268,6 +268,8 @@ function showTasksModal(date, events) {
 
 // Delete task functie (alleen voor admins)
 function deleteTask(slotId, taskId, frequency) {
+  console.log("deleteTask called:", { slotId, taskId, frequency });
+  
   let confirmMsg = "Weet je zeker dat je deze taak wilt verwijderen?";
 
   // Voor frequency taken: waarschuwing dat alle herhalingen verwijderd worden
@@ -283,11 +285,27 @@ function deleteTask(slotId, taskId, frequency) {
   }
 
   const formData = new FormData();
-  if (slotId) {
-    formData.append("slot_id", slotId);
+  
+  // Als er een frequency is (recurring task), stuur ALLEEN task_id
+  if (frequency && (frequency === "DAILY" || frequency === "WEEKLY" || frequency === "MONTHLY")) {
+    console.log("Recurring task detected, sending only task_id:", taskId);
+    if (taskId) {
+      formData.append("task_id", taskId);
+    }
+  } else {
+    // Voor niet-recurring tasks, stuur slot_id
+    console.log("Non-recurring task, sending slot_id:", slotId);
+    if (slotId) {
+      formData.append("slot_id", slotId);
+    }
+    if (taskId) {
+      formData.append("task_id", taskId);
+    }
   }
-  if (taskId) {
-    formData.append("task_id", taskId);
+  
+  console.log("FormData contents:");
+  for (let [key, value] of formData.entries()) {
+    console.log(key, value);
   }
 
   fetch(`${baseUrl}/api/tasks/delete_task.php`, {
@@ -296,6 +314,7 @@ function deleteTask(slotId, taskId, frequency) {
   })
     .then((res) => res.json())
     .then((data) => {
+      console.log("Server response:", data);
       if (data.success) {
         alert(data.message);
         // Sluit modal
@@ -517,52 +536,6 @@ function editTask(slotId, taskId, frequency, task, slotDate) {
   document.getElementById("editTaskForm").onsubmit = function (e) {
     e.preventDefault();
 
-    // Validatie voor datum en tijd in het verleden
-    const editStartTime = document.getElementById("editStartTime").value;
-    const editEndTime = document.getElementById("editEndTime").value;
-    
-    // Check of de slot datum in het verleden ligt
-    if (slotDate) {
-      const taskDate = new Date(slotDate);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      taskDate.setHours(0, 0, 0, 0);
-      
-      // Als de datum in het verleden is
-      if (taskDate < today) {
-        alert('⚠️ Deze taak is in het verleden. Je kunt geen taken in het verleden bewerken.');
-        return false;
-      }
-      
-      // Als de datum vandaag is, controleer de tijd
-      if (taskDate.getTime() === today.getTime() && editStartTime) {
-        const now = new Date();
-        const currentTime = now.getHours() * 60 + now.getMinutes();
-        const [startHour, startMin] = editStartTime.split(':').map(Number);
-        const selectedTime = startHour * 60 + startMin;
-        
-        if (selectedTime < currentTime) {
-          alert('⚠️ De starttijd ligt in het verleden. Kies een latere tijd.');
-          document.getElementById("editStartTime").focus();
-          return false;
-        }
-      }
-    }
-    
-    // Check of eindtijd na starttijd is
-    if (editStartTime && editEndTime) {
-      const [startHour, startMin] = editStartTime.split(':').map(Number);
-      const [endHour, endMin] = editEndTime.split(':').map(Number);
-      const startMinutes = startHour * 60 + startMin;
-      const endMinutes = endHour * 60 + endMin;
-      
-      if (endMinutes <= startMinutes) {
-        alert('⚠️ Eindtijd moet later zijn dan starttijd.');
-        document.getElementById("editEndTime").focus();
-        return false;
-      }
-    }
-
     const formData = new FormData();
     if (slotId) {
       formData.append("slot_id", slotId);
@@ -581,9 +554,9 @@ function editTask(slotId, taskId, frequency, task, slotDate) {
     formData.append("title", document.getElementById("editTitle").value);
     formData.append(
       "start_time",
-      editStartTime,
+      document.getElementById("editStartTime").value,
     );
-    formData.append("end_time", editEndTime);
+    formData.append("end_time", document.getElementById("editEndTime").value);
 
     fetch(`${baseUrl}/api/tasks/update_task.php`, {
       method: "POST",
