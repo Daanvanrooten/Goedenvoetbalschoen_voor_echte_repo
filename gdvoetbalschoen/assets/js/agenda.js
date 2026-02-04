@@ -626,6 +626,30 @@ function editTask(slotId, taskId, frequency, task, slotDate) {
   document.getElementById("editTaskForm").onsubmit = function (e) {
     e.preventDefault();
 
+    // Validatie: check of title niet leeg is
+    const titleInput = document.getElementById("editTitle");
+    if (titleInput.value.trim() === '') {
+      alert("Taaknaam mag niet leeg zijn.");
+      titleInput.focus();
+      return false;
+    }
+
+    // Validatie: check of eindtijd na starttijd is
+    const startTimeInput = document.getElementById("editStartTime");
+    const endTimeInput = document.getElementById("editEndTime");
+    if (startTimeInput.value && endTimeInput.value) {
+      const [startHour, startMin] = startTimeInput.value.split(':').map(Number);
+      const [endHour, endMin] = endTimeInput.value.split(':').map(Number);
+      const startMinutes = startHour * 60 + startMin;
+      const endMinutes = endHour * 60 + endMin;
+      
+      if (endMinutes <= startMinutes) {
+        alert("Eindtijd moet later zijn dan starttijd.");
+        endTimeInput.focus();
+        return false;
+      }
+    }
+
     const formData = new FormData();
     if (slotId) {
       formData.append("slot_id", slotId);
@@ -641,12 +665,9 @@ function editTask(slotId, taskId, frequency, task, slotDate) {
     if (personeelHidden) {
       formData.append("personeel", personeelHidden.value);
     }
-    formData.append("title", document.getElementById("editTitle").value);
-    formData.append(
-      "start_time",
-      document.getElementById("editStartTime").value,
-    );
-    formData.append("end_time", document.getElementById("editEndTime").value);
+    formData.append("title", titleInput.value.trim());
+    formData.append("start_time", startTimeInput.value);
+    formData.append("end_time", endTimeInput.value);
 
     fetch(`${baseUrl}/api/tasks/update_task.php`, {
       method: "POST",

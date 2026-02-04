@@ -657,6 +657,17 @@ while (count($weekNumbers) < 2) {
                         }
                     }
                     
+                    // Check of taaknaam niet leeg is (geen spaties)
+                    const taakNaamInput = document.querySelector('input[name="taaknaam"]');
+                    if (taakNaamInput && taakNaamInput.value.trim() === '') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                        alert('Taaknaam mag niet leeg zijn.');
+                        taakNaamInput.focus();
+                        return false;
+                    }
+                    
                     // Check of eindtijd na starttijd is
                     if (startTimeInput.value && endTimeInput && endTimeInput.value) {
                         const [startHour, startMin] = startTimeInput.value.split(':').map(Number);

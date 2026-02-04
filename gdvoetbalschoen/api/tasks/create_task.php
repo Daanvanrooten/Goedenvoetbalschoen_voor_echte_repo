@@ -48,6 +48,15 @@ if (empty($category)) $errors[] = 'Categorie is verplicht';
 if (empty($date)) $errors[] = 'Datum is verplicht';
 if (empty($start_time)) $errors[] = 'Start tijd is verplicht';
 if (empty($end_time)) $errors[] = 'Eind tijd is verplicht';
+
+// Extra validatie: check of eindtijd na starttijd is
+if (!empty($start_time) && !empty($end_time)) {
+    $start = strtotime($start_time);
+    $end = strtotime($end_time);
+    if ($end <= $start) {
+        $errors[] = 'Eindtijd moet later zijn dan starttijd';
+    }
+}
 if ($herhaling !== 'eenmalig' && empty($eind_datum)) $errors[] = 'Eind datum is verplicht voor herhalende taken';
 if (!empty($errors)) {
     http_response_code(400);

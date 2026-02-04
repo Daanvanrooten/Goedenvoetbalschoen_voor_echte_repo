@@ -36,6 +36,24 @@ if (!$task_id && !$slot_id) {
     exit;
 }
 
+// Validatie: check of title niet leeg is (als gegeven)
+if ($title !== null && empty($title)) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Taaknaam mag niet leeg zijn']);
+    exit;
+}
+
+// Validatie: check of eindtijd na starttijd is
+if ($start_time && $end_time) {
+    $start = strtotime($start_time);
+    $end = strtotime($end_time);
+    if ($end <= $start) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Eindtijd moet later zijn dan starttijd']);
+        exit;
+    }
+}
+
 try {
     $conn = getDbConnection();
 
