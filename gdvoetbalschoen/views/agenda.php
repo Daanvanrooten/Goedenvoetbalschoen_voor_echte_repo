@@ -619,13 +619,16 @@ while (count($weekNumbers) < 2) {
                         return false;
                     }
                     
-                    if (!datumInput.value) {
+                    // Haal ACTUELE waarden op bij elke submit
+                    const datumValue = datumInput.value.trim();
+                    
+                    if (!datumValue) {
                         e.preventDefault();
                         alert('Selecteer een datum.');
                         return false;
                     }
                     
-                    const selectedDate = new Date(datumInput.value);
+                    const selectedDate = new Date(datumValue);
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
                     selectedDate.setHours(0, 0, 0, 0);
@@ -641,13 +644,15 @@ while (count($weekNumbers) < 2) {
                     }
                     
                     // Als datum vandaag is, check of tijd in het verleden is
-                    if (selectedDate.getTime() === today.getTime() && startTimeInput.value) {
+                    const startTimeValue = startTimeInput.value.trim();
+                    if (selectedDate.getTime() === today.getTime() && startTimeValue) {
                         const now = new Date();
                         const currentTime = now.getHours() * 60 + now.getMinutes();
-                        const [startHour, startMin] = startTimeInput.value.split(':').map(Number);
+                        const [startHour, startMin] = startTimeValue.split(':').map(Number);
                         const selectedTime = startHour * 60 + startMin;
                         
-                        if (selectedTime < currentTime) {
+                        // Geef 2 minuten speling voor kleine vertragingen
+                        if (selectedTime < (currentTime - 2)) {
                             e.preventDefault();
                             e.stopPropagation();
                             e.stopImmediatePropagation();
@@ -668,49 +673,8 @@ while (count($weekNumbers) < 2) {
                         return false;
                     }
                     
-                    // Check of eindtijd na starttijd is
-                    if (startTimeInput.value && endTimeInput && endTimeInput.value) {
-                        const [startHour, startMin] = startTimeInput.value.split(':').map(Number);
-                        const [endHour, endMin] = endTimeInput.value.split(':').map(Number);
-                        const startMinutes = startHour * 60 + startMin;
-                        const endMinutes = endHour * 60 + endMin;
-                        
-                        if (endMinutes <= startMinutes) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            e.stopImmediatePropagation();
-                            alert('Eindtijd moet later zijn dan starttijd.');
-                            endTimeInput.focus();
-                            return false;
-                        }
-                    }
-                    
-                    // Check einddatum voor herhalende taken
-                    const eindDatumInput = document.getElementById('eindDatumInput');
-                    const selectedHerhaling = document.querySelector('input[name="herhaling"]:checked');
-                    if (selectedHerhaling && selectedHerhaling.value !== 'eenmalig' && eindDatumInput && eindDatumInput.value) {
-                        const eindDate = new Date(eindDatumInput.value);
-                        eindDate.setHours(0, 0, 0, 0);
-                        
-                        if (eindDate < selectedDate) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            e.stopImmediatePropagation();
-                            alert('Einddatum moet later zijn dan de startdatum.');
-                            eindDatumInput.focus();
-                            return false;
-                        }
-                        
-                        if (eindDate < today) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            e.stopImmediatePropagation();
-                            alert('Einddatum kan niet in het verleden liggen.');
-                            eindDatumInput.focus();
-                            return false;
-                        }
-                    }
-                }, true);
+                    // Backend validatie handelt eindtijd en einddatum af - geen frontend dubbele check meer
+                });
             }
             
             if (datumInput) {
