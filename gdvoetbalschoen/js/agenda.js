@@ -413,7 +413,7 @@ function editTask(slotId, taskId, frequency, task, slotDate) {
     );
     const editPersoneelHidden = document.getElementById("editPersoneelHidden");
 
-    // Laad huidige toegewezen personeel
+    // Laadt huidige toegewezen personeel
     const fetchUrl = slotId 
       ? `${baseUrl}/api/users/get_assigned_users.php?slot_id=${slotId}`
       : `${baseUrl}/api/users/get_assigned_users.php?task_id=${taskId}&slot_date=${encodeURIComponent(slotDate)}`;

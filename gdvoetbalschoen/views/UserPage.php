@@ -15,7 +15,7 @@
     $sqlGetUserInfo = "SELECT * FROM users WHERE user_id = :user_id";
     
     $sqla = "SELECT slot_id FROM task_registrations WHERE user_id = :user_id";
-    $sqlb = "SELECT task_id FROM task_slots WHERE slot_id = :slot_id";
+    $sqlb = "SELECT * FROM task_slots WHERE slot_id = :slot_id";
     $sqlc = "SELECT * FROM task_categories WHERE category_id = :category_id";
     $sql = "SELECT * FROM tasks WHERE task_id = :task_id";
 
@@ -33,16 +33,18 @@
         //get task_id here so can call tasks
         $stmtb = $conn->prepare($sqlb);
         $stmtb->execute([':slot_id' => $slotID["slot_id"]]);
-        $GetSlots = $stmtb->fetchAll(PDO::FETCH_ASSOC);
-        foreach($GetSlots as $taskID){
-            
+        $GetSlots = $stmtb->fetchall(PDO::FETCH_ASSOC);
+        
+        foreach($GetSlots as $GetSlot){
             //get tasks with TaskID
             $stmt = $conn->prepare($sql);
-            $stmt->execute([':task_id' => $taskID["task_id"]]);
+            $stmt->execute([':task_id' => $GetSlot["task_id"]]);
             $GetTask = $stmt->fetchall(PDO::FETCH_ASSOC);
             
             //get the category names
             foreach($GetTask as $task){
+                $task["slot_date"] = $GetSlot["slot_date"];
+                $task["slot_id"] = $GetSlot["slot_id"];
                 $AllTasks[] = $task;
 
                 $stmtc = $conn->prepare($sqlc);
@@ -54,22 +56,14 @@
     }
 
     if (isset($_POST['QuitTask'])) {
-        $TaskID = $_POST['id'];
-        $sqlGetSlot = "SELECT slot_id FROM task_slots WHERE task_id = :task_id LIMIT 1";
-        $sqlDeleteSlot = "DELETE FROM task_slots WHERE task_id = :task_id AND slot_id = :slot_id";
+        $SlotID = $_POST['id'];
+        $sqlGetSlot = "SELECT slot_id FROM task_slots WHERE slot_id = :slot_id LIMIT 1";
         $sqlDeleteReg = "DELETE FROM task_registrations WHERE user_id = :user_id AND slot_id = :slot_id";
-
+        
         //get the slot ID
         $stmtGetSlot = $conn->prepare($sqlGetSlot);
-        $stmtGetSlot->execute([':task_id' => $TaskID]);
+        $stmtGetSlot->execute([':slot_id' => $SlotID]);
         $GetSlotID = $stmtGetSlot->fetch(PDO::FETCH_ASSOC);
-
-        //user the slot ID to delete the slot connection
-        $stmtDeleteSlot = $conn->prepare($sqlDeleteSlot);
-        $stmtDeleteSlot->execute([
-            ':task_id' => $TaskID,
-            ':slot_id' => $GetSlotID['slot_id']
-        ]);
 
         //now delete the registration with the slot and the user
         $stmtDeleteReg = $conn->prepare($sqlDeleteReg);
@@ -155,7 +149,7 @@
                             "</div>" .
                             //Times and dates
                             "<div class='TimeArea'>" .
-                                "<div>Date: " . $Task["day"] . "-" . $Task["month"] . "-" . $Task["year"]  . "</div>" .
+                                "<div>Date: " . $Task["slot_date"] . "</div>" .
                                 "<div>Starts: " . $Task["start_time"] . "</div>" .
                                 "<div>Ends: " . $Task["end_time"] . "</div>" .
                             "</div>" .
@@ -166,7 +160,7 @@
                             "</div>" .
                             //Quit Task button
                             "<form class='ButtonArea' action='UserPage.php' method='POST'>" .
-                                "<input type='hidden' name='id' value='" . $Task["task_id"] . "' />" .
+                                "<input type='hidden' name='id' value='" . $Task["slot_id"] . "' />" .
                                 "<button name='QuitTask'>Quit Task</button>" .
                             "</form>" .
                         "</div>";

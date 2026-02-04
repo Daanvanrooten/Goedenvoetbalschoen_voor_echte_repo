@@ -1,0 +1,97 @@
+body{
+    margin:0;
+    background-color:#f8f8f8;
+}
+
+.NavBar{
+    margin-top: 75px;
+    width:70%;
+    display:flex;
+    flex-direction: column;
+    justify-self: center;
+    height:50px;
+    border-radius: 8px 8px 0px 0px;
+    border:solid;
+    border-width: 2px;
+    border-color: grey;
+    background-color:white;
+    align-items: center;
+}
+
+.TaskBlock{
+    width:70%;
+    display:flex;
+    flex-direction: column;
+    justify-self: center;
+    height:500px;
+    border-radius: 0px 0px 8px 8px;
+    background-color:white;
+    border:solid;
+    border-width: 2px;
+    border-color: grey;
+    overflow: auto;
+    align-items: center;
+}
+
+.TaskArea{
+    display:flex;
+    flex-direction: column;
+    justify-self: center;
+    align-items: center;
+    margin:50px;
+    width:80%;
+    gap:25px;
+}
+
+.TaskElement{
+    border:solid;
+    border-color: grey;
+    border-width: 2px;
+    border-radius: 8px;
+    width:100%;
+    height:100px;
+    display:flex;
+    gap:10px;
+    justify-content: center;
+    align-items: center;
+}
+.TaskElement div{
+    width:27%;
+}
+h3{
+    margin:0px;
+}
+#EditBlock{
+    background-color:#f8f8f8;
+    height:500px;
+    width:600px;
+    width: 50%;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display:none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.EditArea{
+    height:90%;
+    width:80%;
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    gap:20px;
+}
+
+.EditArea input{
+    height:35px;
+    width:80%;
+    border-radius: 4px;
+    border:none;
+}
+
+.TaskElement button{
+    width:45px;
+    height:25px;
+}

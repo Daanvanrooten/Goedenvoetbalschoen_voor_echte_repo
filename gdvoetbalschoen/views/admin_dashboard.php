@@ -121,6 +121,16 @@ $aantalTakenOpen = 0;
                         </svg>
                     </div>
                 </a>
+                <a href="TaskManager.php" class="action-card">
+                    <h3 class="action-title">Taken Bewerken</h3>
+                    <div class="action-icon">
+                        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="5" y="3" width="14" height="18" rx="1" stroke="#2c2c2c" stroke-width="1.5" />
+                            <path d="M9 7H15M9 11H15M9 15H12" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round" />
+                            <rect x="8" y="1" width="8" height="3" rx="0.5" fill="#2c2c2c" />
+                        </svg>
+                    </div>
+                </a>
             </section>
         </main>
 
