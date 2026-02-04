@@ -28,6 +28,7 @@ $stmt = $pdo->prepare("
         ts.end_time,
         ts.capacity,
         t.title,
+        t.description,
         t.task_id,
         tc.color_hex,
         t.frequency,
@@ -51,6 +52,7 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $date = $row['slot_date'];
     $tasksByDate[$date][] = [
         'title' => $row['title'],
+        'description' => $row['description'],
         'start' => substr($row['start_time'], 0, 5),
         'end'   => substr($row['end_time'], 0, 5),
         'color' => $row['color_hex'],

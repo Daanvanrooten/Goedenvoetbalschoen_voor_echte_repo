@@ -25,9 +25,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $task_id = isset($_POST['task_id']) ? intval($_POST['task_id']) : null;
 $slot_id = isset($_POST['slot_id']) ? intval($_POST['slot_id']) : null;
 $title = isset($_POST['title']) ? trim($_POST['title']) : null;
+$description = isset($_POST['description']) ? trim($_POST['description']) : null;
 $start_time = isset($_POST['start_time']) ? $_POST['start_time'] : null;
 $end_time = isset($_POST['end_time']) ? $_POST['end_time'] : null;
 $slot_date = isset($_POST['slot_date']) ? $_POST['slot_date'] : null;
+$capacity = isset($_POST['capacity']) ? intval($_POST['capacity']) : null;
 $personeel = isset($_POST['personeel']) ? $_POST['personeel'] : null; // Comma-separated user IDs
 
 if (!$task_id && !$slot_id) {
@@ -57,10 +59,25 @@ if ($start_time && $end_time) {
 try {
     $conn = getDbConnection();
 
-    // Update task title en times als task_id gegeven is
-    if ($task_id && $title) {
-        $stmt = $conn->prepare("UPDATE tasks SET title = ? WHERE task_id = ?");
-        $stmt->execute([$title, $task_id]);
+    // Update task title and description als task_id gegeven is
+    if ($task_id && ($title || $description !== null)) {
+        $updates = [];
+        $params = [];
+        
+        if ($title) {
+            $updates[] = "title = ?";
+            $params[] = $title;
+        }
+        if ($description !== null) {
+            $updates[] = "description = ?";
+            $params[] = $description;
+        }
+        
+        if (!empty($updates)) {
+            $params[] = $task_id;
+            $stmt = $conn->prepare("UPDATE tasks SET " . implode(', ', $updates) . " WHERE task_id = ?");
+            $stmt->execute($params);
+        }
     }
 
     // Update task times (voor frequency-based tasks)
@@ -85,7 +102,7 @@ try {
     }
 
     // Update slot times als slot_id gegeven is (voor specifieke slots)
-    if ($slot_id && ($start_time || $end_time || $slot_date)) {
+    if ($slot_id && ($start_time || $end_time || $slot_date || $capacity)) {
         $updates = [];
         $params = [];
 
@@ -100,6 +117,10 @@ try {
         if ($slot_date) {
             $updates[] = "slot_date = ?";
             $params[] = $slot_date;
+        }
+        if ($capacity) {
+            $updates[] = "capacity = ?";
+            $params[] = $capacity;
         }
 
         if (!empty($updates)) {
