@@ -136,6 +136,23 @@ $totalPages = 1;
         </div>
     </div>
 
+    <!-- Delete User Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeDeleteModal">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                </svg>
+            </button>
+            <h2 class="modal-title">Gebruiker verwijderen</h2>
+            <p class="modal-text">Weet je zeker dat je deze gebruiker wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.</p>
+            <div class="modal-actions">
+                <button class="modal-btn cancel-btn" id="cancelDeleteBtn">Annuleer</button>
+                <button class="modal-btn confirm-btn" id="confirmDeleteBtn" style="background-color: #dc2626;">Verwijderen</button>
+            </div>
+        </div>
+    </div>
+
     <script src="../assets/js/ledenbeheer.js"></script>
     <script>
         // Dynamische leden ophalen en paginering
@@ -173,7 +190,7 @@ $totalPages = 1;
                                     <td class="email-col desktop-only"><span class="email-text">${lid.email}</span></td>
                                     <td class="phone-col desktop-only"><span class="phone-text">${lid.telefoonnummer ? lid.telefoonnummer : '-'}</span></td>
                                     <td class="actions-col">
-                                        <button class="icon-btn delete-btn" title="Verwijderen">
+                                        <button class="icon-btn delete-btn" data-user-id="${lid.user_id}" data-user-name="${lid.first_name} ${lid.last_name}" title="Verwijderen">
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" /></svg>
                                         </button>
                                         <button class="icon-btn more-btn" data-member-id="${lid.user_id}" data-member-name="${lid.first_name} ${lid.last_name}" data-role="${lid.role_id}" title="Meer opties">
@@ -242,6 +259,15 @@ $totalPages = 1;
             let selectedRole = null;
             let selectedName = '';
 
+            // Delete modal elements
+            const deleteModal = document.getElementById('deleteModal');
+            const closeDeleteModalBtn = document.getElementById('closeDeleteModal');
+            const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+            let deleteUserId = null;
+            let deleteUserName = '';
+
+            // Admin role change modal and delete button handler
             ledenBody.addEventListener('click', function(e) {
                 const moreBtn = e.target.closest('.more-btn');
                 if (moreBtn) {
@@ -249,13 +275,23 @@ $totalPages = 1;
                     selectedRole = parseInt(moreBtn.dataset.role);
                     selectedName = moreBtn.dataset.memberName;
                     // Pas modal tekst aan
-                    document.querySelector('.modal-title').textContent = 'Admin beheer';
+                    document.querySelector('#adminModal .modal-title').textContent = 'Admin beheer';
                     if (selectedRole === 2) {
-                        document.querySelector('.modal-text').textContent = `Wil je ${selectedName} geen admin meer maken?`;
+                        document.querySelector('#adminModal .modal-text').textContent = `Wil je ${selectedName} geen admin meer maken?`;
                     } else {
-                        document.querySelector('.modal-text').textContent = `Wil je ${selectedName} admin maken?`;
+                        document.querySelector('#adminModal .modal-text').textContent = `Wil je ${selectedName} admin maken?`;
                     }
                     adminModal.classList.add('active');
+                }
+
+                // Delete button handler
+                const deleteBtn = e.target.closest('.delete-btn');
+                if (deleteBtn) {
+                    deleteUserId = deleteBtn.dataset.userId;
+                    deleteUserName = deleteBtn.dataset.userName;
+                    document.querySelector('#deleteModal .modal-text').textContent =
+                        `Weet je zeker dat je ${deleteUserName} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.`;
+                    deleteModal.classList.add('active');
                 }
             });
 
@@ -278,7 +314,43 @@ $totalPages = 1;
                     .then(data => {
                         alert(data.message);
                         closeAdminModal();
-                        window.location.reload();
+                        fetchLeden(currentPage);
+                    })
+                    .catch(err => {
+                        alert('Er is een fout opgetreden bij het wijzigen van de rol');
+                        closeAdminModal();
+                    });
+            });
+
+            // Delete modal handlers
+            function closeDeleteModal() {
+                deleteModal.classList.remove('active');
+            }
+            closeDeleteModalBtn.addEventListener('click', closeDeleteModal);
+            cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+            confirmDeleteBtn.addEventListener('click', function() {
+                if (!deleteUserId) return;
+                fetch('../api/users/delete_user.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: `user_id=${deleteUserId}`
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message);
+                            closeDeleteModal();
+                            fetchLeden(currentPage);
+                        } else {
+                            alert('Fout: ' + data.message);
+                            closeDeleteModal();
+                        }
+                    })
+                    .catch(err => {
+                        alert('Er is een fout opgetreden bij het verwijderen van de gebruiker');
+                        closeDeleteModal();
                     });
             });
         });
