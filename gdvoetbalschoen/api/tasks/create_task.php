@@ -48,7 +48,64 @@ if (empty($category)) $errors[] = 'Categorie is verplicht';
 if (empty($date)) $errors[] = 'Datum is verplicht';
 if (empty($start_time)) $errors[] = 'Start tijd is verplicht';
 if (empty($end_time)) $errors[] = 'Eind tijd is verplicht';
-if ($herhaling !== 'eenmalig' && empty($eind_datum)) $errors[] = 'Eind datum is verplicht voor herhalende taken';
+
+// Validatie: check of datum niet in het verleden is
+if (!empty($date)) {
+    $today = new DateTime();
+    $today->setTime(0, 0, 0);
+    $selectedDate = new DateTime($date);
+    $selectedDate->setTime(0, 0, 0);
+
+    if ($selectedDate < $today) {
+        $errors[] = 'Datum kan niet in het verleden liggen';
+    }
+
+    // Als datum vandaag is, check of starttijd niet in verleden is
+    if ($selectedDate->format('Y-m-d') === $today->format('Y-m-d') && !empty($start_time)) {
+        $now = new DateTime();
+        $startDateTime = new DateTime($date . ' ' . $start_time);
+        // Geef 2 minuten speling
+        $now->modify('-2 minutes');
+        if ($startDateTime < $now) {
+            $errors[] = 'Starttijd kan niet in het verleden liggen';
+        }
+    }
+}
+
+// Extra validatie: check of eindtijd na starttijd is
+if (!empty($start_time) && !empty($end_time)) {
+    $start = strtotime($start_time);
+    $end = strtotime($end_time);
+    if ($end <= $start) {
+        $errors[] = 'Eindtijd moet later zijn dan starttijd';
+    }
+}
+
+// Validatie voor herhalende taken
+if ($herhaling !== 'eenmalig') {
+    if (empty($eind_datum)) {
+        $errors[] = 'Eind datum is verplicht voor herhalende taken';
+    } else {
+        // Check of einddatum niet in verleden is
+        $today = new DateTime();
+        $today->setTime(0, 0, 0);
+        $eindDatumObj = new DateTime($eind_datum);
+        $eindDatumObj->setTime(0, 0, 0);
+
+        if ($eindDatumObj < $today) {
+            $errors[] = 'Einddatum kan niet in het verleden liggen';
+        }
+
+        // Check of einddatum na startdatum is
+        if (!empty($date)) {
+            $startDatumObj = new DateTime($date);
+            $startDatumObj->setTime(0, 0, 0);
+            if ($eindDatumObj < $startDatumObj) {
+                $errors[] = 'Einddatum moet later zijn dan startdatum';
+            }
+        }
+    }
+}
 if (!empty($errors)) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => implode(', ', $errors)]);
@@ -71,10 +128,10 @@ try {
         // Herhalende taak - genereer slots tot einddatum
         $currentDate = new DateTime($date);
         $endDate = new DateTime($eind_datum);
-        
+
         while ($currentDate <= $endDate) {
             $slotDates[] = $currentDate->format('Y-m-d');
-            
+
             // Verhoog datum op basis van frequentie
             if ($frequency === 'DAILY') {
                 $currentDate->modify('+1 day');
