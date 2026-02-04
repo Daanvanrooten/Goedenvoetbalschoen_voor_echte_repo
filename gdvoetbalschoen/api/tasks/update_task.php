@@ -67,10 +67,14 @@ try {
     }
 
     // Update slot times als slot_id gegeven is (voor specifieke slots)
-    if ($slot_id && ($start_time || $end_time || $slot_date)) {
+    if ($slot_id && ($start_time || $end_time || $slot_date || $title)) {
         $updates = [];
         $params = [];
 
+        if ($title) {
+            $updates[] = "title = ?";
+            $params[] = $title;
+        }
         if ($start_time) {
             $updates[] = "start_time = ?";
             $params[] = $start_time;
