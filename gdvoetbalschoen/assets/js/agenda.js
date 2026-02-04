@@ -464,21 +464,7 @@ function editTask(slotId, taskId, frequency, task, slotDate) {
   editModal.innerHTML = `
     <div style='background:#fff;border-radius:16px;max-width:500px;width:90vw;padding:24px;box-shadow:0 2px 16px rgba(0,0,0,0.15);max-height:90vh;overflow-y:auto;'>
       <h2 style='margin:0 0 20px 0;font-size:20px;'>Taak Bewerken</h2>
-      ${isFrequencyTask ? `
-      <div style='background:#fff3cd;border:1px solid #ffc107;padding:12px;border-radius:6px;margin-bottom:16px;font-size:14px;color:#856404;'>
-        ⚠️ Deze taak herhaalt zich ${frequencyLabel}. Kies wat je wilt bewerken:
-        <div style='margin-top:10px;'>
-          <label style='display:block;margin-bottom:8px;cursor:pointer;'>
-            <input type='radio' name='editScope' value='all' checked style='margin-right:8px;'>
-            <strong>Alle herhalingen bewerken</strong> (alle ${frequencyLabel}e taken)
-          </label>
-          <label style='display:block;cursor:pointer;'>
-            <input type='radio' name='editScope' value='single' style='margin-right:8px;'>
-            <strong>Alleen deze dag bewerken</strong> (${slotDate || 'huidige datum'})
-          </label>
-        </div>
-      </div>
-      ` : ""}
+      ${isFrequencyTask ? `<div style='background:#fff3cd;border:1px solid #ffc107;padding:12px;border-radius:6px;margin-bottom:16px;font-size:14px;color:#856404;'>⚠️ Deze taak herhaalt zich ${frequencyLabel}. Wijzigingen worden op ALLE herhalingen toegepast.</div>` : ""}
       <form id='editTaskForm'>
         <div style='margin-bottom:16px;'>
           <label style='display:block;margin-bottom:6px;font-weight:600;'>Taak naam</label>
@@ -641,39 +627,15 @@ function editTask(slotId, taskId, frequency, task, slotDate) {
     e.preventDefault();
 
     const formData = new FormData();
-    
-    // Check edit scope voor recurring tasks
-    let editScope = 'all'; // default
-    if (isFrequencyTask) {
-      const selectedScope = document.querySelector('input[name="editScope"]:checked');
-      editScope = selectedScope ? selectedScope.value : 'all';
-    }
-    
-    // Als 'single' gekozen is, stuur alleen slot_id
-    // Als 'all' gekozen is, stuur task_id
-    if (editScope === 'single' && slotId) {
+    if (slotId) {
       formData.append("slot_id", slotId);
-      if (slotDate) {
-        formData.append("slot_date", slotDate);
-      }
-    } else if (editScope === 'all' && taskId) {
-      formData.append("task_id", taskId);
-      if (slotDate) {
-        formData.append("slot_date", slotDate);
-      }
-    } else {
-      // Fallback voor non-recurring tasks
-      if (slotId) {
-        formData.append("slot_id", slotId);
-      }
-      if (taskId) {
-        formData.append("task_id", taskId);
-      }
-      if (slotDate) {
-        formData.append("slot_date", slotDate);
-      }
     }
-    
+    if (taskId) {
+      formData.append("task_id", taskId);
+    }
+    if (slotDate) {
+      formData.append("slot_date", slotDate);
+    }
     // Voeg personeel toe als het veld bestaat
     const personeelHidden = document.getElementById("editPersoneelHidden");
     if (personeelHidden) {

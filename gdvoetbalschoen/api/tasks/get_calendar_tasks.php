@@ -27,7 +27,7 @@ $stmt = $pdo->prepare("
         ts.start_time,
         ts.end_time,
         ts.capacity,
-        COALESCE(ts.title, t.title) as title,
+        t.title,
         t.task_id,
         tc.color_hex,
         t.frequency,
