@@ -16,31 +16,31 @@ function getEventClass(colorHex) {
 // Render week events in een kolom
 function renderWeekEvents(dayColumn, events) {
   const isAdmin = typeof userIsAdmin !== "undefined" && userIsAdmin === true;
-
+  
   events.forEach((ev) => {
     const el = document.createElement("div");
-
+    
     // Bepaal de kleur op basis van inschrijfstatus (voor niet-admins)
     let colorClass = getEventClass(ev.color); // Standaard kleur
-
+    
     if (!isAdmin) {
       const capacity = ev.capacity || 1;
       const registered = ev.registered_count || 0;
       const isFull = registered >= capacity;
       const userRegistered = ev.user_is_registered || false;
-
+      
       // Groen: ingeschreven
       // Oranje: niet ingeschreven, nog plek
       // Rood: vol
       if (userRegistered) {
-        colorClass = "green-bg";
+        colorClass = 'green-bg';
       } else if (isFull) {
-        colorClass = "red-bg";
+        colorClass = 'red-bg';
       } else {
-        colorClass = "orange-bg";
+        colorClass = 'orange-bg';
       }
     }
-
+    
     el.classList.add("week-event", colorClass);
     el.innerHTML = `
             <div class="event-time">${ev.start} - ${ev.end}</div>
@@ -120,7 +120,8 @@ function showTasksModal(date, events) {
         </div>
         <div style='padding:0 20px 20px 20px;max-height:400px;overflow-y:auto;'>
             ${events
-              .map((ev, idx) => {
+              .map(
+                (ev, idx) => {
                 const capacity = ev.capacity || 1;
                 const registered = ev.registered_count || 0;
                 const spotsLeft = capacity - registered;
@@ -163,12 +164,7 @@ function showTasksModal(date, events) {
                             ✏️ Bewerken
                         </button>
                     </div>
-                    ${
-                      ev.frequency &&
-                      (ev.frequency === "DAILY" ||
-                        ev.frequency === "WEEKLY" ||
-                        ev.frequency === "MONTHLY")
-                        ? `
+                    ${ev.frequency && (ev.frequency === 'DAILY' || ev.frequency === 'WEEKLY' || ev.frequency === 'MONTHLY') ? `
                     <div style='margin-top:8px;display:flex;gap:8px;'>
                         <button class='delete-all-task-btn' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-frequency='${ev.frequency || ""}' style='flex:1;background:#dc3545;color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;'>
                             🗑️ Alles verwijderen
@@ -177,18 +173,16 @@ function showTasksModal(date, events) {
                             🗑️ Alleen deze dag
                         </button>
                     </div>
-                    `
-                        : `
+                    ` : `
                     <div style='margin-top:8px;'>
                         <button class='delete-task-btn' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-frequency='${ev.frequency || ""}' style='width:100%;background:#dc3545;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;'>
                             🗑️ Verwijderen
                         </button>
                     </div>
-                    `
-                    }
+                    `}
                     `
                         : !isAdmin && ev.slot_id
-                          ? `
+                        ? `
                     <div class='signup-container-${ev.slot_id}' style='margin-top:12px;'>
                         ${
                           userRegistered
@@ -205,7 +199,7 @@ function showTasksModal(date, events) {
                         }
                     </div>
                     `
-                          : ""
+                        : ""
                     }
                 </div>
             `;
@@ -312,7 +306,7 @@ function showTasksModal(date, events) {
 // Delete task functie (alleen voor admins)
 function deleteTask(slotId, taskId, frequency) {
   console.log("deleteTask called:", { slotId, taskId, frequency });
-
+  
   let confirmMsg = `Weet je zeker dat je deze taak wilt verwijderen?`;
 
   // Voor frequency taken: waarschuwing dat alle herhalingen verwijderd worden
@@ -320,12 +314,7 @@ function deleteTask(slotId, taskId, frequency) {
     frequency &&
     (frequency === "DAILY" || frequency === "WEEKLY" || frequency === "MONTHLY")
   ) {
-    const frequencyText =
-      frequency === "DAILY"
-        ? "dagelijks"
-        : frequency === "WEEKLY"
-          ? "wekelijks"
-          : "maandelijks";
+    const frequencyText = frequency === "DAILY" ? "dagelijks" : frequency === "WEEKLY" ? "wekelijks" : "maandelijks";
     confirmMsg = `⚠️ WAARSCHUWING ⚠️\n\nDeze taak herhaalt zich ${frequencyText}.\n\nJe staat op het punt om ALLE herhalingen van Task ID ${taskId} te verwijderen (tot de einddatum).\n\nLET OP: Als je meerdere herhalende taken met dezelfde naam hebt, wordt alleen Task ID ${taskId} verwijderd.\n\nWeet je het zeker?`;
   }
 
@@ -334,12 +323,9 @@ function deleteTask(slotId, taskId, frequency) {
   }
 
   const formData = new FormData();
-
+  
   // Als er een frequency is (recurring task), stuur ALLEEN task_id
-  if (
-    frequency &&
-    (frequency === "DAILY" || frequency === "WEEKLY" || frequency === "MONTHLY")
-  ) {
+  if (frequency && (frequency === "DAILY" || frequency === "WEEKLY" || frequency === "MONTHLY")) {
     console.log("Recurring task detected, sending only task_id:", taskId);
     if (taskId) {
       formData.append("task_id", taskId);
@@ -354,7 +340,7 @@ function deleteTask(slotId, taskId, frequency) {
       formData.append("task_id", taskId);
     }
   }
-
+  
   console.log("FormData contents:");
   for (let [key, value] of formData.entries()) {
     console.log(key, value);
@@ -389,20 +375,15 @@ function deleteTask(slotId, taskId, frequency) {
 // Delete single task instance functie (alleen voor recurring tasks)
 function deleteSingleTask(slotId, taskId, slotDate) {
   console.log("deleteSingleTask called:", { slotId, taskId, slotDate });
-
+  
   // Format date voor weergave
-  let dateDisplay = slotDate || "deze datum";
+  let dateDisplay = slotDate || 'deze datum';
   if (slotDate) {
-    const dateObj = new Date(slotDate + "T00:00:00");
-    const options = {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    };
-    dateDisplay = dateObj.toLocaleDateString("nl-NL", options);
+    const dateObj = new Date(slotDate + 'T00:00:00');
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    dateDisplay = dateObj.toLocaleDateString('nl-NL', options);
   }
-
+  
   const confirmMsg = `Weet je zeker dat je alleen de taak op ${dateDisplay} wilt verwijderen?\n\nDe andere herhalingen blijven behouden.`;
 
   if (!confirm(confirmMsg)) {
@@ -413,7 +394,7 @@ function deleteSingleTask(slotId, taskId, slotDate) {
   if (slotId) {
     formData.append("slot_id", slotId);
   }
-
+  
   console.log("Deleting single slot_id:", slotId);
 
   fetch(`${baseUrl}/api/tasks/delete_task.php`, {
@@ -575,7 +556,7 @@ function editTask(slotId, taskId, frequency, task, slotDate) {
     const editPersoneelHidden = document.getElementById("editPersoneelHidden");
 
     // Laad huidige toegewezen personeel
-    const fetchUrl = slotId
+    const fetchUrl = slotId 
       ? `${baseUrl}/api/users/get_assigned_users.php?slot_id=${slotId}`
       : `${baseUrl}/api/users/get_assigned_users.php?task_id=${taskId}&slot_date=${encodeURIComponent(slotDate)}`;
     fetch(fetchUrl)
@@ -683,7 +664,7 @@ function editTask(slotId, taskId, frequency, task, slotDate) {
 
     // Validatie: check of title niet leeg is
     const titleInput = document.getElementById("editTitle");
-    if (titleInput.value.trim() === "") {
+    if (titleInput.value.trim() === '') {
       alert("Taaknaam mag niet leeg zijn.");
       titleInput.focus();
       return false;
@@ -693,11 +674,11 @@ function editTask(slotId, taskId, frequency, task, slotDate) {
     const startTimeInput = document.getElementById("editStartTime");
     const endTimeInput = document.getElementById("editEndTime");
     if (startTimeInput.value && endTimeInput.value) {
-      const [startHour, startMin] = startTimeInput.value.split(":").map(Number);
-      const [endHour, endMin] = endTimeInput.value.split(":").map(Number);
+      const [startHour, startMin] = startTimeInput.value.split(':').map(Number);
+      const [endHour, endMin] = endTimeInput.value.split(':').map(Number);
       const startMinutes = startHour * 60 + startMin;
       const endMinutes = endHour * 60 + endMin;
-
+      
       if (endMinutes <= startMinutes) {
         alert("Eindtijd moet later zijn dan starttijd.");
         endTimeInput.focus();
@@ -774,30 +755,30 @@ function renderEventsForDay(dayCell, events) {
   // Toon alleen een blokje, klikbaar voor alle taken
   if (events.length > 0) {
     const el = document.createElement("div");
-
+    
     // Bepaal de kleur op basis van inschrijfstatus (voor niet-admins)
     const isAdmin = typeof userIsAdmin !== "undefined" && userIsAdmin === true;
     let colorClass = getEventClass(events[0].color); // Standaard kleur
-
+    
     if (!isAdmin && events.length === 1) {
       const event = events[0];
       const capacity = event.capacity || 1;
       const registered = event.registered_count || 0;
       const isFull = registered >= capacity;
       const userRegistered = event.user_is_registered || false;
-
+      
       // Groen: ingeschreven
       // Oranje: niet ingeschreven, nog plek
       // Rood: vol
       if (userRegistered) {
-        colorClass = "green";
+        colorClass = 'green';
       } else if (isFull) {
-        colorClass = "red";
+        colorClass = 'red';
       } else {
-        colorClass = "orange";
+        colorClass = 'orange';
       }
     }
-
+    
     el.classList.add("event", colorClass);
     el.style.cursor = "pointer";
     let freqLabel = "";
@@ -943,24 +924,24 @@ if (fileUpload && fotoInput) {
 if (taakForm) {
   taakForm.addEventListener("submit", async function (e) {
     e.preventDefault();
-
+    
     const formData = new FormData(this);
     const submitBtn = this.querySelector(".submit-btn");
-
+    
     // Disable button om dubbele submits te voorkomen
     if (submitBtn.disabled) {
       return; // Stop als al bezig
     }
-
+    
     submitBtn.disabled = true;
     submitBtn.textContent = "Bezig...";
-
+    
     try {
       const response = await fetch(baseUrl + "/api/tasks/create_task.php", {
         method: "POST",
         body: formData,
       });
-
+      
       // Parse JSON response - werkt voor zowel success als error responses
       let data;
       try {
@@ -969,7 +950,7 @@ if (taakForm) {
         console.error("JSON parse error:", jsonError);
         throw new Error("Ongeldig serverantwoord");
       }
-
+      
       if (data.success) {
         alert(data.message);
         this.reset();
@@ -1225,7 +1206,7 @@ function regenerateCalendar() {
     .then((data) => {
       window.tasksByDate = data;
       const tasksByDate = window.tasksByDate;
-
+      
       // Loop door alle day cells en voeg events toe
       const allDayCells = daysGrid.querySelectorAll(".day-cell.current-month");
       allDayCells.forEach((dayCell, index) => {

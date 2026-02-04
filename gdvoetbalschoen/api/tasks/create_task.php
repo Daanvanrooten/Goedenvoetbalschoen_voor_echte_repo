@@ -55,11 +55,11 @@ if (!empty($date)) {
     $today->setTime(0, 0, 0);
     $selectedDate = new DateTime($date);
     $selectedDate->setTime(0, 0, 0);
-
+    
     if ($selectedDate < $today) {
         $errors[] = 'Datum kan niet in het verleden liggen';
     }
-
+    
     // Als datum vandaag is, check of starttijd niet in verleden is
     if ($selectedDate->format('Y-m-d') === $today->format('Y-m-d') && !empty($start_time)) {
         $now = new DateTime();
@@ -91,11 +91,11 @@ if ($herhaling !== 'eenmalig') {
         $today->setTime(0, 0, 0);
         $eindDatumObj = new DateTime($eind_datum);
         $eindDatumObj->setTime(0, 0, 0);
-
+        
         if ($eindDatumObj < $today) {
             $errors[] = 'Einddatum kan niet in het verleden liggen';
         }
-
+        
         // Check of einddatum na startdatum is
         if (!empty($date)) {
             $startDatumObj = new DateTime($date);
@@ -128,10 +128,10 @@ try {
         // Herhalende taak - genereer slots tot einddatum
         $currentDate = new DateTime($date);
         $endDate = new DateTime($eind_datum);
-
+        
         while ($currentDate <= $endDate) {
             $slotDates[] = $currentDate->format('Y-m-d');
-
+            
             // Verhoog datum op basis van frequentie
             if ($frequency === 'DAILY') {
                 $currentDate->modify('+1 day');
