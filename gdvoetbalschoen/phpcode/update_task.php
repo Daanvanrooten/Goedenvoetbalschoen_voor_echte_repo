@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'db_connection.php';
+require_once '../../config/db_connection.php';
 header('Content-Type: application/json');
 
 // Check of gebruiker is ingelogd en admin is
@@ -28,6 +28,8 @@ $title = isset($_POST['title']) ? trim($_POST['title']) : null;
 $start_time = isset($_POST['start_time']) ? $_POST['start_time'] : null;
 $end_time = isset($_POST['end_time']) ? $_POST['end_time'] : null;
 $slot_date = isset($_POST['slot_date']) ? $_POST['slot_date'] : null;
+$capacity = isset($_POST['capacity']) ? intval($_POST['capacity']) : null;
+$category_id = isset($_POST['category_id']) ? intval($_POST['category_id']) : null;
 $personeel = isset($_POST['personeel']) ? $_POST['personeel'] : null; // Comma-separated user IDs
 
 if (!$task_id && !$slot_id) {
@@ -36,13 +38,46 @@ if (!$task_id && !$slot_id) {
     exit;
 }
 
+// Validatie: check of title niet leeg is (als gegeven)
+if ($title !== null && empty($title)) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Taaknaam mag niet leeg zijn']);
+    exit;
+}
+
+// Validatie: check of eindtijd na starttijd is
+if ($start_time && $end_time) {
+    $start = strtotime($start_time);
+    $end = strtotime($end_time);
+    if ($end <= $start) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Eindtijd moet later zijn dan starttijd']);
+        exit;
+    }
+}
+
 try {
     $conn = getDbConnection();
 
-    // Update task title en times als task_id gegeven is
-    if ($task_id && $title) {
-        $stmt = $conn->prepare("UPDATE tasks SET title = ? WHERE task_id = ?");
-        $stmt->execute([$title, $task_id]);
+    // Update task title en/of category als task_id gegeven is
+    if ($task_id && ($title || $category_id)) {
+        $updates = [];
+        $params = [];
+        
+        if ($title) {
+            $updates[] = "title = ?";
+            $params[] = $title;
+        }
+        if ($category_id) {
+            $updates[] = "category_id = ?";
+            $params[] = $category_id;
+        }
+        
+        if (!empty($updates)) {
+            $params[] = $task_id;
+            $stmt = $conn->prepare("UPDATE tasks SET " . implode(', ', $updates) . " WHERE task_id = ?");
+            $stmt->execute($params);
+        }
     }
 
     // Update task times (voor frequency-based tasks)
@@ -66,8 +101,8 @@ try {
         }
     }
 
-    // Update slot times als slot_id gegeven is (voor specifieke slots)
-    if ($slot_id && ($start_time || $end_time || $slot_date)) {
+    // Update slot times en capacity als slot_id gegeven is (voor specifieke slots)
+    if ($slot_id && ($start_time || $end_time || $slot_date || $capacity)) {
         $updates = [];
         $params = [];
 
@@ -83,12 +118,22 @@ try {
             $updates[] = "slot_date = ?";
             $params[] = $slot_date;
         }
+        if ($capacity !== null && $capacity > 0) {
+            $updates[] = "capacity = ?";
+            $params[] = $capacity;
+        }
 
         if (!empty($updates)) {
             $params[] = $slot_id;
             $stmt = $conn->prepare("UPDATE task_slots SET " . implode(', ', $updates) . " WHERE slot_id = ?");
             $stmt->execute($params);
         }
+    }
+    
+    // Update capacity voor alle slots van een task als task_id gegeven is
+    if ($task_id && !$slot_id && $capacity !== null && $capacity > 0) {
+        $stmt = $conn->prepare("UPDATE task_slots SET capacity = ? WHERE task_id = ?");
+        $stmt->execute([$capacity, $task_id]);
     }
 
     // Update personeel assignments als slot_id gegeven is
@@ -105,6 +150,41 @@ try {
                 foreach ($userIds as $userId) {
                     if (is_numeric($userId) && $userId > 0) {
                         $stmtReg->execute([$slot_id, intval($userId)]);
+                    }
+                }
+            }
+        }
+    }
+
+    // Update personeel assignments als task_id gegeven is (recurring tasks)
+    if ($task_id && !$slot_id && $personeel !== null) {
+        // Haal slots op voor deze task, gefilterd op datum indien opgegeven
+        if ($slot_date) {
+            $stmt = $conn->prepare("SELECT slot_id FROM task_slots WHERE task_id = ? AND slot_date = ?");
+            $stmt->execute([$task_id, $slot_date]);
+        } else {
+            $stmt = $conn->prepare("SELECT slot_id FROM task_slots WHERE task_id = ?");
+            $stmt->execute([$task_id]);
+        }
+        $slots = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        if (!empty($slots)) {
+            // Verwijder ALLEEN huidige assignments voor de geselecteerde slots (niet alle!)
+            $placeholders = implode(',', array_fill(0, count($slots), '?'));
+            $stmt = $conn->prepare("DELETE FROM task_registrations WHERE slot_id IN ($placeholders)");
+            $stmt->execute($slots);
+
+            // Voeg nieuwe assignments toe voor de geselecteerde slots
+            if (!empty($personeel)) {
+                $userIds = array_filter(array_map('trim', explode(',', $personeel)));
+                if (!empty($userIds)) {
+                    $stmtReg = $conn->prepare("INSERT INTO task_registrations (slot_id, user_id) VALUES (?, ?)");
+                    foreach ($slots as $slotId) {
+                        foreach ($userIds as $userId) {
+                            if (is_numeric($userId) && $userId > 0) {
+                                $stmtReg->execute([$slotId, intval($userId)]);
+                            }
+                        }
                     }
                 }
             }

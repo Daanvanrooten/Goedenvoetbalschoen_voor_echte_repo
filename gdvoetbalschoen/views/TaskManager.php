@@ -16,12 +16,12 @@
         exit();
     }
 
-    $sqlGetAllTasks = "SELECT * FROM tasks";
+    $sqlGetAllTasks = "SELECT DISTINCT t.* FROM tasks t 
+                    INNER JOIN task_slots ts ON t.task_id = ts.task_id 
+                    ORDER BY t.task_id";
     $stmtTasks = $conn->prepare($sqlGetAllTasks);
     $stmtTasks->execute();
-    $Tasks = $stmtTasks->fetchall(PDO::FETCH_ASSOC);
-
-    
+    $Tasks = $stmtTasks->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 
