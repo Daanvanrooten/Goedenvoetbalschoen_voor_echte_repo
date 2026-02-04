@@ -130,10 +130,7 @@ function showTasksModal(date, events) {
 
                 return `
                 <div class='task-item-modal' style='margin-bottom:18px;padding:16px;background:#f9f9f9;border-radius:8px;position:relative;' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}'>
-                    <div style='font-weight:600;font-size:17px;margin-bottom:6px;'>
-                        ${ev.title}
-                        ${isAdmin && ev.task_id ? `<span style='color:#888;font-size:12px;font-weight:normal;'> (ID: ${ev.task_id})</span>` : ""}
-                    </div>
+                    <div style='font-weight:600;font-size:17px;margin-bottom:6px;'>${ev.title}</div>
                     <div style='color:#888;font-size:14px;margin-bottom:8px;'>
                         <span style='display:inline-block;margin-right:12px;'>🕐 ${ev.start} - ${ev.end}</span>
                         ${ev.frequency ? `<span style='background:#e5dbfa;color:#6b5b95;padding:2px 8px;border-radius:4px;font-size:12px;'>${ev.frequency}</span>` : ""}
@@ -163,23 +160,10 @@ function showTasksModal(date, events) {
                         <button class='edit-task-btn' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-frequency='${ev.frequency || ""}' data-slot-date='${ev.slot_date || ""}' style='flex:1;background:#6b5b95;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;'>
                             ✏️ Bewerken
                         </button>
-                    </div>
-                    ${ev.frequency && (ev.frequency === 'DAILY' || ev.frequency === 'WEEKLY' || ev.frequency === 'MONTHLY') ? `
-                    <div style='margin-top:8px;display:flex;gap:8px;'>
-                        <button class='delete-all-task-btn' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-frequency='${ev.frequency || ""}' style='flex:1;background:#dc3545;color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;'>
-                            🗑️ Alles verwijderen
-                        </button>
-                        <button class='delete-single-task-btn' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-slot-date='${ev.slot_date || ""}' style='flex:1;background:#ff6b6b;color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;'>
-                            🗑️ Alleen deze dag
-                        </button>
-                    </div>
-                    ` : `
-                    <div style='margin-top:8px;'>
-                        <button class='delete-task-btn' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-frequency='${ev.frequency || ""}' style='width:100%;background:#dc3545;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;'>
+                        <button class='delete-task-btn' data-slot-id='${ev.slot_id || ""}' data-task-id='${ev.task_id || ""}' data-frequency='${ev.frequency || ""}' style='flex:1;background:#dc3545;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;'>
                             🗑️ Verwijderen
                         </button>
                     </div>
-                    `}
                     `
                         : !isAdmin && ev.slot_id
                         ? `
@@ -236,27 +220,6 @@ function showTasksModal(date, events) {
       };
     });
 
-    // Delete all instances (recurring tasks)
-    modal.querySelectorAll(".delete-all-task-btn").forEach((btn) => {
-      btn.onclick = function () {
-        const slotId = this.dataset.slotId || null;
-        const taskId = this.dataset.taskId || null;
-        const frequency = this.dataset.frequency || null;
-        deleteTask(slotId, taskId, frequency);
-      };
-    });
-
-    // Delete single instance (recurring tasks)
-    modal.querySelectorAll(".delete-single-task-btn").forEach((btn) => {
-      btn.onclick = function () {
-        const slotId = this.dataset.slotId || null;
-        const taskId = this.dataset.taskId || null;
-        const slotDate = this.dataset.slotDate || null;
-        deleteSingleTask(slotId, taskId, slotDate);
-      };
-    });
-
-    // Delete regular task (non-recurring)
     modal.querySelectorAll(".delete-task-btn").forEach((btn) => {
       btn.onclick = function () {
         const slotId = this.dataset.slotId || null;
@@ -305,86 +268,15 @@ function showTasksModal(date, events) {
 
 // Delete task functie (alleen voor admins)
 function deleteTask(slotId, taskId, frequency) {
-  console.log("deleteTask called:", { slotId, taskId, frequency });
-  
-  let confirmMsg = `Weet je zeker dat je deze taak wilt verwijderen?`;
+  let confirmMsg = "Weet je zeker dat je deze taak wilt verwijderen?";
 
   // Voor frequency taken: waarschuwing dat alle herhalingen verwijderd worden
   if (
     frequency &&
     (frequency === "DAILY" || frequency === "WEEKLY" || frequency === "MONTHLY")
   ) {
-    const frequencyText = frequency === "DAILY" ? "dagelijks" : frequency === "WEEKLY" ? "wekelijks" : "maandelijks";
-    confirmMsg = `⚠️ WAARSCHUWING ⚠️\n\nDeze taak herhaalt zich ${frequencyText}.\n\nJe staat op het punt om ALLE herhalingen van Task ID ${taskId} te verwijderen (tot de einddatum).\n\nLET OP: Als je meerdere herhalende taken met dezelfde naam hebt, wordt alleen Task ID ${taskId} verwijderd.\n\nWeet je het zeker?`;
+    confirmMsg = `Deze taak herhaalt zich ${frequency === "DAILY" ? "dagelijks" : frequency === "WEEKLY" ? "wekelijks" : "maandelijks"}. Weet je zeker dat je ALLE herhalingen wilt verwijderen?`;
   }
-
-  if (!confirm(confirmMsg)) {
-    return;
-  }
-
-  const formData = new FormData();
-  
-  // Als er een frequency is (recurring task), stuur ALLEEN task_id
-  if (frequency && (frequency === "DAILY" || frequency === "WEEKLY" || frequency === "MONTHLY")) {
-    console.log("Recurring task detected, sending only task_id:", taskId);
-    if (taskId) {
-      formData.append("task_id", taskId);
-    }
-  } else {
-    // Voor niet-recurring tasks, stuur slot_id
-    console.log("Non-recurring task, sending slot_id:", slotId);
-    if (slotId) {
-      formData.append("slot_id", slotId);
-    }
-    if (taskId) {
-      formData.append("task_id", taskId);
-    }
-  }
-  
-  console.log("FormData contents:");
-  for (let [key, value] of formData.entries()) {
-    console.log(key, value);
-  }
-
-  fetch(`${baseUrl}/api/tasks/delete_task.php`, {
-    method: "POST",
-    body: formData,
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      console.log("Server response:", data);
-      if (data.success) {
-        alert(data.message);
-        // Sluit modal
-        const modal = document.getElementById("tasksModal");
-        if (modal) modal.style.display = "none";
-        // Force hard refresh van calendar data
-        currentMonthEvents = {}; // Clear cache
-        regenerateCalendar();
-        regenerateWeekView();
-      } else {
-        alert("Fout: " + data.message);
-      }
-    })
-    .catch((err) => {
-      console.error("Delete error:", err);
-      alert("Er ging iets fout bij het verwijderen");
-    });
-}
-
-// Delete single task instance functie (alleen voor recurring tasks)
-function deleteSingleTask(slotId, taskId, slotDate) {
-  console.log("deleteSingleTask called:", { slotId, taskId, slotDate });
-  
-  // Format date voor weergave
-  let dateDisplay = slotDate || 'deze datum';
-  if (slotDate) {
-    const dateObj = new Date(slotDate + 'T00:00:00');
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    dateDisplay = dateObj.toLocaleDateString('nl-NL', options);
-  }
-  
-  const confirmMsg = `Weet je zeker dat je alleen de taak op ${dateDisplay} wilt verwijderen?\n\nDe andere herhalingen blijven behouden.`;
 
   if (!confirm(confirmMsg)) {
     return;
@@ -394,8 +286,9 @@ function deleteSingleTask(slotId, taskId, slotDate) {
   if (slotId) {
     formData.append("slot_id", slotId);
   }
-  
-  console.log("Deleting single slot_id:", slotId);
+  if (taskId) {
+    formData.append("task_id", taskId);
+  }
 
   fetch(`${baseUrl}/api/tasks/delete_task.php`, {
     method: "POST",
@@ -403,14 +296,12 @@ function deleteSingleTask(slotId, taskId, slotDate) {
   })
     .then((res) => res.json())
     .then((data) => {
-      console.log("Server response:", data);
       if (data.success) {
         alert(data.message);
         // Sluit modal
         const modal = document.getElementById("tasksModal");
         if (modal) modal.style.display = "none";
-        // Force hard refresh van calendar data
-        currentMonthEvents = {}; // Clear cache
+        // Refresh calendar
         regenerateCalendar();
         regenerateWeekView();
       } else {
@@ -418,7 +309,7 @@ function deleteSingleTask(slotId, taskId, slotDate) {
       }
     })
     .catch((err) => {
-      console.error("Delete single error:", err);
+      console.error("Delete error:", err);
       alert("Er ging iets fout bij het verwijderen");
     });
 }
@@ -869,10 +760,14 @@ if (taakForm) {
         alert(data.message);
         this.reset();
         closeTaakModal();
+        // Ververs de kalender en weekview
+        regenerateCalendar();
+        regenerateWeekView();
       } else {
         alert(data.message);
       }
     } catch (err) {
+      console.error("Create task error:", err);
       alert("Er is een fout opgetreden. Probeer het opnieuw.");
     } finally {
       submitBtn.disabled = false;
@@ -1066,42 +961,6 @@ function regenerateCalendar() {
     daysGrid.appendChild(dayCell);
   }
 
-  // Add current month's days first
-  for (let day = 1; day <= daysInMonth; day++) {
-    const dayCell = document.createElement("div");
-    dayCell.className = "day-cell current-month";
-
-    // Check if it's today
-    const today = new Date();
-    if (
-      day === today.getDate() &&
-      currentMonth === today.getMonth() &&
-      currentYear === today.getFullYear()
-    ) {
-      dayCell.classList.add("today");
-    }
-
-    // Check if it's weekend (Saturday of Sunday)
-    const dayOfWeek = new Date(currentYear, currentMonth, day).getDay();
-    if (dayOfWeek === 0 || dayOfWeek === 6) {
-      dayCell.classList.add("weekend");
-    }
-
-    dayCell.textContent = day;
-    daysGrid.appendChild(dayCell);
-  }
-
-  // Add next month's days to fill the grid
-  const totalCells = adjustedFirstDay + daysInMonth;
-  const remainingCells = Math.ceil(totalCells / 7) * 7 - totalCells;
-
-  for (let day = 1; day <= remainingCells; day++) {
-    const dayCell = document.createElement("div");
-    dayCell.className = "day-cell next-month";
-    dayCell.textContent = day;
-    daysGrid.appendChild(dayCell);
-  }
-
   // Haal taken op en render ze in de juiste dag
   const year = currentYear;
   const month = currentMonth;
@@ -1115,17 +974,48 @@ function regenerateCalendar() {
     .then((data) => {
       window.tasksByDate = data;
       const tasksByDate = window.tasksByDate;
-      
-      // Loop door alle day cells en voeg events toe
-      const allDayCells = daysGrid.querySelectorAll(".day-cell.current-month");
-      allDayCells.forEach((dayCell, index) => {
-        const day = index + 1;
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dayCell = document.createElement("div");
+        dayCell.className = "day-cell current-month";
+
+        // Check if it's today
+        const today = new Date();
+        if (
+          day === today.getDate() &&
+          currentMonth === today.getMonth() &&
+          currentYear === today.getFullYear()
+        ) {
+          dayCell.classList.add("today");
+        }
+
+        // Check if it's weekend (Saturday of Sunday)
+        const dayOfWeek = new Date(currentYear, currentMonth, day).getDay();
+        if (dayOfWeek === 0 || dayOfWeek === 6) {
+          dayCell.classList.add("weekend");
+        }
+
+        dayCell.textContent = day;
+
+        // Render events voor deze dag
         const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
         if (tasksByDate[dateKey]) {
           renderEventsForDay(dayCell, tasksByDate[dateKey]);
         }
-      });
+
+        daysGrid.appendChild(dayCell);
+      }
     });
+
+  // Add next month's days to fill the grid
+  const totalCells = adjustedFirstDay + daysInMonth;
+  const remainingCells = Math.ceil(totalCells / 7) * 7 - totalCells;
+
+  for (let day = 1; day <= remainingCells; day++) {
+    const dayCell = document.createElement("div");
+    dayCell.className = "day-cell prev-month";
+    dayCell.textContent = day;
+    daysGrid.appendChild(dayCell);
+  }
 
   // Re-add click handlers to new day cells
   const newDayCells = daysGrid.querySelectorAll(".day-cell");
@@ -1634,6 +1524,13 @@ document.addEventListener("DOMContentLoaded", function () {
   regenerateCalendar(); // 👈 deze ontbrak
   updateWeekInfo();
   regenerateWeekView();
+  
+  // Auto-refresh elke 30 seconden om data synchroon te houden
+  setInterval(function() {
+    regenerateCalendar();
+    regenerateWeekView();
+    console.log("Agenda automatisch ververst");
+  }, 30000); // 30 seconden
 });
 
 console.log("Agenda pagina geladen!");

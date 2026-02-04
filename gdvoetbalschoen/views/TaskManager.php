@@ -21,6 +21,8 @@
     $stmtTasks->execute();
     $Tasks = $stmtTasks->fetchall(PDO::FETCH_ASSOC);
 
+    
+
 ?>
 
 <!DOCTYPE html>
@@ -57,11 +59,21 @@
     </div>
 
     <div id="EditBlock">
+        <div class="CloseBar">
+            <button id="CloseField">X</button>
+        </div>
         <div class="EditArea">
             <input name="Title" id="Title">
-            <input name="Title" id="Description">
-            <input type="date" name="Title" id="Date">
-            <input name="Title" id="Frequency">
+            <input type="time" name="TimeStart" id="TimeStart">
+            <input type="time" name="TimeEnd" id="TimeEnd">
+            <select name="categorie" id="Category" required>
+                <option value="">Selecteer categorie...</option>
+            </select>
+            <div class="UpdateBar">
+                <button id="UpdateTask">Update</button>
+                <button id="DeleteTask">Delete</button>
+            </div>
+            
         </div>
     </div>
 

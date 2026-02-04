@@ -468,10 +468,6 @@ while (count($weekNumbers) < 2) {
                             <label>Eind tijd</label>
                             <input type="time" name="end_time" id="endTimeInput" required>
                         </div>
-                        <div class="form-group" id="eindDatumGroup" style="display:none;margin-top:30px;">
-                            <label>Eind datum</label>
-                            <input type="date" name="eind_datum" id="eindDatumInput">
-                        </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
@@ -512,6 +508,11 @@ while (count($weekNumbers) < 2) {
                                     <span>Maandelijks</span>
                                 </label>
                             </div>
+                        </div>
+                        <div class="form-group" id="eindDatumGroup" style="display:none;">
+                            <label>Eind datum</label>
+                            <input type="date" name="eind_datum" id="eindDatumInput">
+                            <small>Wanneer stopt de herhaling?</small>
                         </div>
                         <div class="form-group">
                             <label>Max aantal leden</label>

@@ -20,16 +20,23 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 $task_id = isset($_GET['task_id']) ? intval($_GET['task_id']) : null;
 
 $sqlGetTask = "SELECT * FROM tasks WHERE task_id = :task_id";
+$sqlGetSlotID = "SELECT slot_id FROM task_slots WHERE task_id = :task_id LIMIT 1";
+
 $stmtTasks = $conn->prepare($sqlGetTask);
 $stmtTasks->execute([':task_id' => $task_id]);
 $Tasks = $stmtTasks->fetch(PDO::FETCH_ASSOC);
+
+$stmtSlotID = $conn->prepare($sqlGetSlotID);
+$stmtSlotID->execute([':task_id' => $task_id]);
+$SlotID = $stmtSlotID->fetch(PDO::FETCH_ASSOC);
 
 $Date = sprintf("%04d-%02d-%02d", $Tasks["year"], $Tasks["month"], $Tasks["day"]);
 
 echo json_encode(['success' => true, 'message' => 'Got task!', 
     'title' => $Tasks["title"],
-    'Date' => $Date,
-    'description' => $Tasks["description"],
-    'frequency' => $Tasks["frequency"],
+    'category' => $Tasks["category_id"],
+    'timeStart' => $Tasks["start_time"],
+    'timeEnd' => $Tasks["end_time"],
+    'SlotID' => $SlotID["slot_id"],
     ]);
 ?>

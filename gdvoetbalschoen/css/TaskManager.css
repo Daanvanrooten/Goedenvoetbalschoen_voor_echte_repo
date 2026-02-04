@@ -7,7 +7,6 @@ body{
     margin-top: 75px;
     width:70%;
     display:flex;
-    flex-direction: column;
     justify-self: center;
     height:50px;
     border-radius: 8px 8px 0px 0px;
@@ -16,6 +15,21 @@ body{
     border-color: grey;
     background-color:white;
     align-items: center;
+    justify-content: left;
+}
+
+.NavBar a, .NavBar a:visited{
+    padding:5px;
+    margin:10px;
+    background-color:#6b7adb;
+    text-decoration: none;
+    border-radius: 5px;
+    color:white;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.NavBar a:hover{
+    background-color:#8b9bef;
 }
 
 .TaskBlock{
@@ -31,6 +45,7 @@ body{
     border-color: grey;
     overflow: auto;
     align-items: center;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 .TaskArea{
@@ -63,8 +78,7 @@ h3{
 }
 #EditBlock{
     background-color:#f8f8f8;
-    height:500px;
-    width:600px;
+    height:350px;
     width: 50%;
     position: fixed;
     top: 50%;
@@ -74,24 +88,108 @@ h3{
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 4px 12px rgba(107, 122, 219, 0.4);
+    border-radius: 8px;
 }
 .EditArea{
-    height:90%;
+    height:100%;
     width:80%;
     display:flex;
     flex-direction: column;
     align-items: center;
-    gap:20px;
+    justify-content: center;
+    gap:15px;
 }
 
 .EditArea input{
-    height:35px;
+    height:40px;
     width:80%;
     border-radius: 4px;
     border:none;
+    font-size: 16px;
+}
+.EditArea select{
+    height:40px;
+    width:80%;
+    border-radius: 4px;
+    border:none;
+    font-size: 16px;
 }
 
 .TaskElement button{
-    width:45px;
+    width:55px;
+    height:35px;
+    background-color: #6b7adb;
+    border:none;
+    border-radius: 5px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    color:white;
+    font-size: 14px;
+}
+
+.TaskElement button:hover{
+    background-color: #8b9bef;
+    cursor:pointer;
+}
+
+#UpdateTask{
+    width:200px;
+    height:35px;
+    background-color: #6b7adb;
+    border:none;
+    border-radius: 5px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    color:white;
+}
+
+#UpdateTask:hover{
+    background-color: #8b9bef;
+    cursor:pointer;
+}
+
+#DeleteTask{
+    width:200px;
+    height:35px;
+    background-color: red;
+    border:none;
+    border-radius: 5px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    color:white;
+}
+
+#DeleteTask:hover{
+    background-color: rgb(254, 62, 62);
+    cursor:pointer;
+}
+
+.CloseBar{
+    margin:10px;
+    width:95%;
+    display:flex;
+    justify-content: right;
+    align-items: right;
+}
+
+#CloseField{
+    background-color: red;
+    color: white;
+    border-radius: 8px;
+    border:none;
     height:25px;
+    width:25px;
+    font-weight: bold;
+}
+#CloseField:hover{
+    background-color: rgb(254, 62, 62);
+    cursor:pointer;
+}
+.UpdateBar{
+    width:80%;
+    display:flex;
+    gap:20px;
+    justify-content: center;
+    align-items: center;
 }
