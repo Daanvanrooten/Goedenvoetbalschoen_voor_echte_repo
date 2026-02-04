@@ -517,6 +517,52 @@ function editTask(slotId, taskId, frequency, task, slotDate) {
   document.getElementById("editTaskForm").onsubmit = function (e) {
     e.preventDefault();
 
+    // Validatie voor datum en tijd in het verleden
+    const editStartTime = document.getElementById("editStartTime").value;
+    const editEndTime = document.getElementById("editEndTime").value;
+    
+    // Check of de slot datum in het verleden ligt
+    if (slotDate) {
+      const taskDate = new Date(slotDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      taskDate.setHours(0, 0, 0, 0);
+      
+      // Als de datum in het verleden is
+      if (taskDate < today) {
+        alert('⚠️ Deze taak is in het verleden. Je kunt geen taken in het verleden bewerken.');
+        return false;
+      }
+      
+      // Als de datum vandaag is, controleer de tijd
+      if (taskDate.getTime() === today.getTime() && editStartTime) {
+        const now = new Date();
+        const currentTime = now.getHours() * 60 + now.getMinutes();
+        const [startHour, startMin] = editStartTime.split(':').map(Number);
+        const selectedTime = startHour * 60 + startMin;
+        
+        if (selectedTime < currentTime) {
+          alert('⚠️ De starttijd ligt in het verleden. Kies een latere tijd.');
+          document.getElementById("editStartTime").focus();
+          return false;
+        }
+      }
+    }
+    
+    // Check of eindtijd na starttijd is
+    if (editStartTime && editEndTime) {
+      const [startHour, startMin] = editStartTime.split(':').map(Number);
+      const [endHour, endMin] = editEndTime.split(':').map(Number);
+      const startMinutes = startHour * 60 + startMin;
+      const endMinutes = endHour * 60 + endMin;
+      
+      if (endMinutes <= startMinutes) {
+        alert('⚠️ Eindtijd moet later zijn dan starttijd.');
+        document.getElementById("editEndTime").focus();
+        return false;
+      }
+    }
+
     const formData = new FormData();
     if (slotId) {
       formData.append("slot_id", slotId);
@@ -535,9 +581,9 @@ function editTask(slotId, taskId, frequency, task, slotDate) {
     formData.append("title", document.getElementById("editTitle").value);
     formData.append(
       "start_time",
-      document.getElementById("editStartTime").value,
+      editStartTime,
     );
-    formData.append("end_time", document.getElementById("editEndTime").value);
+    formData.append("end_time", editEndTime);
 
     fetch(`${baseUrl}/api/tasks/update_task.php`, {
       method: "POST",
