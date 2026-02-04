@@ -924,48 +924,26 @@ if (fileUpload && fotoInput) {
 if (taakForm) {
   taakForm.addEventListener("submit", async function (e) {
     e.preventDefault();
-    
     const formData = new FormData(this);
     const submitBtn = this.querySelector(".submit-btn");
-    
-    // Disable button om dubbele submits te voorkomen
-    if (submitBtn.disabled) {
-      return; // Stop als al bezig
-    }
-    
     submitBtn.disabled = true;
     submitBtn.textContent = "Bezig...";
-    
     try {
       const response = await fetch(baseUrl + "/api/tasks/create_task.php", {
         method: "POST",
         body: formData,
       });
-      
-      // Parse JSON response - werkt voor zowel success als error responses
-      let data;
-      try {
-        data = await response.json();
-      } catch (jsonError) {
-        console.error("JSON parse error:", jsonError);
-        throw new Error("Ongeldig serverantwoord");
-      }
-      
+      const data = await response.json();
       if (data.success) {
         alert(data.message);
         this.reset();
         closeTaakModal();
-        // Herlaad pagina om nieuwe taak te tonen
-        location.reload();
       } else {
-        // Toon validatie foutmelding - formulier blijft open voor correctie
         alert(data.message);
       }
     } catch (err) {
-      console.error("Fetch error:", err);
       alert("Er is een fout opgetreden. Probeer het opnieuw.");
     } finally {
-      // Zorg dat button altijd weer enabled wordt zodat gebruiker opnieuw kan submitten
       submitBtn.disabled = false;
       submitBtn.textContent = "Taak aanmaken";
     }
